@@ -25,9 +25,16 @@ KEY_LABELS = {
     # Gemini / GCP
     "GEMINI_API_KEY":                "Gemini API Key",
     "GCP_PROJECT_ID":                "GCP Project ID",
-    # Firebase
-    "FIREBASE_WEB_API_KEY":          "Firebase Web API Key",
-    "FIREBASE_SERVICE_ACCOUNT_JSON": "Firebase Service Account JSON",
+    # Firebase — secrets (encrypted store only)
+    "FIREBASE_WEB_API_KEY":          "Firebase Web API Key (secret)",
+    "FIREBASE_SERVICE_ACCOUNT_JSON": "Firebase Service Account JSON (secret)",
+    # Firebase — project metadata (non-secret, but stored here for convenience)
+    "FIREBASE_PROJECT_ID":           "Firebase Project ID",
+    "FIREBASE_AUTH_DOMAIN":          "Firebase Auth Domain",
+    "FIREBASE_STORAGE_BUCKET":       "Firebase Storage Bucket",
+    "FIREBASE_MESSAGING_SENDER_ID":  "Firebase Messaging Sender ID",
+    "FIREBASE_APP_ID":               "Firebase App ID",
+    "FIREBASE_MEASUREMENT_ID":       "Firebase Measurement ID",
     # App config
     "FIRESTORE_COLLECTION":          "Firestore Collection Name",
     "DEMO_CITY":                     "Demo City (hospital data pull)",
@@ -36,9 +43,15 @@ KEY_LABELS = {
 
 KEY_DESCRIPTIONS = {
     "GEMINI_API_KEY":                "Google AI Studio key for Gemini 3.5-flash & 3.1-pro.",
-    "GCP_PROJECT_ID":                "Your GCP Project ID (e.g. lifeline-agent-demo).",
-    "FIREBASE_WEB_API_KEY":          "Firebase project Web API key — used for Auth sign-in (NOT the service account key). Find it in Firebase Console → Project Settings → General.",
-    "FIREBASE_SERVICE_ACCOUNT_JSON": "Paste the full contents of your Firebase service account JSON file. Used for Firestore + Admin Auth. Keep secret.",
+    "GCP_PROJECT_ID":                "Your GCP Project ID (e.g. lifeline-3725b).",
+    "FIREBASE_WEB_API_KEY":          "Firebase Web API key — used for client Auth sign-in. SECRET: store here, never in .env or source code.",
+    "FIREBASE_SERVICE_ACCOUNT_JSON": "Full contents of Firebase service account JSON. Used for Firestore + Admin Auth. SECRET: store here only.",
+    "FIREBASE_PROJECT_ID":           "Firebase project ID (e.g. lifeline-3725b). Safe to version-control via .env.example.",
+    "FIREBASE_AUTH_DOMAIN":          "Firebase Auth domain (e.g. lifeline-3725b.firebaseapp.com).",
+    "FIREBASE_STORAGE_BUCKET":       "Firebase Storage bucket (e.g. lifeline-3725b.firebasestorage.app).",
+    "FIREBASE_MESSAGING_SENDER_ID":  "Firebase Cloud Messaging sender ID.",
+    "FIREBASE_APP_ID":               "Firebase web app ID.",
+    "FIREBASE_MEASUREMENT_ID":       "Firebase Analytics measurement ID.",
     "FIRESTORE_COLLECTION":          "Firestore collection for audit records (e.g. dispatch_cases).",
     "DEMO_CITY":                     "City for Overpass API hospital pull (e.g. mumbai, london, seattle).",
     "CLOUD_RUN_REGION":              "GCP region for Cloud Run (e.g. us-central1).",

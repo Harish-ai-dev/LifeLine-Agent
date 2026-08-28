@@ -3,10 +3,19 @@ FastAPI app — exposes POST /dispatch, deployed to Cloud Run.
 See docs/05-environment-setup.md for the deploy command.
 """
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from lifeline.schemas import Case, Location
 from lifeline.orchestrator import run_dispatch
 
 app = FastAPI(title="LifeLine Agent")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # For hackathon demo, allow all
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/health")

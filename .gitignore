@@ -13,17 +13,34 @@ env/
 # ─── Secrets — NEVER commit these ─────────────────────────────────────────────
 .env
 .env.local
-.admin_auth.json        # bcrypt admin credentials (legacy)
-.admin_config.enc       # AES-encrypted API key store
-serviceAccountKey.json  # Firebase service account
+.env.*.local
+.admin_auth.json            # bcrypt admin credentials (legacy)
+.admin_config.enc           # AES-encrypted API key store (machine-locked)
+serviceAccountKey.json      # Firebase service account
 *service_account*.json
+*credentials*.json
+*private_key*.json
+*secret*.json
 *.pem
 *.key
+*.p12
+*.pfx
+
+# ─── Secrets directory (catch-all safe folder for any local key files) ─────────
+secrets/
+.secrets/
 
 # ─── Firebase / GCP ────────────────────────────────────────────────────────────
 .firebase/
 firebase-debug.log
 .firebaserc
+firebase-config.js          # Never commit JS SDK config with API key
+firebase-config.ts
+
+# ─── Node / JS (if a web frontend is added) ────────────────────────────────────
+node_modules/
+.npm/
+*.lock                      # package-lock.json / yarn.lock have no secrets but keep clean
 
 # ─── Data (generated, not source) ─────────────────────────────────────────────
 data/hospitals_raw.json
@@ -46,3 +63,6 @@ Thumbs.db
 
 # ─── Streamlit ─────────────────────────────────────────────────────────────────
 .streamlit/secrets.toml
+
+# --- Scripts -------------------------------------------------------------------
+start.bat

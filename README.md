@@ -38,7 +38,7 @@ LifeLine Agent is built for **The Taskmaster** track because it is a fully auton
 ### How it flows
 
 ```
-[Preset Scenario / Streamlit UI]
+[Preset Scenario / React + Vite (TypeScript) UI]
          │
          ▼
 ┌─────────────────────┐   NEWS2 score (real formula) + Gemini 3.1 Pro reasoning
@@ -79,7 +79,7 @@ LifeLine Agent is built for **The Taskmaster** track because it is a fully auton
 | **Hospital Locations** | OpenStreetMap Overpass API (free, no key) |
 | **Routing / ETA** | OSRM public demo server (free, no key) |
 | **Triage Formula** | NEWS2 — Royal College of Physicians (public standard) |
-| **Frontend** | Streamlit |
+| **Frontend** | React + Vite (TypeScript) |
 | **CLI** | Typer + Rich |
 | **Packaging** | `pyproject.toml` (hatchling), `pip install -e .` |
 
@@ -92,7 +92,7 @@ LifeLine Agent is built for **The Taskmaster** track because it is a fully auton
 - **Real Hospital Data** — hospital names and GPS coordinates fetched from OpenStreetMap via the free Overpass API for any city.
 - **Real Driving ETAs** — OSRM public server provides actual road-network distance and drive time for hospital ranking.
 - **Immutable Audit Trail** — every dispatch run (inputs + all agent outputs) is written to Firestore with a UTC timestamp. HIPAA-defensible audit log design.
-- **Super Admin Panel** — Streamlit UI for securely setting API keys (AES-256 encrypted at rest, Firebase Auth login, never hardcoded).
+- **Super Admin Panel** — React + Vite (TypeScript) UI for securely setting API keys (AES-256 encrypted at rest, Firebase Auth login, never hardcoded).
 - **One-command Install** — `pip install -e .` registers the `lifeline` CLI globally.
 
 ---
@@ -139,7 +139,7 @@ lifeline --help
 **Step 2 — Configure API keys via the Admin Panel**
 ```bash
 lifeline admin
-# Opens http://localhost:8501 in your browser
+# Opens http://localhost:5173 in your browser
 ```
 On first launch, the setup wizard appears:
 1. Create your **admin email + password** (stored in Firebase Auth — never on disk in plain text)
@@ -178,7 +178,7 @@ lifeline run
 **Step 5 — Launch the demo UI**
 ```bash
 lifeline ui
-# Opens Streamlit at http://localhost:8501
+# Opens React + Vite (TypeScript) at http://localhost:5173
 # Pick a scenario from the dropdown → click Dispatch → watch agents run
 ```
 
@@ -278,11 +278,11 @@ lifeline-agent/
 │       ├── routes_api.py       ← OSRM routing
 │       └── firestore_client.py ← Firestore audit log
 ├── admin/                  ← Super Admin Panel
-│   ├── superadmin.py       ← Streamlit admin UI
+│   ├── superadmin.py       ← React + Vite (TypeScript) admin UI
 │   ├── auth.py             ← Firebase Auth
 │   └── config_manager.py   ← AES-256 encrypted config
 ├── ui/
-│   └── streamlit_app.py    ← Demo UI (preset scenarios)
+│   └── React + Vite (TypeScript)_app.py    ← Demo UI (preset scenarios)
 ├── data/
 │   └── demo_cases.json     ← 5 preset scenarios
 ├── scripts/
@@ -307,3 +307,4 @@ lifeline-agent/
 ## 📄 License
 
 Apache 2.0 — see [LICENSE](LICENSE)
+

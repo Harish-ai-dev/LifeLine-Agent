@@ -6,22 +6,23 @@ Also runnable as:                                   python -m lifeline
 
 Commands
 --------
-  lifeline                  → show help
-  lifeline version          → show version
-  lifeline init             → interactive setup wizard (first-run)
-  lifeline status           → system health dashboard
-  lifeline admin            → super admin panel (API keys, Firebase login)
-  lifeline run              → start FastAPI agent server
-  lifeline ui               → launch demo Streamlit UI
-  lifeline fetch-hospitals  → pull real hospital data (OpenStreetMap)
-  lifeline seed             → enrich hospitals with simulated bed data
-  lifeline dispatch         → run a single dispatch from the terminal
-  lifeline test             → run test suite
-  lifeline logs             → tail recent Firestore audit records
+  lifeline                  -> show help
+  lifeline version          -> show version
+  lifeline init             -> interactive setup wizard (first-run)
+  lifeline status           -> system health dashboard
+  lifeline admin            -> super admin panel (API keys, Firebase login)
+  lifeline run              -> start FastAPI agent server
+  lifeline ui               -> launch demo Streamlit UI
+  lifeline fetch-hospitals  -> pull real hospital data (OpenStreetMap)
+  lifeline seed             -> enrich hospitals with simulated bed data
+  lifeline dispatch         -> run a single dispatch from the terminal
+  lifeline test             -> run test suite
+  lifeline logs             -> tail recent Firestore audit records
 """
 
 from __future__ import annotations
 
+import io
 import json
 import os
 import subprocess
@@ -32,19 +33,27 @@ from typing import Annotated, Optional
 
 import typer
 from rich import print as rprint
-from rich.columns import Columns
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.prompt import Confirm, Prompt
 from rich.rule import Rule
 from rich.table import Table
-from rich.text import Text
+
+# ── Windows UTF-8 fix ─────────────────────────────────────────────────────────
+# Force UTF-8 output so emoji render correctly on Windows terminals.
+# Falls back gracefully if the terminal truly can't handle it.
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 # ── App ───────────────────────────────────────────────────────────────────────
 app = typer.Typer(
     name="lifeline",
-    help="🚑 LifeLine Agent — Autonomous Emergency Dispatch powered by Gemini + ADK",
+    help="[LifeLine Agent] Autonomous Emergency Dispatch powered by Gemini + ADK",
     add_completion=True,
     rich_markup_mode="rich",
     no_args_is_help=True,
@@ -370,12 +379,14 @@ def ui():
     """
     _banner("Demo Dispatch UI")
     _inject_config()
-    console.print("[dim]Opening demo UI at http://localhost:8501 ...[/dim]\n")
-    subprocess.run([
-        sys.executable, "-m", "streamlit", "run",
-        str(PROJECT_ROOT / "ui" / "streamlit_app.py"),
-        "--browser.gatherUsageStats", "false",
-    ])
+    console.print("[dim]Opening React frontend at http://localhost:5173 ...[/dim]\n")
+    
+    frontend_dir = PROJECT_ROOT / "frontend"
+    if not (frontend_dir / "node_modules").exists():
+        console.print("[yellow]First run: installing npm dependencies...[/yellow]")
+        subprocess.run(["npm", "install"], cwd=frontend_dir, shell=sys.platform == "win32")
+
+    subprocess.run(["npm", "run", "dev"], cwd=frontend_dir, shell=sys.platform == "win32")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -659,3 +670,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
