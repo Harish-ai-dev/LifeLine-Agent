@@ -1,0 +1,32 @@
+{
+  "Scenario 1 - Mild": {
+    "patient_age": 29,
+    "vitals": {"heart_rate": 82, "respiratory_rate": 16, "systolic_bp": 118, "spo2": 98, "temperature_c": 37.0, "consciousness": "alert"},
+    "chief_complaint": "minor ankle sprain after fall",
+    "mechanism_of_injury": "twisted ankle during sport"
+  },
+  "Scenario 2 - Moderate": {
+    "patient_age": 61,
+    "vitals": {"heart_rate": 98, "respiratory_rate": 20, "systolic_bp": 105, "spo2": 95, "temperature_c": 38.1, "consciousness": "alert"},
+    "chief_complaint": "abdominal pain, fever",
+    "mechanism_of_injury": null
+  },
+  "Scenario 3 - Critical Cardiac": {
+    "patient_age": 54,
+    "vitals": {"heart_rate": 118, "respiratory_rate": 24, "systolic_bp": 88, "spo2": 91, "temperature_c": 38.6, "consciousness": "alert"},
+    "chief_complaint": "chest pain, shortness of breath",
+    "mechanism_of_injury": null
+  },
+  "Scenario 4 - Critical Trauma": {
+    "patient_age": 33,
+    "vitals": {"heart_rate": 130, "respiratory_rate": 28, "systolic_bp": 80, "spo2": 89, "temperature_c": 36.2, "consciousness": "confused"},
+    "chief_complaint": "multiple injuries, severe bleeding",
+    "mechanism_of_injury": "motorcycle collision"
+  },
+  "Scenario 5 - Edge Case (nearest full)": {
+    "patient_age": 54,
+    "vitals": {"heart_rate": 118, "respiratory_rate": 24, "systolic_bp": 88, "spo2": 91, "temperature_c": 38.6, "consciousness": "alert"},
+    "chief_complaint": "chest pain, shortness of breath",
+    "mechanism_of_injury": null
+  }
+}
