@@ -22,19 +22,26 @@ CONFIG_FILE = os.path.abspath(
 
 # ── Labels & Descriptions shown in the admin UI ───────────────────────────────
 KEY_LABELS = {
-    "GEMINI_API_KEY":        "Gemini API Key",
-    "GCP_PROJECT_ID":        "GCP Project ID",
-    "FIRESTORE_COLLECTION":  "Firestore Collection Name",
-    "DEMO_CITY":             "Demo City (for hospital data pull)",
-    "CLOUD_RUN_REGION":      "Cloud Run Region",
+    # Gemini / GCP
+    "GEMINI_API_KEY":                "Gemini API Key",
+    "GCP_PROJECT_ID":                "GCP Project ID",
+    # Firebase
+    "FIREBASE_WEB_API_KEY":          "Firebase Web API Key",
+    "FIREBASE_SERVICE_ACCOUNT_JSON": "Firebase Service Account JSON",
+    # App config
+    "FIRESTORE_COLLECTION":          "Firestore Collection Name",
+    "DEMO_CITY":                     "Demo City (hospital data pull)",
+    "CLOUD_RUN_REGION":              "Cloud Run Region",
 }
 
 KEY_DESCRIPTIONS = {
-    "GEMINI_API_KEY":       "Google AI Studio or Vertex AI API key. Required for all LlmAgent calls.",
-    "GCP_PROJECT_ID":       "Your Google Cloud Project ID (e.g. lifeline-agent-demo).",
-    "FIRESTORE_COLLECTION": "Firestore collection to write audit records to (e.g. dispatch_cases).",
-    "DEMO_CITY":            "City used to fetch real hospital locations via Overpass API (e.g. mumbai).",
-    "CLOUD_RUN_REGION":     "GCP region for Cloud Run deployment (e.g. us-central1).",
+    "GEMINI_API_KEY":                "Google AI Studio key for Gemini 3.5-flash & 3.1-pro.",
+    "GCP_PROJECT_ID":                "Your GCP Project ID (e.g. lifeline-agent-demo).",
+    "FIREBASE_WEB_API_KEY":          "Firebase project Web API key — used for Auth sign-in (NOT the service account key). Find it in Firebase Console → Project Settings → General.",
+    "FIREBASE_SERVICE_ACCOUNT_JSON": "Paste the full contents of your Firebase service account JSON file. Used for Firestore + Admin Auth. Keep secret.",
+    "FIRESTORE_COLLECTION":          "Firestore collection for audit records (e.g. dispatch_cases).",
+    "DEMO_CITY":                     "City for Overpass API hospital pull (e.g. mumbai, london, seattle).",
+    "CLOUD_RUN_REGION":              "GCP region for Cloud Run (e.g. us-central1).",
 }
 
 

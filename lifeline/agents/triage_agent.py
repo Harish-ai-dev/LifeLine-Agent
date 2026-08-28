@@ -13,6 +13,7 @@ from google.adk.agents import LlmAgent
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types as genai_types
+from lifeline.models import AGENT_MODELS
 from lifeline.schemas import TriageInput, TriageOutput
 
 APP_NAME = "lifeline_triage"
@@ -74,7 +75,7 @@ Output ONLY a valid JSON object with keys:
 # ── ADK Agent ─────────────────────────────────────────────────────────────────
 triage_agent = LlmAgent(
     name="triage_agent",
-    model="gemini-3.1-pro",
+    model=AGENT_MODELS["triage_agent"],
     instruction=TRIAGE_SYSTEM_PROMPT,
     output_schema=TriageOutput,
     output_key="triage_result",
@@ -127,6 +128,7 @@ def run_triage(triage_input: TriageInput) -> TriageOutput:
         data = json.loads(cleaned)
 
     return TriageOutput(**data)
+
 
 
 

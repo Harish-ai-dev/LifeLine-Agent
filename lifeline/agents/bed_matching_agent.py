@@ -4,6 +4,7 @@ Input/output contract: docs/04-agent-contracts.md#bed-matching-agent
 """
 import json
 from google.adk.agents import LlmAgent
+from lifeline.models import AGENT_MODELS
 from lifeline.schemas import BedMatchingInput, BedMatchingOutput
 
 BED_MATCHING_SYSTEM_PROMPT = """
@@ -27,7 +28,7 @@ def get_hospitals() -> list[dict]:
 # output_schema=BedMatchingOutput
 bed_matching_agent = LlmAgent(
     name="bed_matching_agent",
-    model="gemini-3.5-flash",
+    model=AGENT_MODELS["bed_matching_agent"],
     instruction=BED_MATCHING_SYSTEM_PROMPT,
     tools=[get_hospitals],
     output_schema=BedMatchingOutput,
@@ -37,6 +38,7 @@ bed_matching_agent = LlmAgent(
 def run_bed_matching(bed_input: BedMatchingInput) -> BedMatchingOutput:
     """TODO: invoke bed_matching_agent, parse into BedMatchingOutput."""
     raise NotImplementedError
+
 
 
 

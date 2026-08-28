@@ -1,8 +1,2 @@
-google-adk
-google-generativeai
-google-cloud-firestore
-fastapi
-uvicorn
-streamlit
-requests
-pydantic
+# Install the package itself (reads pyproject.toml)
+-e ".[dev]"

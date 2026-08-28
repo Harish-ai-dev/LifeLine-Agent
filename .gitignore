@@ -1,6 +1,48 @@
-.env
-venv/
+# ─── Python ────────────────────────────────────────────────────────────────────
 __pycache__/
-*.pyc
-.DS_Store
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+
+# ─── Secrets — NEVER commit these ─────────────────────────────────────────────
+.env
+.env.local
+.admin_auth.json        # bcrypt admin credentials (legacy)
+.admin_config.enc       # AES-encrypted API key store
+serviceAccountKey.json  # Firebase service account
+*service_account*.json
+*.pem
+*.key
+
+# ─── Firebase / GCP ────────────────────────────────────────────────────────────
+.firebase/
+firebase-debug.log
+.firebaserc
+
+# ─── Data (generated, not source) ─────────────────────────────────────────────
 data/hospitals_raw.json
+data/hospitals.json
+
+# ─── Test / Coverage ───────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# ─── IDE ───────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.iml
+
+# ─── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ─── Streamlit ─────────────────────────────────────────────────────────────────
+.streamlit/secrets.toml
