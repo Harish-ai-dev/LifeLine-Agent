@@ -48,6 +48,11 @@ class BedMatchingInput(BaseModel):
     patient_location: Location
 
 
+class DispatchRequest(BaseModel):
+    case: Case
+    patient_location: Location
+
+
 class HospitalChoice(BaseModel):
     name: str
     lat: float

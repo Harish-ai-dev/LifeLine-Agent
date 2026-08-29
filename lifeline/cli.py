@@ -386,7 +386,7 @@ def ui():
         console.print("[yellow]First run: installing npm dependencies...[/yellow]")
         subprocess.run(["npm", "install"], cwd=frontend_dir, shell=sys.platform == "win32")
 
-    subprocess.run(["npm", "run", "dev"], cwd=frontend_dir, shell=sys.platform == "win32")
+    subprocess.run(["npm", "run", "dev", "--", "--open"], cwd=frontend_dir, shell=sys.platform == "win32")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
