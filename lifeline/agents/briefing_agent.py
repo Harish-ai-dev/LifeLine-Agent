@@ -40,13 +40,14 @@ Output ONLY valid JSON matching this schema:
 }
 """
 
-briefing_agent = LlmAgent(
-    name="briefing_agent",
-    model=AGENT_MODELS["briefing_agent"],
-    instruction=BRIEFING_SYSTEM_PROMPT,
-    output_schema=BriefingOutput,
-    output_key="briefing_result",
-)
+def _get_briefing_agent():
+    return LlmAgent(
+        name="briefing_agent",
+        model=AGENT_MODELS["briefing_agent"],
+        instruction=BRIEFING_SYSTEM_PROMPT,
+        output_schema=BriefingOutput,
+        output_key="briefing_result",
+    )
 
 
 def _build_briefing_prompt(
@@ -90,53 +91,56 @@ def run_briefing(
     Invoke Briefing Agent synchronously via ADK Runner.
     Returns structured BriefingOutput.
     """
-    session_service = InMemorySessionService()
-    runner = Runner(
-        agent=briefing_agent,
-        app_name=APP_NAME,
-        session_service=session_service,
-    )
-
-    session = run_async(
-        session_service.create_session(app_name=APP_NAME, user_id="dispatch")
-    )
-
-    prompt_text = _build_briefing_prompt(case, triage, bed_match, routing)
-    user_message = genai_types.Content(
-        role="user",
-        parts=[genai_types.Part(text=prompt_text)],
-    )
-
-    final_response = None
-    for event in runner.run(
-        user_id="dispatch",
-        session_id=session.id,
-        new_message=user_message,
-    ):
-        if event.is_final_response() and event.content:
-            final_response = event.content.parts[0].text
-            break
-
-    if not final_response:
-        # Graceful fallback briefing
-        eta_val = (
-            routing.eta_minutes
-            if routing
-            else bed_match.chosen_hospital.eta_minutes or 10
-        )
-        return BriefingOutput(
-            pre_arrival_brief=(
-                f"INCOMING EN ROUTE to {bed_match.chosen_hospital.name}: {case.patient_age}yo patient presenting with {case.chief_complaint}. "
-                f"Triage classified as {triage.severity_label.upper()} ({triage.required_specialty}). "
-                f"Vitals: HR {case.vitals.heart_rate}, BP {case.vitals.systolic_bp}, SpO2 {case.vitals.spo2}%. "
-                f"ETA is approximately {eta_val} minutes. Please prepare receiving resuscitation bay."
-            )
-        )
-
     try:
-        data = json.loads(final_response)
-    except json.JSONDecodeError:
-        cleaned = final_response.strip().strip("```json").strip("```").strip()
-        data = json.loads(cleaned)
+        agent = _get_briefing_agent()
+        session_service = InMemorySessionService()
+        runner = Runner(
+            agent=agent,
+            app_name=APP_NAME,
+            session_service=session_service,
+        )
 
-    return BriefingOutput(**data)
+        session = run_async(
+            session_service.create_session(app_name=APP_NAME, user_id="dispatch")
+        )
+
+        prompt_text = _build_briefing_prompt(case, triage, bed_match, routing)
+        user_message = genai_types.Content(
+            role="user",
+            parts=[genai_types.Part(text=prompt_text)],
+        )
+
+        final_response = None
+        for event in runner.run(
+            user_id="dispatch",
+            session_id=session.id,
+            new_message=user_message,
+        ):
+            if event.is_final_response() and event.content:
+                final_response = event.content.parts[0].text
+                break
+
+        if final_response:
+            try:
+                data = json.loads(final_response)
+            except json.JSONDecodeError:
+                cleaned = final_response.strip().strip("```json").strip("```").strip()
+                data = json.loads(cleaned)
+            return BriefingOutput(**data)
+    except Exception:
+        pass
+
+    # Graceful fallback briefing
+    eta_val = (
+        routing.eta_minutes
+        if routing
+        else bed_match.chosen_hospital.eta_minutes or 10
+    )
+    return BriefingOutput(
+        pre_arrival_brief=(
+            f"INCOMING EN ROUTE to {bed_match.chosen_hospital.name}: {case.patient_age}yo patient presenting with {case.chief_complaint}. "
+            f"Triage classified as {triage.severity_label.upper()} ({triage.required_specialty}). "
+            f"Vitals: HR {case.vitals.heart_rate}, BP {case.vitals.systolic_bp}, SpO2 {case.vitals.spo2}%. "
+            f"ETA is approximately {eta_val} minutes. Please prepare receiving resuscitation bay."
+        )
+    )

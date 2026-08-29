@@ -142,6 +142,10 @@ def start_services(
 ) -> None:
     load_config()
 
+    # If Next.js is selected and port was left at default 8501, use standard 3000
+    if frontend_type == "next" and frontend_port == 8501:
+        frontend_port = 3000
+
     # ── Resolve the correct Python interpreter ────────────────────────────────
     PYTHON = find_python()
 
