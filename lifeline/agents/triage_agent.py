@@ -8,11 +8,11 @@ just vibes — to classify severity and required specialty.
 """
 
 import json
-import asyncio
 from google.adk.agents import LlmAgent
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types as genai_types
+from lifeline.async_utils import run_async
 from lifeline.models import AGENT_MODELS
 from lifeline.schemas import TriageInput, TriageOutput
 
@@ -95,7 +95,7 @@ def run_triage(triage_input: TriageInput) -> TriageOutput:
         session_service=session_service,
     )
 
-    session = asyncio.get_event_loop().run_until_complete(
+    session = run_async(
         session_service.create_session(app_name=APP_NAME, user_id="dispatch")
     )
 

@@ -321,91 +321,114 @@ def admin():
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# run
+# run  — starts BOTH backend + frontend by default
 # ══════════════════════════════════════════════════════════════════════════════
 @app.command()
 def run(
     host: Annotated[str, typer.Option("--host", "-h", help="Bind host")] = "0.0.0.0",
-    port: Annotated[int, typer.Option("--port", "-p", help="Bind port")] = 8000,
-    reload: Annotated[bool, typer.Option("--reload", help="Auto-reload (dev mode)")] = False,
-    workers: Annotated[int, typer.Option("--workers", "-w", help="Worker processes")] = 1,
-    with_ui: Annotated[bool, typer.Option("--with-ui", "-u", help="Also start frontend UI concurrently")] = False,
-    frontend: Annotated[str, typer.Option("--frontend", "-f", help="Frontend type ('streamlit' or 'next')")] = "streamlit",
-    frontend_port: Annotated[int, typer.Option("--frontend-port", help="Frontend port")] = 8501,
+    port: Annotated[int, typer.Option("--port", "-p", help="Backend API port")] = 8000,
+    frontend_port: Annotated[int, typer.Option("--frontend-port", help="Streamlit UI port")] = 8501,
+    frontend: Annotated[str, typer.Option("--frontend", "-f", help="UI type: 'streamlit' or 'next'")] = "streamlit",
+    reload: Annotated[bool, typer.Option("--reload", help="Auto-reload backend on code changes (dev)")] = False,
+    backend_only: Annotated[bool, typer.Option("--backend-only", "-b", help="Start only the API server, skip UI")] = False,
 ):
     """
-    Start the LifeLine Agent API server (FastAPI + uvicorn) and optional Frontend UI.
+    Start the full LifeLine Agent stack — Backend API + Streamlit UI.
 
-    Endpoints:
-      GET  /health     → liveness probe
-      POST /dispatch   → run the full agent pipeline
-      GET  /docs       → interactive Swagger UI
+    By default launches BOTH services in one terminal:
+
+      \b
+      Backend API  →  http://localhost:8000
+      API Docs     →  http://localhost:8000/docs
+      Streamlit UI →  http://localhost:8501
+
+    Use [bold]--backend-only[/bold] to start just the API server.
     """
     _banner()
     _inject_config()
 
-    if with_ui:
-        start_script = PROJECT_ROOT / "start.py"
-        if start_script.exists():
-            args = [
-                sys.executable,
-                str(start_script),
-                "--host", host,
-                "--port", str(port),
-                "--frontend", frontend,
-                "--frontend-port", str(frontend_port),
-            ]
-            if reload:
-                args.append("--reload")
-            subprocess.run(args)
-            return
+    start_script = PROJECT_ROOT / "start.py"
 
+    if not backend_only and start_script.exists():
+        # ── Launch both services ──────────────────────────────────────────────
+        console.print(Panel(
+            "[bold green]▶  Starting Backend API + Streamlit UI[/bold green]\n\n"
+            f"  Backend API  →  [link]http://localhost:{port}[/link]\n"
+            f"  API Docs     →  [link]http://localhost:{port}/docs[/link]\n"
+            f"  Streamlit UI →  [link]http://localhost:{frontend_port}[/link]\n\n"
+            "[dim]Press Ctrl+C to stop all services[/dim]",
+            border_style="green",
+            expand=False,
+        ))
+        cmd = [
+            sys.executable, str(start_script),
+            "--host", host,
+            "--port", str(port),
+            "--frontend", frontend,
+            "--frontend-port", str(frontend_port),
+        ]
+        if reload:
+            cmd.append("--reload")
+        subprocess.run(cmd, cwd=str(PROJECT_ROOT))
+        return
+
+    # ── Backend-only mode ─────────────────────────────────────────────────────
     console.print(Panel(
-        f"[bold green]▶  Starting API Server[/bold green]\n\n"
-        f"  URL:      [link]http://{host}:{port}[/link]\n"
-        f"  Docs:     [link]http://{host}:{port}/docs[/link]\n"
-        f"  Health:   [link]http://{host}:{port}/health[/link]\n"
-        f"  Workers:  {workers}\n"
-        f"  Reload:   {'on (dev mode)' if reload else 'off'}",
-        border_style="green",
+        f"[bold yellow]▶  Starting API Server (backend only)[/bold yellow]\n\n"
+        f"  URL:     [link]http://{host}:{port}[/link]\n"
+        f"  Docs:    [link]http://{host}:{port}/docs[/link]\n"
+        f"  Health:  [link]http://{host}:{port}/health[/link]\n"
+        f"  Reload:  {'on (dev)' if reload else 'off'}",
+        border_style="yellow",
         expand=False,
     ))
-
-    args = [
+    cmd = [
         sys.executable, "-m", "uvicorn",
         "lifeline.main:app",
         "--host", host,
         "--port", str(port),
-        "--workers", str(workers),
     ]
     if reload:
-        args.append("--reload")
-
-    subprocess.run(args)
+        cmd.append("--reload")
+    subprocess.run(cmd, cwd=str(PROJECT_ROOT))
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # ui
 # ══════════════════════════════════════════════════════════════════════════════
 @app.command()
-def ui():
+def ui(
+    port: Annotated[int, typer.Option("--port", "-p", help="Streamlit port")] = 8501,
+):
     """
-    Launch the demo dispatch UI (Streamlit).
+    Launch the Streamlit demo dispatch UI.
 
     Shows 5 preset emergency scenarios with a Dispatch button.
-    Each click runs the full Triage → Bed-Matching pipeline live.
+    Each click runs the full Triage → Bed-Matching pipeline.
     Opens at [link]http://localhost:8501[/link]
     """
-    _banner("Demo Dispatch UI")
+    _banner("Demo Dispatch UI — Streamlit")
     _inject_config()
-    console.print("[dim]Opening React frontend at http://localhost:5173 ...[/dim]\n")
-    
-    frontend_dir = PROJECT_ROOT / "frontend"
-    if not (frontend_dir / "node_modules").exists():
-        console.print("[yellow]First run: installing npm dependencies...[/yellow]")
-        subprocess.run(["npm", "install"], cwd=frontend_dir, shell=sys.platform == "win32")
 
-    subprocess.run(["npm", "run", "dev", "--", "--open"], cwd=frontend_dir, shell=sys.platform == "win32")
+    ui_script = PROJECT_ROOT / "ui" / "streamlit_app.py"
+    if not ui_script.exists():
+        err_console.print(f"UI script not found: {ui_script}")
+        raise typer.Exit(1)
+
+    console.print(Panel(
+        f"[bold cyan]▶  Launching Streamlit UI[/bold cyan]\n\n"
+        f"  URL:  [link]http://localhost:{port}[/link]\n\n"
+        "[dim]Make sure the backend is running: lifeline run --backend-only[/dim]",
+        border_style="cyan",
+        expand=False,
+    ))
+
+    subprocess.run([
+        sys.executable, "-m", "streamlit", "run",
+        str(ui_script),
+        "--server.port", str(port),
+        "--server.fileWatcherType", "none",
+    ], cwd=str(PROJECT_ROOT))
 
 
 # ══════════════════════════════════════════════════════════════════════════════

@@ -1,20 +1,21 @@
 """
-LifeLine Agent - Unified Startup Script
-=======================================
-Runs both the FastAPI backend and Frontend (Streamlit) concurrently in a
-single terminal window.
+LifeLine Agent — Unified Startup Script
+========================================
+Starts both the FastAPI backend and the Streamlit UI in one terminal.
 
 Usage:
-    python start.py                                 # default: both services
-    python start.py --port 8000 --frontend-port 8501
-    python start.py --frontend next                 # use Next.js instead
-    python start.py --reload                        # hot-reload the backend
+    python start.py                          # default: both services
+    python start.py --port 8000              # custom backend port
+    python start.py --frontend-port 8502     # custom UI port
+    python start.py --frontend next          # use Next.js instead of Streamlit
+    python start.py --reload                 # hot-reload backend
 """
 
 from __future__ import annotations
 
 import argparse
 import os
+import shutil
 import signal
 import socket
 import subprocess
@@ -23,7 +24,7 @@ import threading
 import time
 from pathlib import Path
 
-# ── Windows UTF-8 Invariant ─────────────────────────────────────────────────
+# ── Windows UTF-8 ─────────────────────────────────────────────────────────────
 if sys.platform == "win32":
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -34,17 +35,81 @@ if sys.platform == "win32":
 PROJECT_ROOT = Path(__file__).resolve().parent
 
 
-# ── Helpers ──────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
+# Interpreter detection
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _can_import(python: str, *packages: str) -> bool:
+    """Return True if *python* can import all *packages*."""
+    check = "; ".join(f"import {p}" for p in packages)
+    try:
+        result = subprocess.run(
+            [python, "-c", check],
+            capture_output=True,
+            timeout=5,
+        )
+        return result.returncode == 0
+    except Exception:
+        return False
+
+
+def find_python() -> str:
+    """
+    Return the path to a Python interpreter that has uvicorn AND streamlit.
+
+    Priority:
+      1. sys.executable (the Python that launched this script) — if it works
+      2. `python` / `python3` on PATH
+      3. Common Anaconda / conda install locations on Windows
+      4. sys.executable as final fallback (will fail loudly at runtime)
+    """
+    candidates = [sys.executable]
+
+    # Add every `python` / `python3` visible on PATH
+    for name in ("python", "python3", "py"):
+        p = shutil.which(name)
+        if p and p not in candidates:
+            candidates.append(p)
+
+    # Common Windows Anaconda paths
+    home = Path.home()
+    for rel in (
+        "anaconda3/python.exe",
+        "anaconda/python.exe",
+        "miniconda3/python.exe",
+        "miniconda/python.exe",
+        "AppData/Local/Programs/Python/Python311/python.exe",
+        "AppData/Local/Programs/Python/Python312/python.exe",
+        "AppData/Local/Programs/Python/Python313/python.exe",
+    ):
+        p = str(home / rel)
+        if Path(p).exists() and p not in candidates:
+            candidates.append(p)
+
+    for python in candidates:
+        if _can_import(python, "uvicorn", "streamlit"):
+            return python
+
+    # Nothing works — return sys.executable; errors will surface in subprocesses
+    return sys.executable
+
+
+def find_exe(name: str) -> str | None:
+    """Return the full path to a console-script executable if it exists."""
+    return shutil.which(name)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Helpers
+# ─────────────────────────────────────────────────────────────────────────────
 
 def is_port_in_use(port: int, host: str = "127.0.0.1") -> bool:
-    """Return True if *port* is already bound on *host*."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.settimeout(0.5)
         return s.connect_ex((host, port)) == 0
 
 
-def load_config():
-    """Push encrypted admin credentials into os.environ (no-op if not set)."""
+def load_config() -> None:
     try:
         from admin.config_manager import get_runtime_config, inject_to_env
         inject_to_env(get_runtime_config())
@@ -52,11 +117,10 @@ def load_config():
         pass
 
 
-def _stream_lines(process: subprocess.Popen, prefix: str, stop_event: threading.Event):
-    """Read subprocess output line-by-line and forward to stdout with a prefix."""
+def _stream(proc: subprocess.Popen, prefix: str, stop: threading.Event) -> None:
     try:
-        for raw in iter(process.stdout.readline, b""):
-            if stop_event.is_set():
+        for raw in iter(proc.stdout.readline, b""):
+            if stop.is_set():
                 break
             line = raw.decode("utf-8", errors="replace").rstrip()
             if line:
@@ -65,7 +129,9 @@ def _stream_lines(process: subprocess.Popen, prefix: str, stop_event: threading.
         pass
 
 
-# ── Main ─────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
+# Main
+# ─────────────────────────────────────────────────────────────────────────────
 
 def start_services(
     backend_host: str = "0.0.0.0",
@@ -76,36 +142,51 @@ def start_services(
 ) -> None:
     load_config()
 
-    # ── Pre-flight port checks ────────────────────────────────────────────────
-    for port, name in ((backend_port, "Backend"), (frontend_port, "Frontend")):
-        if is_port_in_use(port):
-            print(
-                f"\n❌  {name} port {port} is already in use.\n"
-                f"    Kill the process occupying it, or pass a different port:\n"
-                f"    python start.py {'--port' if name=='Backend' else '--frontend-port'} <free_port>\n"
-            )
-            sys.exit(1)
+    # ── Resolve the correct Python interpreter ────────────────────────────────
+    PYTHON = find_python()
 
     print("=" * 65)
     print("  🚑  LifeLine Agent — Autonomous Emergency Dispatch")
     print("=" * 65)
-    print(f"  ▶ Backend API  →  http://localhost:{backend_port}")
-    print(f"  ▶ API Docs     →  http://localhost:{backend_port}/docs")
-    print(f"  ▶ Frontend UI  →  http://localhost:{frontend_port}")
+    print(f"  Python       →  {PYTHON}")
+    print(f"  Backend API  →  http://localhost:{backend_port}")
+    print(f"  API Docs     →  http://localhost:{backend_port}/docs")
+    print(f"  Frontend UI  →  http://localhost:{frontend_port}")
     print("=" * 65)
     print("  Ctrl+C to stop all services.\n")
 
+    # ── Port pre-flight ───────────────────────────────────────────────────────
+    for port, name in ((backend_port, "Backend"), (frontend_port, "Frontend")):
+        if is_port_in_use(port):
+            print(
+                f"\n❌  {name} port {port} is already in use.\n"
+                f"    Free it or pass a different port:\n"
+                f"    python start.py {'--port' if name == 'Backend' else '--frontend-port'} <free_port>\n"
+            )
+            sys.exit(1)
+
+    env = {**os.environ, "PYTHONUNBUFFERED": "1"}
     processes: list[tuple[str, subprocess.Popen]] = []
     stop_event = threading.Event()
     shutting_down = threading.Event()
 
     # ── Backend ───────────────────────────────────────────────────────────────
-    backend_cmd = [
-        sys.executable, "-m", "uvicorn",
-        "lifeline.main:app",
-        "--host", backend_host,
-        "--port", str(backend_port),
-    ]
+    # Prefer the uvicorn console-script if it's on PATH (avoids python -m)
+    uvicorn_exe = find_exe("uvicorn")
+    if uvicorn_exe:
+        backend_cmd = [
+            uvicorn_exe,
+            "lifeline.main:app",
+            "--host", backend_host,
+            "--port", str(backend_port),
+        ]
+    else:
+        backend_cmd = [
+            PYTHON, "-m", "uvicorn",
+            "lifeline.main:app",
+            "--host", backend_host,
+            "--port", str(backend_port),
+        ]
     if reload:
         backend_cmd.append("--reload")
 
@@ -114,13 +195,11 @@ def start_services(
         cwd=str(PROJECT_ROOT),
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-        env=os.environ.copy(),
+        env=env,
     )
     processes.append(("Backend ", backend_proc))
     threading.Thread(
-        target=_stream_lines,
-        args=(backend_proc, "[Backend ]", stop_event),
-        daemon=True,
+        target=_stream, args=(backend_proc, "[Backend ]", stop_event), daemon=True
     ).start()
 
     # ── Frontend ──────────────────────────────────────────────────────────────
@@ -129,13 +208,22 @@ def start_services(
         frontend_cwd = str(PROJECT_ROOT / "frontend")
         use_shell = sys.platform == "win32"
     else:
-        frontend_cmd = [
-            sys.executable, "-m", "streamlit", "run",
-            str(PROJECT_ROOT / "ui" / "streamlit_app.py"),  # absolute path
-            "--server.port", str(frontend_port),
-            "--server.headless", "true",
-            "--server.fileWatcherType", "none",  # avoid watchdog conflicts
-        ]
+        ui_script = str(PROJECT_ROOT / "ui" / "streamlit_app.py")
+        streamlit_exe = find_exe("streamlit")
+        if streamlit_exe:
+            frontend_cmd = [
+                streamlit_exe, "run", ui_script,
+                "--server.port", str(frontend_port),
+                "--server.headless", "true",
+                "--server.fileWatcherType", "none",
+            ]
+        else:
+            frontend_cmd = [
+                PYTHON, "-m", "streamlit", "run", ui_script,
+                "--server.port", str(frontend_port),
+                "--server.headless", "true",
+                "--server.fileWatcherType", "none",
+            ]
         frontend_cwd = str(PROJECT_ROOT)
         use_shell = False
 
@@ -145,29 +233,27 @@ def start_services(
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         shell=use_shell,
-        env=os.environ.copy(),
+        env=env,
     )
     processes.append(("Frontend", frontend_proc))
     threading.Thread(
-        target=_stream_lines,
-        args=(frontend_proc, "[Frontend]", stop_event),
-        daemon=True,
+        target=_stream, args=(frontend_proc, "[Frontend]", stop_event), daemon=True
     ).start()
 
-    # ── Shutdown handler ──────────────────────────────────────────────────────
-    def cleanup(signum=None, frame=None):
+    # ── Cleanup / signal handling ─────────────────────────────────────────────
+    def cleanup(signum=None, frame=None) -> None:
         if shutting_down.is_set():
             return
         shutting_down.set()
         stop_event.set()
         print("\n\n🛑  Shutting down LifeLine Agent services...")
-        for name, p in processes:
+        for _, p in processes:
             try:
                 p.terminate()
             except Exception:
                 pass
         time.sleep(1.5)
-        for name, p in processes:
+        for _, p in processes:
             try:
                 if p.poll() is None:
                     p.kill()
@@ -179,7 +265,7 @@ def start_services(
     signal.signal(signal.SIGINT, cleanup)
     signal.signal(signal.SIGTERM, cleanup)
 
-    # ── Monitor loop (non-spinning) ───────────────────────────────────────────
+    # ── Monitor loop ──────────────────────────────────────────────────────────
     try:
         while not shutting_down.is_set():
             time.sleep(0.75)
@@ -187,8 +273,9 @@ def start_services(
                 code = p.poll()
                 if code is not None and not shutting_down.is_set():
                     print(
-                        f"\n❌  {name.strip()} service exited unexpectedly "
-                        f"(code {code}). Stopping all services."
+                        f"\n❌  {name.strip()} service exited unexpectedly (code {code}).\n"
+                        "    Check the output above for error details.\n"
+                        "    Stopping all services."
                     )
                     cleanup()
                     return
@@ -196,7 +283,7 @@ def start_services(
         cleanup()
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="LifeLine Agent — start backend + frontend together",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -204,11 +291,12 @@ def main():
     parser.add_argument("--host", default="0.0.0.0", help="Backend bind host")
     parser.add_argument("--port", type=int, default=8000, help="Backend port")
     parser.add_argument(
-        "--frontend", default="streamlit", choices=["streamlit", "next"],
+        "--frontend", default="streamlit",
+        choices=["streamlit", "next"],
         help="Frontend UI type",
     )
     parser.add_argument("--frontend-port", type=int, default=8501, help="Frontend port")
-    parser.add_argument("--reload", action="store_true", help="Enable backend hot-reload (dev)")
+    parser.add_argument("--reload", action="store_true", help="Backend hot-reload (dev)")
     args = parser.parse_args()
 
     start_services(
