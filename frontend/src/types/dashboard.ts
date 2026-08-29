@@ -218,15 +218,19 @@ export interface AuditEventLog {
     | 'AUTO_ROUTED'
     | 'ACKNOWLEDGED'
     | 'BAY_PREPARED'
+    | 'AUTO_BED_RESERVED'
+    | 'AUTO_BED_FREED'
     | 'TIER_1_AUTO_REASSIGNED'
     | 'TIER_2_GOV_ESCALATED'
     | 'AUTHORITY_INTERVENTION'
     | 'MANUAL_OVERRIDE'
     | 'DONOR_REQUEST_RAISED'
+    | 'AUTO_DONOR_CALLOUT_TRIGGERED'
     | 'DONOR_AUTO_MATCHED'
     | 'DONOR_ACCEPTED_TRANSIT'
     | 'DONOR_EN_ROUTE'
     | 'DONOR_ARRIVED'
+    | 'AUTO_BLOOD_RESTOCKED'
     | 'RESOLVED';
   severity: AlertSeverity;
   actor: string;

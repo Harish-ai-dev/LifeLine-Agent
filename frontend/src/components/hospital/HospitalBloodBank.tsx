@@ -27,10 +27,15 @@ export const HospitalBloodBank: React.FC = () => {
     <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
         <div>
-          <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
-            <Droplet className="w-5 h-5 text-rose-600 fill-rose-600" />
-            <span>Facility Blood Bank Reserve & Donor Match Dispatch</span>
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
+              <Droplet className="w-5 h-5 text-rose-600 fill-rose-600" />
+              <span>Facility Blood Bank Reserve & Donor Match Dispatch</span>
+            </h3>
+            <span className="bg-rose-100 text-rose-800 text-[10px] font-black uppercase px-2 py-0.5 rounded border border-rose-300 flex items-center gap-1">
+              <span>🤖 Auto-Callout Agent Active</span>
+            </span>
+          </div>
           <p className="text-xs text-slate-500 mt-0.5">
             Real-time blood bank units, critical inventory reserves, and automated donor network callout tracking.
           </p>
@@ -43,6 +48,27 @@ export const HospitalBloodBank: React.FC = () => {
           <HeartHandshake className="w-4 h-4" />
           <span>Raise STAT Donor Request</span>
         </button>
+      </div>
+
+      {/* ── Autonomous Blood Bank Surveillance Banner ─────────────────────── */}
+      <div className="bg-gradient-to-r from-rose-50 via-pink-50 to-amber-50 rounded-2xl p-4 border border-rose-200/80 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center font-bold shrink-0">
+            <Droplet className="w-5 h-5 fill-white" />
+          </div>
+          <div>
+            <h4 className="font-extrabold text-rose-950">
+              Autonomous Blood Watchdog & STAT Dispatcher
+            </h4>
+            <p className="text-[11px] text-slate-600">
+              • <strong>Threshold Deficit:</strong> Stocks &le; 2 units autonomously trigger STAT donor match broadcast · • <strong>Auto-Restock:</strong> Completed donations auto-credit inventory.
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-xl border border-rose-300 text-[11px] font-bold text-rose-900 font-mono">
+          Auto-Dispatches Today: {hospitalRequests.length}
+        </div>
       </div>
 
       {/* ── 8-Group Blood Bank Inventory Matrix ──────────────────────────── */}

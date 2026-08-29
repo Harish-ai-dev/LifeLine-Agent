@@ -285,6 +285,26 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
   };
 
   const prepareBay = (alertId: string, bayName: string, actorName = 'ER Charge Nurse') => {
+    const alert = alerts.find((a) => a.id === alertId);
+    const targetHospId = alert?.assignedHospitalId || currentHospital.id;
+    const targetHosp = hospitals.find((h) => h.id === targetHospId) || currentHospital;
+
+    // ── AUTOMATED BED COUNTING: Reserve Trauma Bay & ICU Bed ───────────────
+    const isCritical = (alert?.news2Score || 0) >= 7 || alert?.severity === 'critical';
+
+    setHospitals((prev) =>
+      prev.map((h) => {
+        if (h.id === targetHospId) {
+          return {
+            ...h,
+            availableTraumaBays: Math.max(0, h.availableTraumaBays - 1),
+            availableIcuBeds: isCritical ? Math.max(0, h.availableIcuBeds - 1) : h.availableIcuBeds,
+          };
+        }
+        return h;
+      })
+    );
+
     setAlerts((prev) =>
       prev.map((a) => {
         if (a.id === alertId) {
@@ -300,18 +320,19 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
       })
     );
 
-    const alert = alerts.find((a) => a.id === alertId);
     if (alert) {
       const logEntry: AuditEventLog = {
         id: `log-${Date.now()}`,
         timestamp: new Date().toLocaleTimeString(),
         alertId: alert.id,
         alertTrackingNumber: alert.trackingNumber,
-        hospitalName: currentHospital.name,
-        eventType: 'BAY_PREPARED',
+        hospitalName: targetHosp.name,
+        eventType: 'AUTO_BED_RESERVED',
         severity: alert.severity,
-        actor: actorName,
-        description: `${bayName} ready and staffed. Pre-arrival telemetry synced.`,
+        actor: 'LifeLine Autonomous Bed Allocation Engine',
+        description: `AUTONOMOUS BED TELEMETRY: 1 Trauma Bay ${
+          isCritical ? '+ 1 ICU Bed ' : ''
+        }automatically reserved at ${targetHosp.name} for incoming emergency ${alert.trackingNumber}.`,
       };
       setAuditLogs((logs) => [logEntry, ...logs]);
     }
@@ -335,6 +356,28 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
   };
 
   const resolveAlert = (alertId: string, actorName = 'ER Attending Physician') => {
+    const alert = alerts.find((a) => a.id === alertId);
+    const targetHospId = alert?.assignedHospitalId || currentHospital.id;
+    const targetHosp = hospitals.find((h) => h.id === targetHospId) || currentHospital;
+
+    // ── AUTOMATED BED COUNTING: Free Trauma Bay & ICU Bed on Discharge ──────
+    const isCritical = (alert?.news2Score || 0) >= 7 || alert?.severity === 'critical';
+
+    setHospitals((prev) =>
+      prev.map((h) => {
+        if (h.id === targetHospId) {
+          return {
+            ...h,
+            availableTraumaBays: Math.min(h.totalTraumaBays, h.availableTraumaBays + 1),
+            availableIcuBeds: isCritical
+              ? Math.min(h.totalIcuBeds, h.availableIcuBeds + 1)
+              : h.availableIcuBeds,
+          };
+        }
+        return h;
+      })
+    );
+
     setAlerts((prev) =>
       prev.map((a) => {
         if (a.id === alertId) {
@@ -350,18 +393,19 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
       })
     );
 
-    const alert = alerts.find((a) => a.id === alertId);
     if (alert) {
       const logEntry: AuditEventLog = {
         id: `log-${Date.now()}`,
         timestamp: new Date().toLocaleTimeString(),
         alertId: alert.id,
         alertTrackingNumber: alert.trackingNumber,
-        hospitalName: currentHospital.name,
-        eventType: 'RESOLVED',
+        hospitalName: targetHosp.name,
+        eventType: 'AUTO_BED_FREED',
         severity: alert.severity,
-        actor: actorName,
-        description: `Emergency incident successfully resolved and patient transitioned to care.`,
+        actor: 'LifeLine Autonomous Bed Allocation Engine',
+        description: `AUTONOMOUS BED TELEMETRY: Case resolved. 1 Trauma Bay ${
+          isCritical ? '+ 1 ICU Bed ' : ''
+        }automatically restored to available pool at ${targetHosp.name}.`,
       };
       setAuditLogs((logs) => [logEntry, ...logs]);
     }
@@ -374,7 +418,29 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
     actorName = 'Hospital Operations Admin'
   ) => {
     const target = hospitals.find((h) => h.id === targetHospitalId);
-    if (!target) return;
+    const alert = alerts.find((a) => a.id === alertId);
+    if (!target || !alert) return;
+
+    // ── AUTOMATED BED COUNTING: Transfer Bay Reservation ───────────────────
+    setHospitals((prev) =>
+      prev.map((h) => {
+        if (h.id === alert.assignedHospitalId) {
+          // Free bay at old facility
+          return {
+            ...h,
+            availableTraumaBays: Math.min(h.totalTraumaBays, h.availableTraumaBays + 1),
+          };
+        }
+        if (h.id === targetHospitalId) {
+          // Reserve bay at new facility
+          return {
+            ...h,
+            availableTraumaBays: Math.max(0, h.availableTraumaBays - 1),
+          };
+        }
+        return h;
+      })
+    );
 
     setAlerts((prev) =>
       prev.map((a) => {
@@ -395,21 +461,18 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
       })
     );
 
-    const alert = alerts.find((a) => a.id === alertId);
-    if (alert) {
-      const logEntry: AuditEventLog = {
-        id: `log-${Date.now()}`,
-        timestamp: new Date().toLocaleTimeString(),
-        alertId: alert.id,
-        alertTrackingNumber: alert.trackingNumber,
-        hospitalName: target.name,
-        eventType: 'MANUAL_OVERRIDE',
-        severity: alert.severity,
-        actor: actorName,
-        description: `Manual Transfer: Reassigned from ${currentHospital.name} to ${target.name}. Reason: ${reason}`,
-      };
-      setAuditLogs((logs) => [logEntry, ...logs]);
-    }
+    const logEntry: AuditEventLog = {
+      id: `log-${Date.now()}`,
+      timestamp: new Date().toLocaleTimeString(),
+      alertId: alert.id,
+      alertTrackingNumber: alert.trackingNumber,
+      hospitalName: target.name,
+      eventType: 'MANUAL_OVERRIDE',
+      severity: alert.severity,
+      actor: actorName,
+      description: `Manual Transfer: Reassigned from ${currentHospital.name} to ${target.name}. Reason: ${reason}. Bed telemetry synchronized.`,
+    };
+    setAuditLogs((logs) => [logEntry, ...logs]);
   };
 
   const authorityIntervene = (
@@ -563,6 +626,20 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
       assignedAt: new Date().toLocaleTimeString(),
     };
 
+    // ── AUTOMATED BED COUNTING: Reserve Trauma Bay at Destination Facility ─
+    setHospitals((prev) =>
+      prev.map((h) => {
+        if (h.id === matchedHospital.id) {
+          return {
+            ...h,
+            availableTraumaBays: Math.max(0, h.availableTraumaBays - 1),
+            availableIcuBeds: Math.max(0, h.availableIcuBeds - 1),
+          };
+        }
+        return h;
+      })
+    );
+
     setAlerts((prev) => [newAlert, ...prev]);
 
     const logEntry: AuditEventLog = {
@@ -574,9 +651,29 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
       eventType: 'AUTO_ROUTED',
       severity: 'critical',
       actor: 'LifeLine Real-Time Dispatch Engine',
-      description: `New citizen crisis (${crisisType}) auto-routed to ${matchedHospital.name}. Tier 1 countdown (60s) initialized.`,
+      description: `New citizen crisis (${crisisType}) auto-routed to ${matchedHospital.name}. 1 Trauma Bay + 1 ICU Bed autonomously reserved.`,
     };
     setAuditLogs((logs) => [logEntry, ...logs]);
+
+    // ── AUTOMATED BLOOD BANK & DONOR CALLOUT: Auto-Trigger STAT Broadcast ──
+    const targetBlood = 'A+' as BloodGroup;
+    const stockUnits = matchedHospital.bloodBankInventory[targetBlood] || 0;
+    const universalStock = matchedHospital.bloodBankInventory['O-'] || 0;
+
+    if (crisisType === 'trauma' || crisisType === 'cardiac' || stockUnits <= 3 || universalStock <= 2) {
+      setTimeout(() => {
+        createDonorRequest({
+          hospitalId: matchedHospital.id,
+          patientTrackingNumber: newTracking,
+          patientName: 'Sameer Kulkarni (49yo Male)',
+          type: 'blood',
+          bloodGroupNeeded: stockUnits <= 2 ? targetBlood : 'O-',
+          unitsRequested: crisisType === 'trauma' ? 3 : 2,
+          urgency: 'STAT_CRITICAL',
+          clinicalIndication: `AUTONOMOUS AI TRIGGER: Patient in acute ${crisisType} shock with high NEWS2 risk score (11/20). Hospital reserve below threshold (${stockUnits} units). Autonomous STAT callout dispatched.`,
+        });
+      }, 400);
+    }
   };
 
   // ── ACTIONS: DONOR NETWORK AUTO-MATCHING & RESPONSE ───────────────────────
@@ -764,6 +861,7 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
       let eventType: AuditEventLog['eventType'] = 'DONOR_ACCEPTED_TRANSIT';
       if (response === 'en_route') eventType = 'DONOR_EN_ROUTE';
       if (response === 'arrived') eventType = 'DONOR_ARRIVED';
+      if (response === 'completed') eventType = 'AUTO_BLOOD_RESTOCKED';
 
       const logEntry: AuditEventLog = {
         id: `log-${Date.now()}`,
@@ -772,13 +870,21 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
         alertTrackingNumber: req.requestTrackingNumber,
         hospitalName: req.hospitalName,
         eventType,
-        severity: 'critical',
+        severity: response === 'completed' ? 'moderate' : 'critical',
         actor: `Donor: ${donor.fullName} (${donor.bloodGroup})`,
-        description: `Donor ${donor.fullName} updated status to: ${response.toUpperCase()} for ${
-          req.hospitalName
-        }. Live travel route active.`,
+        description:
+          response === 'completed'
+            ? `AUTONOMOUS RESTOCK: +1 Unit of ${donor.bloodGroup} automatically credited to ${req.hospitalName} reserve following verified donation by ${donor.fullName}.`
+            : `Donor ${donor.fullName} updated status to: ${response.toUpperCase()} for ${
+                req.hospitalName
+              }. Live travel route active.`,
       };
       setAuditLogs((logs) => [logEntry, ...logs]);
+
+      // ── AUTOMATED BLOOD RESTOCK: Increment blood bank inventory ───────────
+      if (response === 'completed' && donor.bloodGroup) {
+        updateHospitalBloodBank(req.hospitalId, donor.bloodGroup, 1);
+      }
     }
   };
 
