@@ -1,2 +1,0 @@
-# Install the package itself (reads pyproject.toml)
--e ".[dev]"

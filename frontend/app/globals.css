@@ -1,0 +1,155 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://cdn.tailwindcss.com");
+
+@layer base {
+  :root {
+    --color-paper: #f7f3ea;
+    --color-ink: #142433;
+    --color-scrub: #cfe5da;
+    --color-paramedic: #245b73;
+    --color-triage: #c84a3d;
+    --color-monitor: #d99a32;
+    --color-muted: #64717c;
+    --color-border: #ddd4c4;
+    --color-border-strong: #d8d0c0;
+    --color-card: #fbf8f0;
+    --color-white: #ffffff;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: "Atkinson Hyperlegible", "Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .lifeline-ribbon {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    gap: 0;
+  }
+
+  .lifeline-ribbon::before {
+    content: "";
+    position: absolute;
+    left: 14px;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--color-paramedic) 0%, var(--color-scrub) 50%, var(--color-triage) 100%);
+    border-radius: 2px;
+    z-index: 0;
+  }
+
+  .lifeline-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .lifeline-step:last-child {
+    padding-bottom: 0;
+  }
+
+  .lifeline-marker {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9999px;
+    background: var(--color-white);
+    border: 3px solid var(--color-border);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-muted);
+    transition: all 0.3s ease;
+  }
+
+  .lifeline-step.is-complete .lifeline-marker {
+    background: var(--color-paramedic);
+    border-color: var(--color-paramedic);
+    color: var(--color-white);
+  }
+
+  .lifeline-step.is-active .lifeline-marker {
+    background: var(--color-white);
+    border-color: var(--color-monitor);
+    color: var(--color-monitor);
+    box-shadow: 0 0 0 4px rgba(217, 154, 50, 0.2);
+    animation: lifeline-pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes lifeline-pulse {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(217, 154, 50, 0.2); }
+    50% { box-shadow: 0 0 0 8px rgba(217, 154, 50, 0); }
+  }
+
+  .lifeline-step.is-complete ~ .lifeline-step .lifeline-marker {
+    border-color: var(--color-border);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .font-display {
+    font-family: "Archivo Narrow", "IBM Plex Sans Condensed", sans-serif;
+  }
+
+  .font-body {
+    font-family: "Atkinson Hyperlegible", "Source Sans 3", sans-serif;
+  }
+
+  .font-data {
+    font-family: "IBM Plex Mono", monospace;
+  }
+}
+
+/* Leaflet map container fixes */
+.leaflet-container {
+  font-family: inherit;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 1rem;
+  box-shadow: 0 20px 40px rgba(20, 36, 51, 0.15);
+}
+
+.leaflet-popup-tip {
+  box-shadow: 0 20px 40px rgba(20, 36, 51, 0.15);
+}
