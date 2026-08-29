@@ -5,7 +5,7 @@
 ```
 [Streamlit UI: preset scenario dropdown + Dispatch button]
             |
-            v
+            vn
 [FastAPI: POST /dispatch]  (src/main.py)
             |
             v
