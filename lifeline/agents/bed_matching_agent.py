@@ -107,22 +107,31 @@ def get_enriched_hospitals(patient_loc: Location) -> list[dict]:
         with open(hospitals_path, "r", encoding="utf-8") as f:
             raw_hospitals = json.load(f)
 
-    enriched = []
+    # First calculate haversine distance for all hospitals to quickly filter candidates
+    candidates = []
     for h in raw_hospitals:
         h_copy = dict(h)
         dest = Location(lat=h["lat"], lng=h["lng"])
+        dist = _haversine_distance(patient_loc, dest)
+        h_copy["distance_km"] = dist
+        h_copy["eta_minutes"] = round(dist * 2.0, 1)
+        candidates.append((dist, h_copy, dest))
+
+    # Sort by haversine distance and take top 10 candidates for accurate routing
+    candidates.sort(key=lambda x: x[0])
+    top_candidates = candidates[:10]
+
+    enriched = []
+    for dist, h_copy, dest in top_candidates:
         try:
             route = get_driving_eta(patient_loc, dest)
             h_copy["distance_km"] = route["distance_km"]
             h_copy["eta_minutes"] = route["eta_minutes"]
         except Exception:
-            dist = _haversine_distance(patient_loc, dest)
-            # Estimate roughly 30 km/h in city traffic -> 2 min per km
-            h_copy["distance_km"] = dist
-            h_copy["eta_minutes"] = round(dist * 2.0, 1)
+            pass
         enriched.append(h_copy)
 
-    # Sort candidates by estimated ETA
+    # Sort final candidates by estimated ETA
     enriched.sort(key=lambda x: x.get("eta_minutes") or 999)
     return enriched
 

@@ -329,9 +329,12 @@ def run(
     port: Annotated[int, typer.Option("--port", "-p", help="Bind port")] = 8000,
     reload: Annotated[bool, typer.Option("--reload", help="Auto-reload (dev mode)")] = False,
     workers: Annotated[int, typer.Option("--workers", "-w", help="Worker processes")] = 1,
+    with_ui: Annotated[bool, typer.Option("--with-ui", "-u", help="Also start frontend UI concurrently")] = False,
+    frontend: Annotated[str, typer.Option("--frontend", "-f", help="Frontend type ('streamlit' or 'next')")] = "streamlit",
+    frontend_port: Annotated[int, typer.Option("--frontend-port", help="Frontend port")] = 8501,
 ):
     """
-    Start the LifeLine Agent API server (FastAPI + uvicorn).
+    Start the LifeLine Agent API server (FastAPI + uvicorn) and optional Frontend UI.
 
     Endpoints:
       GET  /health     → liveness probe
@@ -340,6 +343,22 @@ def run(
     """
     _banner()
     _inject_config()
+
+    if with_ui:
+        start_script = PROJECT_ROOT / "start.py"
+        if start_script.exists():
+            args = [
+                sys.executable,
+                str(start_script),
+                "--host", host,
+                "--port", str(port),
+                "--frontend", frontend,
+                "--frontend-port", str(frontend_port),
+            ]
+            if reload:
+                args.append("--reload")
+            subprocess.run(args)
+            return
 
     console.print(Panel(
         f"[bold green]▶  Starting API Server[/bold green]\n\n"
