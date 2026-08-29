@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode, useRef } from 'react';
 import {
   PortalView,
   HospitalRole,
@@ -88,6 +88,7 @@ interface DashboardContextType {
   updateDonorTravelMode: (requestId: string, donorId: string, mode: TravelMode) => void;
   registerNewDonor: (profile: Omit<DonorProfile, 'id' | 'totalDonations' | 'badgeTitle'>) => void;
   updateHospitalBloodBank: (hospitalId: string, bloodGroup: BloodGroup, deltaUnits: number) => void;
+  checkAndAutoTriggerBloodDeficit: (hospitalId: string, bloodGroup: BloodGroup, currentUnits: number) => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -123,6 +124,8 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   const currentHospital = hospitals.find((h) => h.id === activeHospitalId) || hospitals[0];
   const currentDonor = donors.find((d) => d.id === activeDonorId) || donors[0];
+
+  const watchdogRanRef = useRef(false);
 
   // ── SOUND SYNTHESIZER ─────────────────────────────────────────────────────
   const playEmergencyChime = useCallback(
@@ -284,26 +287,38 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
     }
   };
 
+  // ── AUTOMATED BED COUNTING: Prepare Bay & Reserve Capacity ────────────────
   const prepareBay = (alertId: string, bayName: string, actorName = 'ER Charge Nurse') => {
     const alert = alerts.find((a) => a.id === alertId);
     const targetHospId = alert?.assignedHospitalId || currentHospital.id;
     const targetHosp = hospitals.find((h) => h.id === targetHospId) || currentHospital;
 
-    // ── AUTOMATED BED COUNTING: Reserve Trauma Bay & ICU Bed ───────────────
     const isCritical = (alert?.news2Score || 0) >= 7 || alert?.severity === 'critical';
+    const alreadyReservedBay = alert?.hasReservedBay;
+    const alreadyReservedIcu = alert?.hasReservedIcu;
 
-    setHospitals((prev) =>
-      prev.map((h) => {
-        if (h.id === targetHospId) {
-          return {
-            ...h,
-            availableTraumaBays: Math.max(0, h.availableTraumaBays - 1),
-            availableIcuBeds: isCritical ? Math.max(0, h.availableIcuBeds - 1) : h.availableIcuBeds,
-          };
-        }
-        return h;
-      })
-    );
+    // Single source of truth: decrement ONLY if not already reserved
+    if (!alreadyReservedBay || (isCritical && !alreadyReservedIcu)) {
+      setHospitals((prev) =>
+        prev.map((h) => {
+          if (h.id === targetHospId) {
+            const newTrauma = !alreadyReservedBay
+              ? Math.max(0, Math.min(h.totalTraumaBays, h.availableTraumaBays - 1))
+              : h.availableTraumaBays;
+            const newIcu = isCritical && !alreadyReservedIcu
+              ? Math.max(0, Math.min(h.totalIcuBeds, h.availableIcuBeds - 1))
+              : h.availableIcuBeds;
+
+            return {
+              ...h,
+              availableTraumaBays: newTrauma,
+              availableIcuBeds: newIcu,
+            };
+          }
+          return h;
+        })
+      );
+    }
 
     setAlerts((prev) =>
       prev.map((a) => {
@@ -312,6 +327,8 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
             ...a,
             status: 'bay_ready',
             bayReadyAt: new Date().toLocaleTimeString(),
+            hasReservedBay: true,
+            hasReservedIcu: isCritical ? true : a.hasReservedIcu,
           };
           if (selectedAlert?.id === alertId) setSelectedAlert(updated);
           return updated;
@@ -355,28 +372,37 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
     );
   };
 
+  // ── AUTOMATED BED COUNTING: Free Bay & Restore Capacity on Discharge ──────
   const resolveAlert = (alertId: string, actorName = 'ER Attending Physician') => {
     const alert = alerts.find((a) => a.id === alertId);
     const targetHospId = alert?.assignedHospitalId || currentHospital.id;
     const targetHosp = hospitals.find((h) => h.id === targetHospId) || currentHospital;
 
-    // ── AUTOMATED BED COUNTING: Free Trauma Bay & ICU Bed on Discharge ──────
-    const isCritical = (alert?.news2Score || 0) >= 7 || alert?.severity === 'critical';
+    const hadBay = alert?.hasReservedBay;
+    const hadIcu = alert?.hasReservedIcu;
 
-    setHospitals((prev) =>
-      prev.map((h) => {
-        if (h.id === targetHospId) {
-          return {
-            ...h,
-            availableTraumaBays: Math.min(h.totalTraumaBays, h.availableTraumaBays + 1),
-            availableIcuBeds: isCritical
-              ? Math.min(h.totalIcuBeds, h.availableIcuBeds + 1)
-              : h.availableIcuBeds,
-          };
-        }
-        return h;
-      })
-    );
+    // Single source of truth: restore capacity cleanly if it held a bed
+    if (hadBay || hadIcu) {
+      setHospitals((prev) =>
+        prev.map((h) => {
+          if (h.id === targetHospId) {
+            const newTrauma = hadBay
+              ? Math.max(0, Math.min(h.totalTraumaBays, h.availableTraumaBays + 1))
+              : h.availableTraumaBays;
+            const newIcu = hadIcu
+              ? Math.max(0, Math.min(h.totalIcuBeds, h.availableIcuBeds + 1))
+              : h.availableIcuBeds;
+
+            return {
+              ...h,
+              availableTraumaBays: newTrauma,
+              availableIcuBeds: newIcu,
+            };
+          }
+          return h;
+        })
+      );
+    }
 
     setAlerts((prev) =>
       prev.map((a) => {
@@ -385,6 +411,8 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
             ...a,
             status: 'resolved',
             resolvedAt: new Date().toLocaleTimeString(),
+            hasReservedBay: false,
+            hasReservedIcu: false,
           };
           if (selectedAlert?.id === alertId) setSelectedAlert(updated);
           return updated;
@@ -404,13 +432,14 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
         severity: alert.severity,
         actor: 'LifeLine Autonomous Bed Allocation Engine',
         description: `AUTONOMOUS BED TELEMETRY: Case resolved. 1 Trauma Bay ${
-          isCritical ? '+ 1 ICU Bed ' : ''
+          hadIcu ? '+ 1 ICU Bed ' : ''
         }automatically restored to available pool at ${targetHosp.name}.`,
       };
       setAuditLogs((logs) => [logEntry, ...logs]);
     }
   };
 
+  // ── AUTOMATED BED COUNTING: Transfer Bay Reservation ──────────────────────
   const reassignAlert = (
     alertId: string,
     targetHospitalId: string,
@@ -421,26 +450,38 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
     const alert = alerts.find((a) => a.id === alertId);
     if (!target || !alert) return;
 
-    // ── AUTOMATED BED COUNTING: Transfer Bay Reservation ───────────────────
-    setHospitals((prev) =>
-      prev.map((h) => {
-        if (h.id === alert.assignedHospitalId) {
-          // Free bay at old facility
-          return {
-            ...h,
-            availableTraumaBays: Math.min(h.totalTraumaBays, h.availableTraumaBays + 1),
-          };
-        }
-        if (h.id === targetHospitalId) {
-          // Reserve bay at new facility
-          return {
-            ...h,
-            availableTraumaBays: Math.max(0, h.availableTraumaBays - 1),
-          };
-        }
-        return h;
-      })
-    );
+    const hadBay = alert.hasReservedBay;
+    const hadIcu = alert.hasReservedIcu;
+
+    if (hadBay || hadIcu) {
+      setHospitals((prev) =>
+        prev.map((h) => {
+          if (h.id === alert.assignedHospitalId) {
+            return {
+              ...h,
+              availableTraumaBays: hadBay
+                ? Math.min(h.totalTraumaBays, h.availableTraumaBays + 1)
+                : h.availableTraumaBays,
+              availableIcuBeds: hadIcu
+                ? Math.min(h.totalIcuBeds, h.availableIcuBeds + 1)
+                : h.availableIcuBeds,
+            };
+          }
+          if (h.id === targetHospitalId) {
+            return {
+              ...h,
+              availableTraumaBays: hadBay
+                ? Math.max(0, h.availableTraumaBays - 1)
+                : h.availableTraumaBays,
+              availableIcuBeds: hadIcu
+                ? Math.max(0, h.availableIcuBeds - 1)
+                : h.availableIcuBeds,
+            };
+          }
+          return h;
+        })
+      );
+    }
 
     setAlerts((prev) =>
       prev.map((a) => {
@@ -532,6 +573,7 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
     );
   };
 
+  // ── MANUAL BED ADJUSTMENT WITH STRICT CLAMPING ────────────────────────────
   const updateHospitalCapacity = (
     hospitalId: string,
     icuAvailable: number,
@@ -624,21 +666,9 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
       isTier1Escalated: false,
       isTier2Escalated: false,
       assignedAt: new Date().toLocaleTimeString(),
+      hasReservedBay: false,
+      hasReservedIcu: false,
     };
-
-    // ── AUTOMATED BED COUNTING: Reserve Trauma Bay at Destination Facility ─
-    setHospitals((prev) =>
-      prev.map((h) => {
-        if (h.id === matchedHospital.id) {
-          return {
-            ...h,
-            availableTraumaBays: Math.max(0, h.availableTraumaBays - 1),
-            availableIcuBeds: Math.max(0, h.availableIcuBeds - 1),
-          };
-        }
-        return h;
-      })
-    );
 
     setAlerts((prev) => [newAlert, ...prev]);
 
@@ -651,11 +681,11 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
       eventType: 'AUTO_ROUTED',
       severity: 'critical',
       actor: 'LifeLine Real-Time Dispatch Engine',
-      description: `New citizen crisis (${crisisType}) auto-routed to ${matchedHospital.name}. 1 Trauma Bay + 1 ICU Bed autonomously reserved.`,
+      description: `New citizen crisis (${crisisType}) auto-routed to ${matchedHospital.name}. Tier 1 countdown (60s) initialized.`,
     };
     setAuditLogs((logs) => [logEntry, ...logs]);
 
-    // ── AUTOMATED BLOOD BANK & DONOR CALLOUT: Auto-Trigger STAT Broadcast ──
+    // ── AUTOMATED BLOOD BANK: Auto-Trigger STAT Donor Callout if Needed ────
     const targetBlood = 'A+' as BloodGroup;
     const stockUnits = matchedHospital.bloodBankInventory[targetBlood] || 0;
     const universalStock = matchedHospital.bloodBankInventory['O-'] || 0;
@@ -670,7 +700,7 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
           bloodGroupNeeded: stockUnits <= 2 ? targetBlood : 'O-',
           unitsRequested: crisisType === 'trauma' ? 3 : 2,
           urgency: 'STAT_CRITICAL',
-          clinicalIndication: `AUTONOMOUS AI TRIGGER: Patient in acute ${crisisType} shock with high NEWS2 risk score (11/20). Hospital reserve below threshold (${stockUnits} units). Autonomous STAT callout dispatched.`,
+          clinicalIndication: `AUTONOMOUS AI TRIGGER: Acute ${crisisType} trauma with high risk score (NEWS2: 11). Hospital blood reserve below safe threshold (${stockUnits} units). Autonomous STAT callout dispatched.`,
         });
       }, 400);
     }
@@ -679,119 +709,166 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
   // ── ACTIONS: DONOR NETWORK AUTO-MATCHING & RESPONSE ───────────────────────
 
   // 1. Hospital Raises Blood / Organ Request -> System AUTO-MATCHES Donors
-  const createDonorRequest = (params: {
-    hospitalId: string;
-    patientTrackingNumber?: string;
-    patientName: string;
-    type: DonorRequestType;
-    bloodGroupNeeded?: BloodGroup;
-    organNeeded?: OrganType;
-    unitsRequested: number;
-    urgency: RequestUrgency;
-    clinicalIndication: string;
-  }) => {
-    playEmergencyChime('donor_alert');
+  const createDonorRequest = useCallback(
+    (params: {
+      hospitalId: string;
+      patientTrackingNumber?: string;
+      patientName: string;
+      type: DonorRequestType;
+      bloodGroupNeeded?: BloodGroup;
+      organNeeded?: OrganType;
+      unitsRequested: number;
+      urgency: RequestUrgency;
+      clinicalIndication: string;
+    }) => {
+      playEmergencyChime('donor_alert');
 
-    const hosp = hospitals.find((h) => h.id === params.hospitalId) || currentHospital;
-    const reqId = `req-${Date.now().toString().slice(-4)}`;
-    const trackingNo = `DON-2026-${reqId.slice(-4)}`;
+      const hosp = hospitals.find((h) => h.id === params.hospitalId) || currentHospital;
+      const reqId = `req-${Date.now().toString().slice(-4)}`;
+      const trackingNo = `DON-2026-${reqId.slice(-4)}`;
 
-    // Auto-match compatible donors
-    const matchedList: MatchedDonorEntry[] = [];
+      // Auto-match compatible donors
+      const matchedList: MatchedDonorEntry[] = [];
 
-    donors.forEach((donor) => {
-      let isMatch = false;
+      donors.forEach((donor) => {
+        let isMatch = false;
 
-      if (params.type === 'blood' && params.bloodGroupNeeded) {
-        isMatch =
-          isBloodCompatible(donor.bloodGroup, params.bloodGroupNeeded) &&
-          donor.eligibilityStatus === 'eligible';
-      } else if (params.type === 'organ') {
-        isMatch = donor.isOrganDonor;
+        if (params.type === 'blood' && params.bloodGroupNeeded) {
+          isMatch =
+            isBloodCompatible(donor.bloodGroup, params.bloodGroupNeeded) &&
+            donor.eligibilityStatus === 'eligible';
+        } else if (params.type === 'organ') {
+          isMatch = donor.isOrganDonor;
+        }
+
+        if (isMatch) {
+          const dist = parseFloat((Math.random() * 3.5 + 1.0).toFixed(1));
+          const eta = Math.round(dist * 3.5 + 2);
+
+          matchedList.push({
+            donorId: donor.id,
+            donorName: donor.fullName,
+            bloodGroup: donor.bloodGroup,
+            distanceKm: dist,
+            etaMinutes: eta,
+            travelMode: 'driving',
+            responseStatus: 'notified',
+            contactPhone: donor.phone,
+            currentEtaMinutes: eta,
+          });
+        }
+      });
+
+      const location: DonationLocation = {
+        hospitalId: hosp.id,
+        hospitalName: hosp.name,
+        department:
+          hosp.tier === 'Level 1 Trauma'
+            ? 'Blood Transfusion Center & Trauma Bay B — Ground Floor Wing 2'
+            : 'Main Emergency Blood Bank — Room 104',
+        address: hosp.address,
+        lat: hosp.lat,
+        lng: hosp.lng,
+        phone: hosp.phone,
+        emergencyPhone: hosp.emergencyPhone,
+        landmark: `Near ${hosp.district} Emergency Gate`,
+      };
+
+      const newRequest: DonorRequest = {
+        id: reqId,
+        requestTrackingNumber: trackingNo,
+        hospitalId: hosp.id,
+        hospitalName: hosp.name,
+        patientTrackingNumber: params.patientTrackingNumber,
+        patientName: params.patientName,
+        type: params.type,
+        bloodGroupNeeded: params.bloodGroupNeeded,
+        organNeeded: params.organNeeded,
+        unitsRequested: params.unitsRequested,
+        unitsFulfilled: 0,
+        urgency: params.urgency,
+        clinicalIndication: params.clinicalIndication,
+        createdAt: Date.now(),
+        status: matchedList.length > 0 ? 'matched' : 'open',
+        matchedDonors: matchedList,
+        donationLocation: location,
+      };
+
+      setDonorRequests((prev) => [newRequest, ...prev]);
+
+      // Update donors active match link
+      if (matchedList.length > 0) {
+        setDonors((prev) =>
+          prev.map((d) => {
+            if (matchedList.some((m) => m.donorId === d.id)) {
+              return { ...d, activeMatchRequestId: reqId };
+            }
+            return d;
+          })
+        );
       }
 
-      if (isMatch) {
-        const dist = parseFloat((Math.random() * 3.5 + 1.0).toFixed(1));
-        const eta = Math.round(dist * 3.5 + 2);
+      const logEntry: AuditEventLog = {
+        id: `log-${Date.now()}`,
+        timestamp: new Date().toLocaleTimeString(),
+        alertId: params.patientTrackingNumber || reqId,
+        alertTrackingNumber: trackingNo,
+        hospitalName: hosp.name,
+        eventType: 'DONOR_REQUEST_RAISED',
+        severity: params.urgency === 'STAT_CRITICAL' ? 'critical' : 'moderate',
+        actor: `${hosp.name} Blood Bank Watchdog`,
+        description: `${params.urgency} Request raised for ${params.unitsRequested} unit(s) of ${
+          params.type === 'blood' ? params.bloodGroupNeeded : params.organNeeded
+        }. Auto-matched ${matchedList.length} nearby compatible donors.`,
+      };
+      setAuditLogs((logs) => [logEntry, ...logs]);
+    },
+    [currentHospital, donors, hospitals, playEmergencyChime]
+  );
 
-        matchedList.push({
-          donorId: donor.id,
-          donorName: donor.fullName,
-          bloodGroup: donor.bloodGroup,
-          distanceKm: dist,
-          etaMinutes: eta,
-          travelMode: 'driving',
-          responseStatus: 'notified',
-          contactPhone: donor.phone,
-          currentEtaMinutes: eta,
-        });
+  // ── AUTONOMOUS BLOOD WATCHDOG: Check Deficits and Trigger Broadcasts ──────
+  const checkAndAutoTriggerBloodDeficit = useCallback(
+    (hospitalId: string, bloodGroup: BloodGroup, currentUnits: number) => {
+      if (currentUnits <= 2) {
+        // Check if there is already an open/matched request for this hospital and blood group
+        const existing = donorRequests.find(
+          (r) =>
+            r.hospitalId === hospitalId &&
+            r.bloodGroupNeeded === bloodGroup &&
+            (r.status === 'open' || r.status === 'matched')
+        );
+
+        if (!existing) {
+          const hosp = hospitals.find((h) => h.id === hospitalId) || currentHospital;
+          createDonorRequest({
+            hospitalId: hosp.id,
+            patientName: 'Regional Emergency Reserve Deficit',
+            type: 'blood',
+            bloodGroupNeeded: bloodGroup,
+            unitsRequested: 2,
+            urgency: 'STAT_CRITICAL',
+            clinicalIndication: `CRITICAL INVENTORY DEFICIT: ${hosp.name} reserve for ${bloodGroup} is critically low (${currentUnits} Unit(s) on-site). Autonomous STAT broadcast dispatched to compatible donors.`,
+          });
+        }
       }
-    });
+    },
+    [createDonorRequest, currentHospital, donorRequests, hospitals]
+  );
 
-    const location: DonationLocation = {
-      hospitalId: hosp.id,
-      hospitalName: hosp.name,
-      department:
-        hosp.tier === 'Level 1 Trauma'
-          ? 'Blood Transfusion Center & Trauma Bay B — Ground Floor Wing 2'
-          : 'Main Emergency Blood Bank — Room 104',
-      address: hosp.address,
-      lat: hosp.lat,
-      lng: hosp.lng,
-      phone: hosp.phone,
-      emergencyPhone: hosp.emergencyPhone,
-      landmark: `Near ${hosp.district} Emergency Gate`,
-    };
-
-    const newRequest: DonorRequest = {
-      id: reqId,
-      requestTrackingNumber: trackingNo,
-      hospitalId: hosp.id,
-      hospitalName: hosp.name,
-      patientTrackingNumber: params.patientTrackingNumber,
-      patientName: params.patientName,
-      type: params.type,
-      bloodGroupNeeded: params.bloodGroupNeeded,
-      organNeeded: params.organNeeded,
-      unitsRequested: params.unitsRequested,
-      unitsFulfilled: 0,
-      urgency: params.urgency,
-      clinicalIndication: params.clinicalIndication,
-      createdAt: Date.now(),
-      status: matchedList.length > 0 ? 'matched' : 'open',
-      matchedDonors: matchedList,
-      donationLocation: location,
-    };
-
-    setDonorRequests((prev) => [newRequest, ...prev]);
-
-    // Update donors active match link
-    if (matchedList.length > 0) {
-      setDonors((prev) =>
-        prev.map((d) => {
-          if (matchedList.some((m) => m.donorId === d.id)) {
-            return { ...d, activeMatchRequestId: reqId };
+  // Initial watchdog scan on mount for all hospitals
+  useEffect(() => {
+    if (!watchdogRanRef.current) {
+      watchdogRanRef.current = true;
+      hospitals.forEach((h) => {
+        (Object.keys(h.bloodBankInventory) as BloodGroup[]).forEach((bg) => {
+          const count = h.bloodBankInventory[bg] || 0;
+          if (count <= 2) {
+            checkAndAutoTriggerBloodDeficit(h.id, bg, count);
           }
-          return d;
-        })
-      );
+        });
+      });
     }
-
-    const logEntry: AuditEventLog = {
-      id: `log-${Date.now()}`,
-      timestamp: new Date().toLocaleTimeString(),
-      alertId: params.patientTrackingNumber || reqId,
-      alertTrackingNumber: trackingNo,
-      hospitalName: hosp.name,
-      eventType: 'DONOR_REQUEST_RAISED',
-      severity: params.urgency === 'STAT_CRITICAL' ? 'critical' : 'moderate',
-      actor: `${hosp.name} Blood Bank / Transplant Unit`,
-      description: `${params.urgency} Request raised for ${params.unitsRequested} unit(s) of ${
-        params.type === 'blood' ? params.bloodGroupNeeded : params.organNeeded
-      }. Auto-matched ${matchedList.length} nearby donors.`,
-    };
-    setAuditLogs((logs) => [logEntry, ...logs]);
-  };
+  }, [checkAndAutoTriggerBloodDeficit, hospitals]);
 
   // 2. Donor Responds (Accept, En Route, Arrived, Completed, Decline)
   const respondToDonorRequest = (
@@ -799,6 +876,9 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
     donorId: string,
     response: DonorResponseStatus
   ) => {
+    let updatedReq: DonorRequest | undefined;
+    let respondingDonor: DonorProfile | undefined = donors.find((d) => d.id === donorId);
+
     setDonorRequests((prev) =>
       prev.map((req) => {
         if (req.id === requestId) {
@@ -813,6 +893,7 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
             return m;
           });
 
+          // Accurately tally all positive fulfillment responses
           const fulfilledCount = updatedDonors.filter(
             (m) =>
               m.responseStatus === 'accepted' ||
@@ -821,12 +902,16 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
               m.responseStatus === 'completed'
           ).length;
 
-          return {
+          const isFullyFulfilled = fulfilledCount >= req.unitsRequested;
+
+          const newReq: DonorRequest = {
             ...req,
             matchedDonors: updatedDonors,
             unitsFulfilled: fulfilledCount,
-            status: fulfilledCount >= req.unitsRequested ? 'fulfilled' : 'matched',
+            status: isFullyFulfilled ? 'fulfilled' : 'matched',
           };
+          updatedReq = newReq;
+          return newReq;
         }
         return req;
       })
@@ -848,14 +933,16 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
             newDonations += 1;
           }
 
-          return { ...d, status: newStatus, totalDonations: newDonations };
+          const updatedD: DonorProfile = { ...d, status: newStatus, totalDonations: newDonations };
+          respondingDonor = updatedD;
+          return updatedD;
         }
         return d;
       })
     );
 
-    const donor = donors.find((d) => d.id === donorId);
-    const req = donorRequests.find((r) => r.id === requestId);
+    const req = updatedReq || donorRequests.find((r) => r.id === requestId);
+    const donor = respondingDonor || donors.find((d) => d.id === donorId);
 
     if (donor && req) {
       let eventType: AuditEventLog['eventType'] = 'DONOR_ACCEPTED_TRANSIT';
@@ -874,10 +961,10 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
         actor: `Donor: ${donor.fullName} (${donor.bloodGroup})`,
         description:
           response === 'completed'
-            ? `AUTONOMOUS RESTOCK: +1 Unit of ${donor.bloodGroup} automatically credited to ${req.hospitalName} reserve following verified donation by ${donor.fullName}.`
+            ? `AUTONOMOUS RESTOCK: +1 Unit of ${donor.bloodGroup} automatically credited to ${req.hospitalName} blood bank following verified donation by ${donor.fullName}.`
             : `Donor ${donor.fullName} updated status to: ${response.toUpperCase()} for ${
                 req.hospitalName
-              }. Live travel route active.`,
+              }. Real-time tracking active.`,
       };
       setAuditLogs((logs) => [logEntry, ...logs]);
 
@@ -930,27 +1017,35 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
     setActiveDonorId(newDonor.id);
   };
 
-  // 5. Update Hospital Blood Bank Inventory
+  // 5. Update Hospital Blood Bank Inventory & Trigger Autonomous Watchdog
   const updateHospitalBloodBank = (
     hospitalId: string,
     bloodGroup: BloodGroup,
     deltaUnits: number
   ) => {
+    let finalUnits = 0;
     setHospitals((prev) =>
       prev.map((h) => {
         if (h.id === hospitalId) {
           const curr = h.bloodBankInventory[bloodGroup] || 0;
+          const updatedUnits = Math.max(0, curr + deltaUnits);
+          finalUnits = updatedUnits;
           return {
             ...h,
             bloodBankInventory: {
               ...h.bloodBankInventory,
-              [bloodGroup]: Math.max(0, curr + deltaUnits),
+              [bloodGroup]: updatedUnits,
             },
           };
         }
         return h;
       })
     );
+
+    // If stock drops <= 2, trigger autonomous watchdog
+    if (finalUnits <= 2 && deltaUnits < 0) {
+      checkAndAutoTriggerBloodDeficit(hospitalId, bloodGroup, finalUnits);
+    }
   };
 
   return (
@@ -992,6 +1087,7 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
         updateDonorTravelMode,
         registerNewDonor,
         updateHospitalBloodBank,
+        checkAndAutoTriggerBloodDeficit,
       }}
     >
       {children}

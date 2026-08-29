@@ -10,26 +10,40 @@ import {
   CheckCircle2,
   Users,
   Radio,
+  Droplet,
+  Navigation,
 } from 'lucide-react';
 import { useDashboard } from '../../context/DashboardContext';
 import { LiveAlertQueue } from './LiveAlertQueue';
 import { CapacityManager } from './CapacityManager';
 import { HospitalBloodBank } from './HospitalBloodBank';
+import { DonorNotificationPanel } from './DonorNotificationPanel';
 import { HospitalAuditLog } from './HospitalAuditLog';
 import { AlertDetailModal } from './AlertDetailModal';
 import { EmergencyIncidentAlert } from '../../types/dashboard';
 
 export const HospitalDashboard: React.FC = () => {
-  const { currentHospital, alerts, activeHospitalId, selectedAlert, setSelectedAlert } = useDashboard();
+  const { currentHospital, alerts, activeHospitalId, selectedAlert, setSelectedAlert, donorRequests } =
+    useDashboard();
 
-  const [activeTab, setActiveTab] = useState<'queue' | 'capacity' | 'blood_bank' | 'audit'>('queue');
+  const [activeTab, setActiveTab] = useState<
+    'queue' | 'blood_bank' | 'donor_activity' | 'capacity' | 'audit'
+  >('queue');
 
   // Stats for current hospital
   const hospitalAlerts = alerts.filter((a) => a.assignedHospitalId === activeHospitalId);
   const pendingCount = hospitalAlerts.filter((a) => a.status === 'pending_ack').length;
-  const inTransitCount = hospitalAlerts.filter((a) =>
-    ['acknowledged', 'bay_preparing', 'bay_ready'].includes(a.status)
-  ).length;
+
+  // Active inbound donors for THIS hospital
+  const hospitalRequests = donorRequests.filter((r) => r.hospitalId === activeHospitalId);
+  const inboundDonorsCount = hospitalRequests.reduce(
+    (acc, req) =>
+      acc +
+      req.matchedDonors.filter((d) =>
+        ['en_route', 'arrived', 'accepted'].includes(d.responseStatus)
+      ).length,
+    0
+  );
 
   return (
     <div className="space-y-6 max-w-[1600px] mx-auto pb-16">
@@ -90,12 +104,12 @@ export const HospitalDashboard: React.FC = () => {
             </div>
 
             <div className="bg-slate-800/80 p-3 rounded-2xl border border-slate-700/80">
-              <span className="text-slate-400 text-[10px] uppercase font-bold block">Mean Response Time</span>
-              <span className="text-2xl font-black text-amber-300 font-mono">
-                {currentHospital.slaResponseTimeSec}s
+              <span className="text-slate-400 text-[10px] uppercase font-bold block">Inbound Donors</span>
+              <span className="text-2xl font-black text-rose-300 font-mono">
+                {inboundDonorsCount}
               </span>
               <span className="text-[10px] text-emerald-400 font-bold block">
-                {currentHospital.complianceRate}% SLA
+                Live Responders
               </span>
             </div>
           </div>
@@ -129,8 +143,25 @@ export const HospitalDashboard: React.FC = () => {
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          <Activity className="w-4 h-4 text-rose-500" />
-          <span>Blood Bank & Donor Callouts</span>
+          <Droplet className="w-4 h-4 text-rose-500 fill-rose-500" />
+          <span>Blood Bank Inventory</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('donor_activity')}
+          className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition ${
+            activeTab === 'donor_activity'
+              ? 'bg-slate-900 text-white shadow-sm'
+              : 'text-slate-600 hover:bg-slate-100'
+          }`}
+        >
+          <Radio className="w-4 h-4 text-rose-500 animate-pulse" />
+          <span>Inbound Donors Feed</span>
+          {inboundDonorsCount > 0 && (
+            <span className="bg-rose-600 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full animate-pulse">
+              {inboundDonorsCount} Live
+            </span>
+          )}
         </button>
 
         <button
@@ -161,6 +192,7 @@ export const HospitalDashboard: React.FC = () => {
       {/* ── Tab Views ────────────────────────────────────────────────────── */}
       {activeTab === 'queue' && <LiveAlertQueue onSelectAlert={(alert) => setSelectedAlert(alert)} />}
       {activeTab === 'blood_bank' && <HospitalBloodBank />}
+      {activeTab === 'donor_activity' && <DonorNotificationPanel />}
       {activeTab === 'capacity' && <CapacityManager />}
       {activeTab === 'audit' && <HospitalAuditLog />}
 

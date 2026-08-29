@@ -140,6 +140,10 @@ export interface EmergencyIncidentAlert {
   resolvedAt?: string;
   overriddenBy?: string;
   overrideReason?: string;
+
+  // Bed & Bay Capacity Tracking
+  hasReservedBay?: boolean;
+  hasReservedIcu?: boolean;
 }
 
 export interface DonationLocation {
