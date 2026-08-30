@@ -1,14 +1,27 @@
-export type PortalView = 'hospital' | 'authority' | 'donor' | 'patient-simulator';
+export type PortalView = 'hospital' | 'authority' | 'donor' | 'dispatch' | 'patient-simulator';
+
+export type UserRole = 'blood_donor' | 'hospital_staff' | 'government_authority';
 
 export type HospitalRole = 'triage' | 'doctor' | 'admin' | 'blood_bank';
 export type AuthorityRole = 'analyst' | 'director';
 export type DonorRole = 'donor_individual';
 
+export interface AuthUser {
+  id: string;
+  username: string;
+  role: UserRole;
+  facility_id?: string;
+  facility_name?: string;
+  donor_id?: string;
+  avatar?: string;
+  title?: string;
+}
+
 export type BloodGroup = 'O+' | 'O-' | 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-';
 
 export type OrganType = 'Kidney' | 'Liver' | 'Heart' | 'Lungs' | 'Cornea' | 'Pancreas';
 
-export type DonorRequestType = 'blood' | 'organ';
+export type DonorRequestType = 'blood' | 'organ' | 'equipment';
 
 export type RequestUrgency = 'STAT_CRITICAL' | 'URGENT' | 'STANDARD';
 
@@ -144,6 +157,8 @@ export interface EmergencyIncidentAlert {
   // Bed & Bay Capacity Tracking
   hasReservedBay?: boolean;
   hasReservedIcu?: boolean;
+  reservedBayId?: string;
+  reservedBedType?: string;
 }
 
 export interface DonationLocation {
@@ -191,6 +206,14 @@ export interface DonorRequest {
   donationLocation: DonationLocation;
 }
 
+export interface DonationHistoryRecord {
+  donation_id: string;
+  hospital_name: string;
+  date: string;
+  units: number;
+  type: 'blood' | 'platelets' | 'plasma';
+}
+
 export interface DonorProfile {
   id: string;
   fullName: string;
@@ -210,6 +233,122 @@ export interface DonorProfile {
   totalDonations: number;
   badgeTitle: string;
   activeMatchRequestId?: string;
+  donation_history?: DonationHistoryRecord[];
+}
+
+export interface HospitalIssue {
+  id: string;
+  hospital_id: string;
+  hospital_name: string;
+  category: 'equipment' | 'facility' | 'staffing' | 'supplies';
+  title: string;
+  description: string;
+  severity: 'low' | 'moderate' | 'high' | 'critical';
+  status: 'investigating' | 'in_progress' | 'resolved';
+  reported_by: string;
+  created_at: string;
+  resolved_at?: string | null;
+}
+
+export interface InventoryItem {
+  id: string;
+  hospital_id: string;
+  category: 'blood_bank' | 'medication' | 'equipment' | 'trauma_supplies';
+  item_name: string;
+  current_stock: number;
+  minimum_threshold: number;
+  unit: string;
+  is_low_stock: boolean;
+  last_updated: string;
+}
+
+export interface DailyIntelligenceReport {
+  report_id: string;
+  date: string;
+  model_used: string;
+  headline: string;
+  summary_markdown: string;
+  key_metrics: {
+    total_cases: number;
+    critical_cases: number;
+    sla_compliance_pct: number;
+    auto_reroutes: number;
+  };
+  generated_at: string;
+}
+
+export interface NaturalLanguageQueryResponse {
+  query: string;
+  answer: string;
+  referenced_facilities: string[];
+  timestamp: string;
+}
+
+export interface DispatchProgressionStage {
+  stage: 'triage' | 'bed_matching' | 'routing_briefing';
+  agent_name: string;
+  model_used: 'gemini-3.1-pro' | 'gemini-3.5-flash';
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  headline: string;
+  details: Record<string, any>;
+  timestamp?: string;
+}
+
+export interface MultiAgentDispatchExecution {
+  case_id: string;
+  timestamp: string;
+  patient_input: {
+    patient_age: number;
+    vitals: {
+      heart_rate: number;
+      respiratory_rate: number;
+      systolic_bp: number;
+      spo2: number;
+      temperature_c: number;
+      consciousness: string;
+    };
+    chief_complaint: string;
+    mechanism_of_injury?: string | null;
+  };
+  location_input: {
+    lat: number;
+    lng: number;
+    address?: string;
+  };
+  news2_score: {
+    score: number;
+    risk_band: 'low' | 'medium' | 'high';
+  };
+  triage_result: {
+    severity_label: 'critical' | 'moderate' | 'mild';
+    required_specialty: string;
+    notes: string;
+    model: string;
+  };
+  bed_matching_result: {
+    chosen_hospital: {
+      id: string;
+      name: string;
+      lat: number;
+      lng: number;
+      distance_km: number;
+      eta_minutes: number;
+    };
+    reasoning: string;
+    alternatives: Array<{ name: string; reason_not_chosen: string }>;
+    model: string;
+  };
+  routing_result: {
+    eta_minutes: number;
+    distance_km: number;
+    route_summary: string;
+    model: string;
+  };
+  briefing_result: {
+    pre_arrival_brief: string;
+    model: string;
+  };
+  audit_record_id: string;
 }
 
 export interface AuditEventLog {
@@ -235,6 +374,10 @@ export interface AuditEventLog {
     | 'DONOR_EN_ROUTE'
     | 'DONOR_ARRIVED'
     | 'AUTO_BLOOD_RESTOCKED'
+    | 'ISSUE_REPORTED'
+    | 'ISSUE_RESOLVED'
+    | 'INVENTORY_RESTOCKED'
+    | 'DAILY_REPORT_GENERATED'
     | 'RESOLVED';
   severity: AlertSeverity;
   actor: string;

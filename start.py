@@ -1,14 +1,15 @@
 """
 LifeLine Agent — Unified Startup Script
 ========================================
-Starts both the FastAPI backend and the Streamlit UI in one terminal.
+Starts both the FastAPI backend and the Next.js frontend concurrently.
 
 Usage:
-    python start.py                          # default: both services
+    python start.py                          # default: FastAPI (8000) + Next.js (3000)
     python start.py --port 8000              # custom backend port
-    python start.py --frontend-port 8502     # custom UI port
-    python start.py --frontend next          # use Next.js instead of Streamlit
-    python start.py --reload                 # hot-reload backend
+    python start.py --frontend-port 3000     # custom Next.js port
+    python start.py --backend-only           # run API server only
+    python start.py --frontend-only          # run Next.js app only
+    python start.py --reload                 # enable FastAPI auto-reload
 """
 
 from __future__ import annotations
@@ -20,27 +21,25 @@ import signal
 import socket
 import subprocess
 import sys
-import threading
 import time
 from pathlib import Path
 
-# ── Windows UTF-8 ─────────────────────────────────────────────────────────────
+# ── Windows UTF-8 Encoding Safety ─────────────────────────────────────────────
 if sys.platform == "win32":
     try:
-        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+        if sys.stdout and hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        if sys.stderr and hasattr(sys.stderr, "reconfigure"):
+            sys.stderr.reconfigure(encoding="utf-8", errors="replace")
     except Exception:
         pass
 
 PROJECT_ROOT = Path(__file__).resolve().parent
+FRONTEND_DIR = PROJECT_ROOT / "frontend"
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Interpreter detection
-# ─────────────────────────────────────────────────────────────────────────────
 
 def _can_import(python: str, *packages: str) -> bool:
-    """Return True if *python* can import all *packages*."""
+    """Return True if python interpreter can import the given packages."""
     check = "; ".join(f"import {p}" for p in packages)
     try:
         result = subprocess.run(
@@ -54,262 +53,138 @@ def _can_import(python: str, *packages: str) -> bool:
 
 
 def find_python() -> str:
-    """
-    Return the path to a Python interpreter that has uvicorn AND streamlit.
-
-    Priority:
-      1. sys.executable (the Python that launched this script) — if it works
-      2. `python` / `python3` on PATH
-      3. Common Anaconda / conda install locations on Windows
-      4. sys.executable as final fallback (will fail loudly at runtime)
-    """
+    """Return Python interpreter with uvicorn available."""
     candidates = [sys.executable]
-
-    # Add every `python` / `python3` visible on PATH
     for name in ("python", "python3", "py"):
         p = shutil.which(name)
         if p and p not in candidates:
             candidates.append(p)
 
-    # Common Windows Anaconda paths
-    home = Path.home()
-    for rel in (
-        "anaconda3/python.exe",
-        "anaconda/python.exe",
-        "miniconda3/python.exe",
-        "miniconda/python.exe",
-        "AppData/Local/Programs/Python/Python311/python.exe",
-        "AppData/Local/Programs/Python/Python312/python.exe",
-        "AppData/Local/Programs/Python/Python313/python.exe",
-    ):
-        p = str(home / rel)
-        if Path(p).exists() and p not in candidates:
-            candidates.append(p)
+    for py in candidates:
+        if _can_import(py, "uvicorn"):
+            return py
 
-    for python in candidates:
-        if _can_import(python, "uvicorn", "streamlit"):
-            return python
-
-    # Nothing works — return sys.executable; errors will surface in subprocesses
     return sys.executable
 
 
-def find_exe(name: str) -> str | None:
-    """Return the full path to a console-script executable if it exists."""
-    return shutil.which(name)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Helpers
-# ─────────────────────────────────────────────────────────────────────────────
-
 def is_port_in_use(port: int, host: str = "127.0.0.1") -> bool:
+    """Return True if a TCP port is currently listening."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.settimeout(0.5)
         return s.connect_ex((host, port)) == 0
 
 
-def load_config() -> None:
-    try:
-        from admin.config_manager import get_runtime_config, inject_to_env
-        inject_to_env(get_runtime_config())
-    except Exception:
-        pass
+def wait_for_port(port: int, host: str = "127.0.0.1", timeout: float = 15.0) -> bool:
+    """Block until port starts listening or timeout expires."""
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        if is_port_in_use(port, host):
+            return True
+        time.sleep(0.3)
+    return False
 
 
-def _stream(proc: subprocess.Popen, prefix: str, stop: threading.Event) -> None:
-    try:
-        for raw in iter(proc.stdout.readline, b""):
-            if stop.is_set():
-                break
-            line = raw.decode("utf-8", errors="replace").rstrip()
-            if line:
-                print(f"{prefix} {line}", flush=True)
-    except Exception:
-        pass
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Main
-# ─────────────────────────────────────────────────────────────────────────────
-
-def start_services(
-    backend_host: str = "0.0.0.0",
-    backend_port: int = 8000,
-    frontend_type: str = "streamlit",
-    frontend_port: int = 8501,
-    reload: bool = False,
-) -> None:
-    load_config()
-
-    # If Next.js is selected and port was left at default 8501, use standard 3000
-    if frontend_type == "next" and frontend_port == 8501:
-        frontend_port = 3000
-
-    # ── Resolve the correct Python interpreter ────────────────────────────────
-    PYTHON = find_python()
-
-    print("=" * 65)
-    print("  🚑  LifeLine Agent — Autonomous Emergency Dispatch")
-    print("=" * 65)
-    print(f"  Python       →  {PYTHON}")
-    print(f"  Backend API  →  http://localhost:{backend_port}")
-    print(f"  API Docs     →  http://localhost:{backend_port}/docs")
-    print(f"  Frontend UI  →  http://localhost:{frontend_port}")
-    print("=" * 65)
-    print("  Ctrl+C to stop all services.\n")
-
-    # ── Port pre-flight ───────────────────────────────────────────────────────
-    for port, name in ((backend_port, "Backend"), (frontend_port, "Frontend")):
-        if is_port_in_use(port):
-            print(
-                f"\n❌  {name} port {port} is already in use.\n"
-                f"    Free it or pass a different port:\n"
-                f"    python start.py {'--port' if name == 'Backend' else '--frontend-port'} <free_port>\n"
-            )
-            sys.exit(1)
-
-    env = {**os.environ, "PYTHONUNBUFFERED": "1"}
-    processes: list[tuple[str, subprocess.Popen]] = []
-    stop_event = threading.Event()
-    shutting_down = threading.Event()
-
-    # ── Backend ───────────────────────────────────────────────────────────────
-    # Prefer the uvicorn console-script if it's on PATH (avoids python -m)
-    uvicorn_exe = find_exe("uvicorn")
-    if uvicorn_exe:
-        backend_cmd = [
-            uvicorn_exe,
-            "lifeline.main:app",
-            "--host", backend_host,
-            "--port", str(backend_port),
-        ]
-    else:
-        backend_cmd = [
-            PYTHON, "-m", "uvicorn",
-            "lifeline.main:app",
-            "--host", backend_host,
-            "--port", str(backend_port),
-        ]
+def run_backend(port: int = 8000, reload: bool = False) -> subprocess.Popen:
+    """Start the FastAPI backend server."""
+    python = find_python()
+    cmd = [
+        python, "-m", "uvicorn", "lifeline.main:app",
+        "--host", "0.0.0.0",
+        "--port", str(port),
+    ]
     if reload:
-        backend_cmd.append("--reload")
+        cmd.append("--reload")
 
-    backend_proc = subprocess.Popen(
-        backend_cmd,
+    print(f"🚀 Starting FastAPI backend on http://localhost:{port}...")
+    proc = subprocess.Popen(
+        cmd,
         cwd=str(PROJECT_ROOT),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        env=env,
+        env={**os.environ, "PYTHONUNBUFFERED": "1"},
     )
-    processes.append(("Backend ", backend_proc))
-    threading.Thread(
-        target=_stream, args=(backend_proc, "[Backend ]", stop_event), daemon=True
-    ).start()
+    return proc
 
-    # ── Frontend ──────────────────────────────────────────────────────────────
-    if frontend_type == "next" and (PROJECT_ROOT / "frontend").exists():
-        frontend_cmd = ["npm", "run", "dev", "--", "-p", str(frontend_port)]
-        frontend_cwd = str(PROJECT_ROOT / "frontend")
-        use_shell = sys.platform == "win32"
-    else:
-        ui_script = str(PROJECT_ROOT / "ui" / "streamlit_app.py")
-        streamlit_exe = find_exe("streamlit")
-        if streamlit_exe:
-            frontend_cmd = [
-                streamlit_exe, "run", ui_script,
-                "--server.port", str(frontend_port),
-                "--server.headless", "true",
-                "--server.fileWatcherType", "none",
-            ]
-        else:
-            frontend_cmd = [
-                PYTHON, "-m", "streamlit", "run", ui_script,
-                "--server.port", str(frontend_port),
-                "--server.headless", "true",
-                "--server.fileWatcherType", "none",
-            ]
-        frontend_cwd = str(PROJECT_ROOT)
-        use_shell = False
 
-    frontend_proc = subprocess.Popen(
-        frontend_cmd,
-        cwd=frontend_cwd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        shell=use_shell,
-        env=env,
+def run_frontend(port: int = 3000) -> subprocess.Popen:
+    """Start the Next.js frontend development server."""
+    npm = shutil.which("npm.cmd" if sys.platform == "win32" else "npm") or "npm"
+    cmd = [npm, "run", "dev", "--", "-p", str(port)]
+
+    print(f"🌐 Starting Next.js frontend on http://localhost:{port}...")
+    proc = subprocess.Popen(
+        cmd,
+        cwd=str(FRONTEND_DIR),
+        shell=(sys.platform == "win32"),
     )
-    processes.append(("Frontend", frontend_proc))
-    threading.Thread(
-        target=_stream, args=(frontend_proc, "[Frontend]", stop_event), daemon=True
-    ).start()
-
-    # ── Cleanup / signal handling ─────────────────────────────────────────────
-    def cleanup(signum=None, frame=None) -> None:
-        if shutting_down.is_set():
-            return
-        shutting_down.set()
-        stop_event.set()
-        print("\n\n🛑  Shutting down LifeLine Agent services...")
-        for _, p in processes:
-            try:
-                p.terminate()
-            except Exception:
-                pass
-        time.sleep(1.5)
-        for _, p in processes:
-            try:
-                if p.poll() is None:
-                    p.kill()
-            except Exception:
-                pass
-        print("✓   All services stopped cleanly.")
-        sys.exit(0)
-
-    signal.signal(signal.SIGINT, cleanup)
-    signal.signal(signal.SIGTERM, cleanup)
-
-    # ── Monitor loop ──────────────────────────────────────────────────────────
-    try:
-        while not shutting_down.is_set():
-            time.sleep(0.75)
-            for name, p in processes:
-                code = p.poll()
-                if code is not None and not shutting_down.is_set():
-                    print(
-                        f"\n❌  {name.strip()} service exited unexpectedly (code {code}).\n"
-                        "    Check the output above for error details.\n"
-                        "    Stopping all services."
-                    )
-                    cleanup()
-                    return
-    except KeyboardInterrupt:
-        cleanup()
+    return proc
 
 
-def main() -> None:
+def main():
     parser = argparse.ArgumentParser(
-        description="LifeLine Agent — start backend + frontend together",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        description="Start LifeLine Agent services concurrently.",
+        allow_abbrev=False,
     )
-    parser.add_argument("--host", default="0.0.0.0", help="Backend bind host")
-    parser.add_argument("--port", type=int, default=8000, help="Backend port")
-    parser.add_argument(
-        "--frontend", default="streamlit",
-        choices=["streamlit", "next"],
-        help="Frontend UI type",
-    )
-    parser.add_argument("--frontend-port", type=int, default=8501, help="Frontend port")
-    parser.add_argument("--reload", action="store_true", help="Backend hot-reload (dev)")
+    parser.add_argument("--port", type=int, default=8000, help="FastAPI backend port (default: 8000)")
+    parser.add_argument("--frontend-port", dest="frontend_port", type=int, default=3000, help="Next.js frontend port (default: 3000)")
+    parser.add_argument("--backend-only", action="store_true", help="Start only the backend")
+    parser.add_argument("--frontend-only", action="store_true", help="Start only the frontend")
+    parser.add_argument("--reload", action="store_true", help="Enable auto-reload on backend")
+    parser.add_argument("--no-browser", action="store_true", help="Do not automatically open the browser")
     args = parser.parse_args()
 
-    start_services(
-        backend_host=args.host,
-        backend_port=args.port,
-        frontend_type=args.frontend,
-        frontend_port=args.frontend_port,
-        reload=args.reload,
-    )
+    print("=" * 60)
+    print("🚑 LifeLine Agent — System Startup")
+    print("=" * 60)
+
+    procs: list[subprocess.Popen] = []
+
+    try:
+        if not args.frontend_only:
+            backend_proc = run_backend(port=args.port, reload=args.reload)
+            procs.append(backend_proc)
+
+        if not args.backend_only and (FRONTEND_DIR / "package.json").exists():
+            frontend_proc = run_frontend(port=args.frontend_port)
+            procs.append(frontend_proc)
+
+        # Wait for backend to be ready
+        if not args.frontend_only:
+            wait_for_port(args.port, timeout=10)
+
+        print("\n" + "=" * 60)
+        print("✅ LifeLine Agent is now LIVE!")
+        if not args.backend_only:
+            print(f"   • Next.js Frontend: http://localhost:{args.frontend_port}")
+        if not args.frontend_only:
+            print(f"   • FastAPI Backend:  http://localhost:{args.port}")
+            print(f"   • API Docs:         http://localhost:{args.port}/docs")
+            print(f"   • Health Check:     http://localhost:{args.port}/health")
+        print("=" * 60)
+        print("\nPress Ctrl+C to terminate all running services.\n")
+
+        if not args.no_browser and not args.backend_only:
+            try:
+                import webbrowser
+                webbrowser.open(f"http://localhost:{args.frontend_port}")
+            except Exception:
+                pass
+
+        # Keep parent alive and monitor child processes
+        while True:
+            for p in procs:
+                if p.poll() is not None:
+                    break
+            time.sleep(1)
+
+    except KeyboardInterrupt:
+        print("\n🛑 Shutting down services...")
+    finally:
+        for p in procs:
+            try:
+                p.terminate()
+                p.wait(timeout=3)
+            except Exception:
+                p.kill()
+        print("👋 All services stopped cleanly.")
 
 
 if __name__ == "__main__":

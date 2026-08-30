@@ -24,6 +24,8 @@ interface PortalHeaderProps {
 
 export const PortalHeader: React.FC<PortalHeaderProps> = ({ onOpenSimulator }) => {
   const {
+    currentUser,
+    setIsAuthModalOpen,
     portalView,
     setPortalView,
     activeHospitalId,
@@ -131,6 +133,18 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({ onOpenSimulator }) =
                   {activeDonorReqCount}
                 </span>
               )}
+            </button>
+
+            <button
+              onClick={() => setPortalView('dispatch')}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition ${
+                portalView === 'dispatch'
+                  ? 'bg-gradient-to-r from-amber-600 to-amber-500 text-white shadow-sm font-black'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>Reactive Dispatch</span>
             </button>
           </div>
         </div>
@@ -292,6 +306,19 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({ onOpenSimulator }) =
               )}
             </div>
           )}
+
+          {/* Auth Persona Quick Switcher Button */}
+          <button
+            onClick={() => setIsAuthModalOpen(true)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-800 text-slate-200 border border-slate-700 text-xs font-bold transition"
+            title="Switch User Persona & Mock Token"
+          >
+            <span>{currentUser.avatar || '👤'}</span>
+            <span className="truncate max-w-[100px] hidden sm:inline">{currentUser.username}</span>
+            <span className="text-[10px] font-black uppercase text-sky-400 bg-sky-950/80 px-1.5 py-0.5 rounded border border-sky-800/60 hidden md:inline">
+              {currentUser.role.replace('_', ' ')}
+            </span>
+          </button>
 
           {/* Sound Mute/Unmute Toggle */}
           <button

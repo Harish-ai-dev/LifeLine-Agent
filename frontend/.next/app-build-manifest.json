@@ -1,27 +1,30 @@
 {
   "pages": {
-    "/_not-found/page": [
-      "static/chunks/webpack-8d7a34b96939283c.js",
-      "static/chunks/4bd1b696-157bddc1f2f3c358.js",
-      "static/chunks/215-05d7495ba57f6cd3.js",
-      "static/chunks/main-app-c881fbff6df21a22.js",
-      "static/chunks/app/_not-found/page-b9621181fcc30b9d.js"
+    "/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/page.js"
     ],
     "/layout": [
-      "static/chunks/webpack-8d7a34b96939283c.js",
-      "static/chunks/4bd1b696-157bddc1f2f3c358.js",
-      "static/chunks/215-05d7495ba57f6cd3.js",
-      "static/chunks/main-app-c881fbff6df21a22.js",
-      "static/css/cc58a3f3e1f9d511.css",
-      "static/chunks/app/layout-68d2a30931ed5a34.js"
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/layout.css",
+      "static/chunks/app/layout.js"
     ],
-    "/page": [
-      "static/chunks/webpack-8d7a34b96939283c.js",
-      "static/chunks/4bd1b696-157bddc1f2f3c358.js",
-      "static/chunks/215-05d7495ba57f6cd3.js",
-      "static/chunks/main-app-c881fbff6df21a22.js",
-      "static/chunks/239-5ca3f0fd2282ea28.js",
-      "static/chunks/app/page-0b0486eea2c17ffe.js"
+    "/hospital/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/hospital/page.js"
+    ],
+    "/login/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/login/page.js"
+    ],
+    "/government/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/government/page.js"
     ]
   }
 }

@@ -4,7 +4,7 @@
 
 ### 1. Single Terminal Window Operation
 - **You requested**: "there are three things like only one terminal window and i wnat an cli like ok"
-- **We fixed**: `start.bat` now launches both backend (port 8000) and frontend (port 5173) in the same terminal window
+- **We fixed**: `start.bat` now launches both backend (port 8000) and Next.js frontend (port 3000) in the same terminal window
 - **How to use**: Simply run `start.bat`
 
 ### 2. CLI Command Not Found Error
@@ -61,9 +61,9 @@ Terminal 3 (Testing):
 
 ### Option 3: Web UI Only
 ```bash
- lifeline ui
+lifeline ui
 ```
-Then visit: http://localhost:5173
+Then visit: http://localhost:3000
 
 ## 📊 WHAT'S BEEN VERIFIED
 
@@ -71,15 +71,15 @@ Then visit: http://localhost:5173
 - [x] All dependencies installed (google-adk, google-genai, firebase-admin, etc.)
 - [x] `lifeline` command registered and functional
 - [x] Backend API starts successfully on port 8000
-- [x] Frontend UI starts successfully on port 5173
+- [x] Next.js Frontend UI starts successfully on port 3000
 - [x] Hospital data files created and usable
-- [x] start.bat works without syntax errors
+- [x] start.bat works cleanly in a single terminal
 - [x] All 10 CLI commands are available and functional
 - [x] Test reports generated in `my-agent/reports/`
 
 ## 📁 KEY FILES YOU NOW HAVE
 
-- `start.bat` - Single terminal launcher (FIXED)
+- `start.bat` - Single terminal launcher (FastAPI + Next.js)
 - `SETUP_COMPLETE.md` - Detailed setup instructions
 - `FINAL_STATUS.md` - Complete system status report
 - `README_STATUS.md` - This summary
@@ -93,8 +93,8 @@ Then visit: http://localhost:5173
 - Use `python -m lifeline <command>` instead
 - Restart your terminal after installation
 
-**Port already in use (8000 or 5173)**
-- Check what's using those ports with `netstat -ano | findstr :8000` or `:5173`
+**Port already in use (8000 or 3000)**
+- Check what's using those ports with `netstat -ano | findstr :8000` or `:3000`
 - Stop conflicting processes or change ports in source code
 
 **API keys needed for full functionality**
@@ -111,14 +111,14 @@ The LifeLine Agent autonomous emergency dispatch system is now:
 - ✅ Fully installed and configured for Python 3.14
 - ✅ All dependency resolution issues resolved
 - ✅ CLI working with all 10 commands available separately
-- ✅ Web UI (React+Vite+Tailwind) and backend (FastAPI) functional
+- ✅ Web UI (Next.js 14) and backend (FastAPI) functional
 - ✅ Single-terminal operation available via `start.bat`
 - ✅ Ready for immediate use, testing, and demonstrations
 
 **To begin using the system:**
-1. Run `start.bat` (this starts both backend and frontend)
+1. Run `start.bat` (this starts both backend on 8000 and Next.js frontend on 3000)
 2. In another terminal, run `python -m lifeline dispatch` to test the full pipeline
-3. Open your browser to http://localhost:5173 to see the web UI
+3. Open your browser to http://localhost:3000 to see the web UI
 4. Use `lifeline status` to check system health at any time
 
 All your requested fixes and features have been implemented. The system is ready for operation as of 2026-08-28.

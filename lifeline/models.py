@@ -27,4 +27,5 @@ AGENT_MODELS = {
     "bed_matching_agent": DEFAULT_MODEL,   # gemini-3.5-flash (matching + ranking)
     "routing_agent":      DEFAULT_MODEL,   # gemini-3.5-flash (format OSRM output)
     "briefing_agent":     DEFAULT_MODEL,   # gemini-3.5-flash (one summary call)
+    "reporting_agent":    DEFAULT_MODEL,   # gemini-3.5-flash (daily intelligence & NL Q&A)
 }
