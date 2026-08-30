@@ -327,10 +327,6 @@ class IssueRecord(IssueCreateRequest):
     created_at: str
     resolved_at: Optional[str] = None
     _timestamp: Optional[str] = None
-    ai_classification: Optional[Dict[str, Any]] = Field(
-        default=None,
-        description="AI-generated classification: severity, recommended_action, estimated_resolution_hours"
-    )
 
 
 class IssueUpdateRequest(BaseModel):
@@ -422,21 +418,3 @@ class ReportQueryResponse(BaseModel):
     answer: str
     referenced_facilities: List[str] = []
     timestamp: str
-
-
-# ── Capacity Sync Models ───────────────────────────────────────────────────────
-
-class CapacityDiscrepancy(BaseModel):
-    hospital_id: str
-    resource_type: Literal["icu_beds", "blood_stock", "inventory"]
-    expected: Any
-    actual: Any
-    delta: Any
-    flag: str
-
-
-class CapacitySyncResponse(BaseModel):
-    synced_at: str
-    hospitals_checked: int
-    discrepancies: List[CapacityDiscrepancy]
-    summary: str

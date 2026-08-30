@@ -153,18 +153,6 @@ interface DashboardContextType {
   registerNewDonor: (profile: Omit<DonorProfile, 'id' | 'totalDonations' | 'badgeTitle'>) => void;
   updateHospitalBloodBank: (hospitalId: string, bloodGroup: BloodGroup, deltaUnits: number) => void;
   checkAndAutoTriggerBloodDeficit: (hospitalId: string, bloodGroup: BloodGroup, currentUnits: number) => void;
-
-  // Unified Copilot Overlay Modal
-  isCopilotOpen: boolean;
-  copilotTab: 'all' | 'notifications' | 'copilot';
-  copilotListen: boolean;
-  openCopilot: (tab?: 'all' | 'notifications' | 'copilot', autoListen?: boolean) => void;
-  closeCopilot: () => void;
-
-  // Mobile Navigation Drawer (<md viewports)
-  isMobileSidebarOpen: boolean;
-  setIsMobileSidebarOpen: (open: boolean) => void;
-  toggleMobileSidebar: () => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -235,28 +223,6 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   const watchdogRanRef = useRef(false);
 
-  // ── UNIFIED COPILOT OVERLAY MODAL STATE ──────────────────────────────
-  const [isCopilotOpen, setIsCopilotOpen] = useState(false);
-  const [copilotTab, setCopilotTab] = useState<'all' | 'notifications' | 'copilot'>('all');
-  const [copilotListen, setCopilotListen] = useState(false);
-
-  const openCopilot = useCallback((tab: 'all' | 'notifications' | 'copilot' = 'all', autoListen = false) => {
-    setCopilotTab(tab);
-    setCopilotListen(autoListen);
-    setIsCopilotOpen(true);
-  }, []);
-
-  const closeCopilot = useCallback(() => {
-    setIsCopilotOpen(false);
-    setCopilotListen(false);
-  }, []);
-
-  // ── MOBILE NAVIGATION DRAWER STATE (<md viewports) ──────────────────────
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const toggleMobileSidebar = useCallback(() => {
-    setIsMobileSidebarOpen((prev) => !prev);
-  }, []);
-
   const router = useRouter();
 
   // ── AUTH ACTIONS ──────────────────────────────────────────────────────────
@@ -297,29 +263,20 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
 
       // Resolve facility ID
       const targetFacilityId = facilityId || demoUser.facility_id;
-      let matchedFacilityId = INITIAL_HOSPITALS[0].id;
       if (targetFacilityId) {
         const matched = INITIAL_HOSPITALS.find(
           (h) => h.id === targetFacilityId || h.code.toLowerCase().includes(targetFacilityId.split('_').slice(-1)[0])
         );
-        if (matched) {
-          matchedFacilityId = matched.id;
-          setActiveHospitalId(matched.id);
-        } else {
-          setActiveHospitalId(INITIAL_HOSPITALS[0].id);
-        }
+        if (matched) setActiveHospitalId(matched.id);
+        else setActiveHospitalId(INITIAL_HOSPITALS[0].id);
       }
       if (donorId || demoUser.donor_id) {
         setActiveDonorId(donorId || demoUser.donor_id || 'donor-101');
       }
 
-      if (demoUser.role === 'hospital_staff') {
-        router.push(`/hospital/facility/${matchedFacilityId}`);
-      } else if (demoUser.role === 'government_authority') {
-        router.push('/government');
-      } else if (demoUser.role === 'blood_donor') {
-        router.push('/donor');
-      }
+      if (demoUser.role === 'hospital_staff') router.push('/hospital');
+      else if (demoUser.role === 'government_authority') router.push('/government');
+      else if (demoUser.role === 'blood_donor') router.push('/donor');
     },
     [router]
   );
@@ -1770,14 +1727,6 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
         registerNewDonor,
         updateHospitalBloodBank,
         checkAndAutoTriggerBloodDeficit,
-        isCopilotOpen,
-        copilotTab,
-        copilotListen,
-        openCopilot,
-        closeCopilot,
-        isMobileSidebarOpen,
-        setIsMobileSidebarOpen,
-        toggleMobileSidebar,
       }}
     >
       {children}

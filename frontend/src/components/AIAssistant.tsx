@@ -134,7 +134,7 @@ export function AIAssistant({ isOpen: externalIsOpen, onClose: externalOnClose }
           : currentUser?.role === 'blood_donor' 
           ? 'RequestMatchingCoordinator (L2 LoopAgent)' 
           : 'TriageCoordinator (L2 LoopAgent)',
-        model: 'gemini-3.6-flash',
+        model: 'gemini-2.5-flash',
         realtime: true,
       }
     };
@@ -366,11 +366,10 @@ export function AIAssistant({ isOpen: externalIsOpen, onClose: externalOnClose }
             <div className="p-4 rounded-2xl bg-[#111728] border border-slate-800 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-sm text-sky-400 flex items-center gap-2">
-                  <Layers className="w-4 h-4" /> Level 1: Orchestrator (Root Agent)
+                  <Layers className="w-4 h-4" /> Level 1: Root Sequential Orchestrator
                 </span>
-                <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold animate-pulse flex items-center gap-1">
-                  <RefreshCw className="w-3 h-3 animate-spin" />
-                  LOOPING
+                <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">
+                  ACTIVE
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 leading-relaxed font-sans">

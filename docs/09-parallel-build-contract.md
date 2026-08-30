@@ -455,13 +455,7 @@ All API endpoints return standard HTTP error codes and a consistent JSON payload
     "status": "investigating",
     "reported_by": "Dr. A. Mehta",
     "created_at": "2026-08-29T14:10:00Z",
-    "resolved_at": null,
-    "ai_classification": {
-      "severity": "high",
-      "category": "equipment",
-      "recommended_action": "Divert acute stroke cases to alternative facility until resolved.",
-      "estimated_resolution_hours": 12
-    }
+    "resolved_at": null
   }
   ```
 
@@ -479,27 +473,6 @@ All API endpoints return standard HTTP error codes and a consistent JSON payload
     "unit": "units",
     "is_low_stock": true,
     "last_updated": "2026-08-29T16:00:00Z"
-  }
-  ```
-
-#### `POST /capacity/sync`
-- **Description**: Deterministic data-integrity check to reconcile network bed counts and inventory levels against active patient admissions and open requests.
-- **Response** (`200 OK`):
-  ```json
-  {
-    "synced_at": "2026-08-29T16:00:00Z",
-    "hospitals_checked": 14,
-    "discrepancies": [
-      {
-        "hospital_id": "hosp_mumbai_01",
-        "resource_type": "icu_beds",
-        "expected": 17,
-        "actual": 18,
-        "delta": 1,
-        "flag": "active_patients_mismatch"
-      }
-    ],
-    "summary": "Reconciliation complete across 14 facilities. Found 1 discrepancies."
   }
   ```
 

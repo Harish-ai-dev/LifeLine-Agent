@@ -34,18 +34,13 @@ secrets/
 .firebase/
 firebase-debug.log
 .firebaserc
-firebase-config.js
+firebase-config.js          # Never commit JS SDK config with API key
 firebase-config.ts
 
-# ─── Node / Next.js Build Outputs ──────────────────────────────────────────────
+# ─── Node / JS (if a web frontend is added) ────────────────────────────────────
 node_modules/
 .npm/
-.next/
-frontend/.next/
-out/
-frontend/out/
-*.tsbuildinfo
-next-env.d.ts
+*.lock                      # package-lock.json / yarn.lock have no secrets but keep clean
 
 # ─── Data (generated, not source) ─────────────────────────────────────────────
 data/hospitals_raw.json
@@ -68,3 +63,6 @@ Thumbs.db
 
 # ─── Streamlit ─────────────────────────────────────────────────────────────────
 .streamlit/secrets.toml
+
+# --- Scripts -------------------------------------------------------------------
+start.bat

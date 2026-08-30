@@ -92,7 +92,7 @@ export default function HospitalDashboardPage() {
   );
 
   return (
-    <div className="space-y-6 w-full pb-12">
+    <div className="space-y-6 max-w-[1600px] mx-auto pb-12">
       {/* ── 1. COMMAND CENTER HERO BANNER & REAL-TIME CONTROLS ──────────────── */}
       <div className="bg-white dark:bg-[#0d1424] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
@@ -128,10 +128,7 @@ export default function HospitalDashboardPage() {
                 )}
               </div>
 
-              <h1
-                className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3 whitespace-normal break-words leading-tight"
-                title={currentHospital.name}
-              >
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
                 {currentHospital.name}
               </h1>
 
@@ -253,7 +250,7 @@ export default function HospitalDashboardPage() {
       </div>
 
       {/* ── 3. FOUR CORE TELEMETRY STAT CARDS ──────────────────────────────── */}
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Active Triage Queue */}
         <Link
           href="/hospital/patients"

@@ -39,7 +39,7 @@ export default function DonorPage() {
   const matchedEntry = activeMatch?.matchedDonors.find((m) => m.donorId === currentDonor.id);
 
   return (
-    <div className="space-y-6 w-full pb-16">
+    <div className="space-y-6 max-w-4xl mx-auto pb-16">
       {/* ── 1. DONOR HERO BADGE PASS ──────────────────────────────────────── */}
       <div className="bg-white dark:bg-[#0d1424] p-6 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
@@ -128,7 +128,7 @@ export default function DonorPage() {
       )}
 
       {/* ── 3. QUICK NAVIGATION TILES ──────────────────────────────────────── */}
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Link
           href="/donor/requests"
           className="bg-white dark:bg-[#0e1424] p-5 rounded-3xl border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200 block space-y-2 group shadow-sm"

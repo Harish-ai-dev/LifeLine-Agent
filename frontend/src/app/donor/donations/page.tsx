@@ -66,7 +66,7 @@ export default function DonorDonationsPage() {
   };
 
   return (
-    <div className="space-y-6 w-full pb-16">
+    <div className="space-y-6 max-w-4xl mx-auto pb-16">
       {/* Page Header */}
       <div className="bg-white dark:bg-[#0d1424] p-6 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
         <div className="flex items-center gap-2 mb-1">
@@ -84,7 +84,7 @@ export default function DonorDonationsPage() {
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Eligibility Card */}
         <div className="bg-white dark:bg-[#0d1424] p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-200/50 shrink-0">

@@ -24,8 +24,6 @@ import {
 import { PROJECT_METADATA } from '@/data/marketing/team';
 import { CLINICAL_SCENARIOS } from '@/data/marketing/pipeline';
 import { DESIGN_TOKENS } from '@/data/marketing/tokens';
-import { useTheme } from '@/context/ThemeContext';
-import { Logo } from '@/components/ui/Logo';
 
 interface NavbarProps {
   onOpenDemo: () => void;
@@ -167,7 +165,11 @@ export function Navbar({
           {/* Logo Brand Block */}
           <Link href="/" className="flex items-center space-x-2.5 group flex-shrink-0">
             <div className="relative">
-              <Logo className="group-hover:scale-105 transition-transform duration-300" />
+              <img 
+                src="/logo.png" 
+                alt="LifeLine Agent Logo" 
+                className="w-9 h-9 rounded-[11px] shadow-md group-hover:scale-105 transition-transform duration-300" 
+              />
               <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 border border-white"></span>

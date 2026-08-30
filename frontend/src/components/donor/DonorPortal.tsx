@@ -116,7 +116,7 @@ export const DonorPortal: React.FC = () => {
 
           {/* Sub-tab Switcher & Actions */}
           <div className="flex flex-wrap items-center gap-3">
-            {/* View Switcher: My Profile vs Browse Donors */}
+            {/* View Switcher: My Profile vs Browse Donors One-by-One */}
             <div className="flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-700 text-xs font-bold gap-1">
               <button
                 onClick={() => setPortalSubTab('my_profile')}
@@ -127,7 +127,7 @@ export const DonorPortal: React.FC = () => {
                 }`}
               >
                 <User className="w-3.5 h-3.5" />
-                <span>My Donor Pass</span>
+                <span>My Active Profile</span>
               </button>
 
               <button
@@ -139,7 +139,7 @@ export const DonorPortal: React.FC = () => {
                 }`}
               >
                 <Users className="w-3.5 h-3.5" />
-                <span>Community Donor Roster</span>
+                <span>Browse Donors (One-by-One)</span>
               </button>
             </div>
 
@@ -147,19 +147,17 @@ export const DonorPortal: React.FC = () => {
             <div className="relative">
               <button
                 onClick={() => setShowDonorMenu(!showDonorMenu)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/90 text-slate-200 border border-slate-700 text-xs font-bold transition hover:bg-slate-700/80"
-                title="Switch between registered community donors"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/90 text-slate-200 border border-slate-700 text-xs font-bold transition"
               >
                 <User className="w-3.5 h-3.5 text-rose-400" />
-                <span>Switch Donor ({currentDonor.bloodGroup})</span>
-                <ChevronDown className="w-3 h-3 text-slate-400" />
+                <span>Switch ({currentDonor.bloodGroup})</span>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
               </button>
 
               {showDonorMenu && (
-                <div className="absolute right-0 mt-2 w-72 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-2 z-50 space-y-1 animate-in fade-in zoom-in-95 duration-100">
-                  <div className="px-3 py-1.5 text-[10px] uppercase font-bold text-slate-400 border-b border-slate-800 flex justify-between">
-                    <span>Select Active Donor Persona</span>
-                    <span>{donors.length} Registered</span>
+                <div className="absolute right-0 mt-2 w-64 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-2 z-50 space-y-1">
+                  <div className="px-3 py-1 text-[10px] uppercase font-bold text-slate-400 border-b border-slate-800">
+                    Quick Switch Donor
                   </div>
                   {donors.map((d) => (
                     <button
@@ -168,17 +166,14 @@ export const DonorPortal: React.FC = () => {
                         setActiveDonorId(d.id);
                         setShowDonorMenu(false);
                       }}
-                      className={`w-full text-left px-3 py-2.5 rounded-xl text-xs flex items-center justify-between transition-colors ${
+                      className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center justify-between ${
                         d.id === activeDonorId
                           ? 'bg-rose-600 text-white font-bold'
                           : 'text-slate-300 hover:bg-slate-800'
                       }`}
                     >
-                      <div className="min-w-0">
-                        <div className="font-bold truncate">{d.fullName}</div>
-                        <div className="text-[10px] text-slate-400 font-mono truncate">{d.address}</div>
-                      </div>
-                      <span className="font-mono text-[11px] font-bold bg-white/10 px-2 py-0.5 rounded shrink-0 ml-2">
+                      <span>{d.fullName}</span>
+                      <span className="font-mono text-[11px] font-bold bg-white/10 px-1.5 rounded">
                         {d.bloodGroup}
                       </span>
                     </button>

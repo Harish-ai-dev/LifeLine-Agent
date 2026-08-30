@@ -15,7 +15,6 @@ import {
   Info
 } from 'lucide-react';
 import { PROJECT_METADATA } from '@/data/marketing/team';
-import { Logo } from '@/components/ui/Logo';
 
 interface FooterProps {
   onOpenDemo: () => void;
@@ -38,7 +37,11 @@ export const Footer: React.FC<FooterProps> = ({ onOpenDemo, onOpenWaitlist }) =>
           {/* Col 1: Brand & Hackathon Context */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center space-x-3 group inline-flex">
-              <Logo />
+              <img 
+                src="/logo.png" 
+                alt="LifeLine Agent Logo" 
+                className="w-9 h-9 rounded-[11px] shadow-sm group-hover:scale-105 transition-transform duration-300" 
+              />
               <span className="font-bold text-slate-900 text-base tracking-wider">
                 LIFELINE<span className="text-cyan-500 font-extrabold">AGENT</span>
               </span>

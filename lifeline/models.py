@@ -28,5 +28,4 @@ AGENT_MODELS = {
     "routing_agent":      DEFAULT_MODEL,   # gemini-3.5-flash (format OSRM output)
     "briefing_agent":     DEFAULT_MODEL,   # gemini-3.5-flash (one summary call)
     "reporting_agent":    DEFAULT_MODEL,   # gemini-3.5-flash (daily intelligence & NL Q&A)
-    "issue_classifier_agent": DEFAULT_MODEL, # gemini-3.5-flash (issue classification)
 }

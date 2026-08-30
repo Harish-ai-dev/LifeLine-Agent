@@ -368,7 +368,7 @@ def setup(
 
 @app.command(name="init")
 def init():
-    """Interactive first-run setup wizard — configures API keys and environment (alias for lifeline setup)."""
+    """First-run interactive setup wizard (alias for lifeline setup)."""
     setup(key="all")
 
 
@@ -476,7 +476,7 @@ def status():
     audit = audit_full_system_config(config)
 
     # ── 1. Configuration Audit Table ──────────────────────────────────────────
-    console.print(Rule("[bold]Configuration — API Key & Credential Audit[/bold]"))
+    console.print(Rule("[bold]API Key & Credential Audit[/bold]"))
     table = Table(show_header=True, header_style="bold", border_style="dim")
     table.add_column("Setting / Credential", width=32)
     table.add_column("Status", width=16)
@@ -496,7 +496,7 @@ def status():
 
     # ── 2. Data Files ─────────────────────────────────────────────────────────
     console.print()
-    console.print(Rule("[bold]Data Files — Hospital & Clinical Datasets[/bold]"))
+    console.print(Rule("[bold]Hospital & Clinical Datasets[/bold]"))
     data_files = {
         "data/hospitals_raw.json": "Raw hospital locations (OSM)",
         "data/hospitals.json":     "Enriched hospital dataset (seeded)",
