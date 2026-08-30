@@ -117,19 +117,28 @@ def get_enriched_hospitals(patient_loc: Location) -> list[dict]:
         h_copy["eta_minutes"] = round(dist * 2.0, 1)
         candidates.append((dist, h_copy, dest))
 
-    # Sort by haversine distance and take top 10 candidates for accurate routing
+    # Sort by haversine distance and take top 3 candidates for accurate routing
     candidates.sort(key=lambda x: x[0])
-    top_candidates = candidates[:10]
+    top_candidates = candidates[:3]
 
-    enriched = []
-    for dist, h_copy, dest in top_candidates:
+    import concurrent.futures
+    
+    def enrich_hospital(dist, h_copy, dest):
         try:
             route = get_driving_eta(patient_loc, dest)
             h_copy["distance_km"] = route["distance_km"]
             h_copy["eta_minutes"] = route["eta_minutes"]
         except Exception:
             pass
-        enriched.append(h_copy)
+        return h_copy
+
+    enriched = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        futures = []
+        for dist, h_copy, dest in top_candidates:
+            futures.append(executor.submit(enrich_hospital, dist, h_copy, dest))
+        for future in concurrent.futures.as_completed(futures):
+            enriched.append(future.result())
 
     # Sort final candidates by estimated ETA
     enriched.sort(key=lambda x: x.get("eta_minutes") or 999)
