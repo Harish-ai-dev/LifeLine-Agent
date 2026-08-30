@@ -7,8 +7,8 @@ import os
 
 # ── Primary Models ────────────────────────────────────────────────────────────
 
-# Used by Triage Agent — clinical reasoning (gemini-3.1-pro per docs/03-decision-log.md)
-TRIAGE_MODEL = os.environ.get("TRIAGE_MODEL", "gemini-3.1-pro")
+# Used by Triage Agent — clinical reasoning (gemini-3.1-pro-preview per docs/03-decision-log.md)
+TRIAGE_MODEL = os.environ.get("TRIAGE_MODEL", "gemini-3.1-pro-preview")
 
 # Used by all other agents — fast, frontier-level, cost-efficient
 DEFAULT_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash")
