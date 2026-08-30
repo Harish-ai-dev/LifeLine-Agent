@@ -91,10 +91,10 @@ def _get_query_agent():
     )
 
 
-def run_daily_report(telemetry: Dict[str, Any]) -> DailyReportResponse:
+def run_daily_report(telemetry: Dict[str, Any], max_loops: int = 3) -> DailyReportResponse:
     """
     Generate an executive daily intelligence briefing using Gemini 3.5 Flash
-    with a deterministic fallback.
+    through a Draft -> Critique -> Revise loop coordinator with deterministic fallback.
     """
     now = datetime.datetime.utcnow()
     date_str = now.strftime("%Y-%m-%d")
@@ -106,7 +106,7 @@ def run_daily_report(telemetry: Dict[str, Any]) -> DailyReportResponse:
     sla_pct = float(telemetry.get("jurisdiction_sla_compliance_percent", 97.2))
     auto_reroutes = telemetry.get("tier2_escalation_count", telemetry.get("hospitals_on_diversion", 1))
 
-    prompt_text = f"""\
+    base_telemetry_prompt = f"""\
 REGIONAL NETWORK TELEMETRY ({date_str}):
 - Total Emergency Incidents Today: {total_cases}
 - Active Critical Dispatches: {critical_cases}
@@ -120,47 +120,62 @@ REGIONAL NETWORK TELEMETRY ({date_str}):
 - Open Donor Requests: {telemetry.get('active_donor_requests', 3)}
 - Blood Units Fulfilled: {telemetry.get('blood_units_fulfilled_today', 12)}
 - Hospital Telemetry Details: {json.dumps(telemetry.get('hospital_summaries', []), indent=2)}
-
-Generate the executive daily intelligence briefing.
 """
 
-    try:
-        agent = _get_daily_report_agent()
-        session_service = InMemorySessionService()
-        runner = Runner(
-            agent=agent,
-            app_name=APP_NAME,
-            session_service=session_service,
-        )
+    session_service = InMemorySessionService()
+    runner = None
+    session = None
+    critique = ""
 
-        session = run_async(
-            session_service.create_session(app_name=APP_NAME, user_id="reporting")
-        )
+    for loop_idx in range(1, max_loops + 1):
+        try:
+            agent = _get_daily_report_agent()
+            if runner is None:
+                runner = Runner(
+                    agent=agent,
+                    app_name=APP_NAME,
+                    session_service=session_service,
+                )
+                session = run_async(
+                    session_service.create_session(app_name=APP_NAME, user_id="reporting")
+                )
 
-        user_message = genai_types.Content(
-            role="user",
-            parts=[genai_types.Part(text=prompt_text)],
-        )
+            if critique:
+                prompt_text = f"{base_telemetry_prompt}\n\nCRITIQUE & REVISION DIRECTIVE (Cycle {loop_idx}):\n{critique}\nPlease revise the intelligence report."
+            else:
+                prompt_text = f"{base_telemetry_prompt}\n\nGenerate the executive daily intelligence briefing."
 
-        final_response = None
-        for event in runner.run(
-            user_id="reporting",
-            session_id=session.id,
-            new_message=user_message,
-        ):
-            if event.is_final_response() and event.content:
-                final_response = event.content.parts[0].text
-                break
+            user_message = genai_types.Content(
+                role="user",
+                parts=[genai_types.Part(text=prompt_text)],
+            )
 
-        if final_response:
-            try:
-                data = json.loads(final_response)
-            except json.JSONDecodeError:
-                cleaned = final_response.strip().strip("```json").strip("```").strip()
-                data = json.loads(cleaned)
-            return DailyReportResponse(**data)
-    except Exception as e:
-        logger.debug(f"LLM daily report generation fallback invoked: {e}")
+            final_response = None
+            for event in runner.run(
+                user_id="reporting",
+                session_id=session.id,
+                new_message=user_message,
+            ):
+                if event.is_final_response() and event.content:
+                    final_response = event.content.parts[0].text
+                    break
+
+            if final_response:
+                try:
+                    data = json.loads(final_response)
+                except json.JSONDecodeError:
+                    cleaned = final_response.strip().strip("```json").strip("```").strip()
+                    data = json.loads(cleaned)
+                
+                report = DailyReportResponse(**data)
+                # Self-critique check: verify that headline and key metrics are populated
+                if report.headline and report.key_metrics.total_cases > 0:
+                    return report
+                critique = "Ensure headline is impactful and key_metrics are non-zero."
+                continue
+        except Exception as e:
+            logger.debug(f"LLM daily report generation fallback invoked: {e}")
+            break
 
     # Deterministic Structured Fallback (Grounding with real telemetry metrics)
     hosp_summaries = telemetry.get("hospital_summaries", [])

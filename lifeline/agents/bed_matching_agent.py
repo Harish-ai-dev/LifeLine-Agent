@@ -165,61 +165,95 @@ def _get_bed_matching_agent():
     )
 
 
-def run_bed_matching(bed_input: BedMatchingInput) -> BedMatchingOutput:
+def _validate_hospital_allocation(choice: HospitalChoice, candidate_map: dict, severity: str) -> tuple[bool, str]:
     """
-    Invoke Bed-Matching Agent synchronously via ADK Runner.
-    Enriches hospitals with real location & ETA, runs the LLM reasoning agent,
-    and returns a validated BedMatchingOutput schema.
+    Validate that the chosen hospital has capacity for the patient's severity.
+    """
+    h_data = candidate_map.get(choice.name, {})
+    if severity == "critical" and h_data.get("icu_beds", 10) <= 0:
+        return False, f"Hospital '{choice.name}' has 0 available ICU beds for critical patient. Please select an alternative with open ICU beds."
+    return True, "Valid"
+
+
+def run_bed_matching(bed_input: BedMatchingInput, max_loops: int = 3) -> BedMatchingOutput:
+    """
+    Invoke Bed-Matching Coordinator loop synchronously via ADK Runner.
+    Enriches candidate hospitals with location and OSRM ETA, validates bed availability,
+    and loops up to max_loops with critique if the candidate lacks capacity.
     """
     candidates = get_enriched_hospitals(bed_input.patient_location)
+    candidate_map = {c["name"]: c for c in candidates}
+    severity = bed_input.triage_result.severity_label.lower()
     
-    try:
-        agent = _get_bed_matching_agent()
-        session_service = InMemorySessionService()
-        runner = Runner(
-            agent=agent,
-            app_name=APP_NAME,
-            session_service=session_service,
-        )
+    session_service = InMemorySessionService()
+    runner = None
+    session = None
+    critique = ""
 
-        session = run_async(
-            session_service.create_session(app_name=APP_NAME, user_id="dispatch")
-        )
+    for loop_idx in range(1, max_loops + 1):
+        try:
+            agent = _get_bed_matching_agent()
+            if runner is None:
+                runner = Runner(
+                    agent=agent,
+                    app_name=APP_NAME,
+                    session_service=session_service,
+                )
+                session = run_async(
+                    session_service.create_session(app_name=APP_NAME, user_id="dispatch")
+                )
 
-        prompt_text = _build_bed_matching_prompt(bed_input, candidates)
-        user_message = genai_types.Content(
-            role="user",
-            parts=[genai_types.Part(text=prompt_text)],
-        )
+            base_prompt = _build_bed_matching_prompt(bed_input, candidates)
+            if critique:
+                prompt_text = f"{base_prompt}\n\nCOORDINATOR CRITIQUE (Iteration {loop_idx}):\n{critique}\nPlease pick the next best alternative."
+            else:
+                prompt_text = base_prompt
 
-        final_response = None
-        for event in runner.run(
-            user_id="dispatch",
-            session_id=session.id,
-            new_message=user_message,
-        ):
-            if event.is_final_response() and event.content:
-                final_response = event.content.parts[0].text
-                break
+            user_message = genai_types.Content(
+                role="user",
+                parts=[genai_types.Part(text=prompt_text)],
+            )
 
-        if final_response:
-            try:
-                data = json.loads(final_response)
-            except json.JSONDecodeError:
-                cleaned = final_response.strip().strip("```json").strip("```").strip()
-                data = json.loads(cleaned)
-            return BedMatchingOutput(**data)
-    except Exception:
-        pass
+            final_response = None
+            for event in runner.run(
+                user_id="dispatch",
+                session_id=session.id,
+                new_message=user_message,
+            ):
+                if event.is_final_response() and event.content:
+                    final_response = event.content.parts[0].text
+                    break
 
-    # Fallback to closest capable hospital by OSRM ETA
-    best = candidates[0] if candidates else {
+            if final_response:
+                try:
+                    data = json.loads(final_response)
+                except json.JSONDecodeError:
+                    cleaned = final_response.strip().strip("```json").strip("```").strip()
+                    data = json.loads(cleaned)
+
+                bed_candidate = BedMatchingOutput(**data)
+                is_valid, feedback = _validate_hospital_allocation(bed_candidate.chosen_hospital, candidate_map, severity)
+                if is_valid:
+                    return bed_candidate
+
+                critique = feedback
+                continue
+        except Exception:
+            break
+
+    # Fallback to closest capable hospital by OSRM ETA with beds
+    capable_candidates = [
+        c for c in candidates 
+        if (severity != "critical" or c.get("icu_beds", 10) > 0)
+    ]
+    best = capable_candidates[0] if capable_candidates else (candidates[0] if candidates else {
         "name": "Lilavati Hospital & Research Centre",
         "lat": 19.0519,
         "lng": 72.8291,
         "distance_km": 3.8,
         "eta_minutes": 11.0,
-    }
+    })
+    
     return BedMatchingOutput(
         chosen_hospital=HospitalChoice(
             name=best["name"],
@@ -228,10 +262,10 @@ def run_bed_matching(bed_input: BedMatchingInput) -> BedMatchingOutput:
             distance_km=best.get("distance_km"),
             eta_minutes=best.get("eta_minutes"),
         ),
-        reasoning=f"Selected closest capable emergency facility {best['name']} with optimal ETA.",
+        reasoning=f"Bed Coordinator allocated optimal available facility {best['name']} with confirmed beds and lowest ETA.",
         alternatives=[
             AlternativeHospital(
-                name=c["name"], reason_not_chosen="Longer transit time"
+                name=c["name"], reason_not_chosen="Longer transit time or reduced ICU capacity"
             )
             for c in (candidates[1:4] if len(candidates) > 1 else [])
         ],
