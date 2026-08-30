@@ -39,8 +39,8 @@ export const OpenSourceSection: React.FC = () => {
   };
 
   return (
-    <section id="open-source" className="py-24 bg-[#F8FAFC] relative border-t border-slate-200 scroll-mt-20">
-      <div className="w-full w-full px-2 sm:px-4 lg:px-6 px-4 sm:px-6 lg:px-8 xl:px-10">
+    <section id="open-source" className="py-12 bg-[#F8FAFC] relative border-t border-slate-200 scroll-mt-20">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-10">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto">
@@ -49,17 +49,17 @@ export const OpenSourceSection: React.FC = () => {
             <span>Open Source & Permissive Licensing</span>
           </div>
 
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
             Apache 2.0 Licensed. Built for the Public Good.
           </h2>
 
-          <p className="mt-4 text-base sm:text-lg text-slate-650 font-sans">
+          <p className="mt-4 text-sm sm:text-base text-slate-650 font-sans">
             LifeLine Agent is open source under the Apache 2.0 license. Emergency medical infrastructure belongs in the open so municipal dispatchers, healthcare providers, and developers can audit, extend, and deploy it anywhere in the world.
           </p>
         </div>
 
         {/* Quickstart Developer Code Cards */}
-        <div className="mt-16 max-w-4xl mx-auto space-y-4 font-mono text-xs">
+        <div className="mt-8 max-w-4xl mx-auto space-y-4 font-mono text-xs">
           <div className="flex items-center justify-between text-slate-500 text-xs pb-2 border-b border-slate-250">
             <span className="font-bold text-slate-900 flex items-center space-x-2">
               <Terminal className="w-4 h-4 text-cyan-600" />

@@ -12,8 +12,8 @@ import { TEAM_MEMBERS, PROJECT_METADATA } from '@/data/marketing/team';
 
 export const TeamSection: React.FC = () => {
   return (
-    <section id="team" className="py-24 bg-[#F8FAFC] relative border-t border-slate-200 scroll-mt-20 w-full">
-      <div className="w-full w-full px-2 sm:px-4 lg:px-6 px-4 sm:px-6 lg:px-8 xl:px-10">
+    <section id="team" className="py-12 bg-[#F8FAFC] relative border-t border-slate-200 scroll-mt-20 w-full">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-10">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto">
@@ -22,17 +22,17 @@ export const TeamSection: React.FC = () => {
             <span>The Engineering Team</span>
           </div>
 
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
             Built for the Google Gemini AI Hackathon.
           </h2>
 
-          <p className="mt-4 text-base sm:text-lg text-slate-650 font-sans">
+          <p className="mt-4 text-sm sm:text-base text-slate-650 font-sans">
             Engineered at the intersection of emergency medicine clinical rigor, frontier Google Gemini multi-agent reasoning, and resilient distributed systems.
           </p>
         </div>
 
         {/* Team Cards */}
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
           {TEAM_MEMBERS.map((member, idx) => (
             <div
               key={idx}

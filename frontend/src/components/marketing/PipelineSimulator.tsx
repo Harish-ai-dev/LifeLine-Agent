@@ -48,14 +48,14 @@ export const PipelineSimulator: React.FC = () => {
   };
 
   return (
-    <section id="how-it-works" className="py-24 bg-[#F8FAFC] relative border-t border-slate-200 scroll-mt-20">
+    <section id="how-it-works" className="py-12 bg-[#F8FAFC] relative border-t border-slate-200 scroll-mt-20">
       <div id="pipeline" />
       <div id="simulator" />
       
       {/* Background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-cyan-500/5 blur-[140px] pointer-events-none" />
  
-      <div className="w-full px-2 sm:px-4 lg:px-6 px-4 sm:px-6 lg:px-8 relative">
+      <div className="w-full px-4 sm:px-6 lg:px-8 relative">
         
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto">
@@ -64,17 +64,17 @@ export const PipelineSimulator: React.FC = () => {
             <span>How It Works • Visual Pipeline Walkthrough</span>
           </div>
  
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
             From emergency intake to hospital briefing in seconds.
           </h2>
  
-          <p className="mt-4 text-base sm:text-lg text-slate-650 font-sans">
+          <p className="mt-4 text-sm sm:text-base text-slate-650 font-sans">
             Step through the autonomous 6-stage dispatch pipeline below. Each step triggers a dedicated agent that transforms raw emergency data into clinical severity scores, geospatial routes, hospital locks, and surgical handoffs.
           </p>
         </div>
  
         {/* Scenario Selector Pills */}
-        <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-3 w-full">
+        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3 w-full">
           {CLINICAL_SCENARIOS.map((sc) => {
             const isSelected = selectedScenario.id === sc.id;
             return (

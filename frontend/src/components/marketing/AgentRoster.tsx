@@ -33,8 +33,8 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({ onSelectAgent }) => {
   };
 
   return (
-    <section id="agents" className="py-24 bg-[#F8FAFC] relative border-t border-slate-200 scroll-mt-20 w-full">
-      <div className="w-full w-full px-2 sm:px-4 lg:px-6 px-4 sm:px-6 lg:px-8 xl:px-10">
+    <section id="agents" className="py-12 bg-[#F8FAFC] relative border-t border-slate-200 scroll-mt-20 w-full">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-10">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto">
@@ -43,17 +43,17 @@ export const AgentRoster: React.FC<AgentRosterProps> = ({ onSelectAgent }) => {
             <span>Autonomous Agent Roster</span>
           </div>
 
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
             Every AI agent explicitly specified.
           </h2>
 
-          <p className="mt-4 text-base sm:text-lg text-slate-600 font-sans">
+          <p className="mt-4 text-sm sm:text-base text-slate-600 font-sans">
             LifeLine Agent is not a monolithic black box. Each clinical, geospatial, and reporting task is decoupled into a dedicated agent with explicit model assignments, deterministic guardrails, and strict schema contracts.
           </p>
         </div>
 
         {/* 6 Agent Cards Grid */}
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {AGENT_ROSTER.map((agent) => (
             <div
               key={agent.id}

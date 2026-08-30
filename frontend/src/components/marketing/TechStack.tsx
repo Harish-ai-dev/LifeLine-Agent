@@ -16,10 +16,10 @@ export const TechStack: React.FC = () => {
   const categories = ['AI & Models', 'Backend & Cloud', 'Geospatial & Clinical', 'Frontend', 'Database & Storage'] as const;
 
   return (
-    <section id="tech-stack" className="py-24 bg-[#F8FAFC] relative border-t border-slate-200 scroll-mt-20">
+    <section id="tech-stack" className="py-12 bg-[#F8FAFC] relative border-t border-slate-200 scroll-mt-20">
       <div id="architecture" />
 
-      <div className="w-full px-2 sm:px-4 lg:px-6 px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto">
@@ -28,17 +28,17 @@ export const TechStack: React.FC = () => {
             <span>Modern Systems Architecture</span>
           </div>
 
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
             Production-grade tech stack & protocols.
           </h2>
 
-          <p className="mt-4 text-base sm:text-lg text-slate-600 font-sans">
+          <p className="mt-4 text-sm sm:text-base text-slate-600 font-sans">
             Engineered with Google Gemini frontier AI models, high-performance C++ OSRM routing, serverless Cloud Run scaling, and Royal College of Physicians clinical protocols.
           </p>
         </div>
 
         {/* Architecture Flow Banner */}
-        <div className="mt-16 p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-md w-full">
+        <div className="mt-8 p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-md w-full">
           <div className="text-center mb-6">
             <span className="text-xs font-mono uppercase tracking-wider text-cyan-700 font-bold">System Data Flow & Agent Mesh</span>
           </div>

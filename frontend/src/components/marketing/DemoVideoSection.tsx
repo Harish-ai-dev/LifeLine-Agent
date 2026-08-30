@@ -20,8 +20,8 @@ export const DemoVideoSection: React.FC = () => {
   const [isPlayingSim, setIsPlayingSim] = useState<boolean>(false);
 
   return (
-    <section id="demo" className="py-24 bg-[#F8FAFC] relative border-t border-slate-200 scroll-mt-20 w-full">
-      <div className="w-full w-full px-2 sm:px-4 lg:px-6 px-4 sm:px-6 lg:px-8 xl:px-10">
+    <section id="demo" className="py-12 bg-[#F8FAFC] relative border-t border-slate-200 scroll-mt-20 w-full">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-10">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto">
@@ -30,17 +30,17 @@ export const DemoVideoSection: React.FC = () => {
             <span>Interactive Demo & Product Showcase</span>
           </div>
 
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
             See LifeLine Agent in Action.
           </h2>
 
-          <p className="mt-4 text-base sm:text-lg text-slate-650 font-sans">
+          <p className="mt-4 text-sm sm:text-base text-slate-650 font-sans">
             Watch the 4-minute submission walkthrough below, or toggle between the three operational product views (EMS Mobile, Hospital Receiving Command, and Municipal Authority).
           </p>
         </div>
 
         {/* Video Player Embed Placeholder */}
-        <div className="mt-12 max-w-4xl mx-auto rounded-3xl bg-white border border-slate-200 shadow-xl overflow-hidden relative group">
+        <div className="mt-8 max-w-4xl mx-auto rounded-3xl bg-white border border-slate-200 shadow-xl overflow-hidden relative group">
           {/* Video Header Bar */}
           <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between text-xs font-mono text-slate-600">
             <div className="flex items-center space-x-2">

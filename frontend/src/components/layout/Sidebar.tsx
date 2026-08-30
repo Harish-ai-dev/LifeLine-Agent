@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useDashboard } from '@/context/DashboardContext';
 import {
+  RefreshCw,
   LayoutDashboard,
   Siren,
   Users,
@@ -285,3 +286,4 @@ export function Sidebar() {
     </aside>
   );
 }
+
