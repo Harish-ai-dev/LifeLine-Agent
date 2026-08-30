@@ -418,3 +418,22 @@ class ReportQueryResponse(BaseModel):
     answer: str
     referenced_facilities: List[str] = []
     timestamp: str
+
+
+# -- Capacity Sync Schemas ----------------------------------------------------
+
+class CapacityDiscrepancy(BaseModel):
+    hospital_id: str
+    resource_type: str                # "icu_beds", "blood_stock", etc.
+    expected: Any                     # expected value (int or str)
+    actual: Any                       # actual value found
+    delta: Any                        # magnitude of discrepancy
+    flag: str                         # short machine-readable label
+
+
+class CapacitySyncResponse(BaseModel):
+    synced_at: str                    # ISO-8601 UTC timestamp
+    hospitals_checked: int
+    discrepancies: List[CapacityDiscrepancy] = []
+    summary: str
+
