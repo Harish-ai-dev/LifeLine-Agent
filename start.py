@@ -1,15 +1,16 @@
 """
 LifeLine Agent — Unified Startup Script
 ========================================
-Starts both the FastAPI backend and the Next.js frontend concurrently.
+Starts FastAPI backend (8000), Next.js frontend (3000), and Google ADK Web UI (8088) concurrently.
 
 Usage:
-    python start.py                          # default: FastAPI (8000) + Next.js (3000)
+    python start.py                          # starts Backend (8000), Frontend (3000), ADK Web (8088)
     python start.py --port 8000              # custom backend port
     python start.py --frontend-port 3000     # custom Next.js port
+    python start.py --adk-port 8088          # custom ADK Web port
     python start.py --backend-only           # run API server only
     python start.py --frontend-only          # run Next.js app only
-    python start.py --reload                 # enable FastAPI auto-reload
+    python start.py --no-adk                 # skip ADK Web server
 """
 
 from __future__ import annotations
@@ -17,7 +18,6 @@ from __future__ import annotations
 import argparse
 import os
 import shutil
-import signal
 import socket
 import subprocess
 import sys
@@ -38,32 +38,8 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 FRONTEND_DIR = PROJECT_ROOT / "frontend"
 
 
-def _can_import(python: str, *packages: str) -> bool:
-    """Return True if python interpreter can import the given packages."""
-    check = "; ".join(f"import {p}" for p in packages)
-    try:
-        result = subprocess.run(
-            [python, "-c", check],
-            capture_output=True,
-            timeout=5,
-        )
-        return result.returncode == 0
-    except Exception:
-        return False
-
-
 def find_python() -> str:
-    """Return Python interpreter with uvicorn available."""
-    candidates = [sys.executable]
-    for name in ("python", "python3", "py"):
-        p = shutil.which(name)
-        if p and p not in candidates:
-            candidates.append(p)
-
-    for py in candidates:
-        if _can_import(py, "uvicorn"):
-            return py
-
+    """Return current active Python interpreter."""
     return sys.executable
 
 
@@ -74,7 +50,7 @@ def is_port_in_use(port: int, host: str = "127.0.0.1") -> bool:
         return s.connect_ex((host, port)) == 0
 
 
-def wait_for_port(port: int, host: str = "127.0.0.1", timeout: float = 15.0) -> bool:
+def wait_for_port(port: int, host: str = "127.0.0.1", timeout: float = 10.0) -> bool:
     """Block until port starts listening or timeout expires."""
     deadline = time.time() + timeout
     while time.time() < deadline:
@@ -95,7 +71,7 @@ def run_backend(port: int = 8000, reload: bool = False) -> subprocess.Popen:
     if reload:
         cmd.append("--reload")
 
-    print(f"🚀 Starting FastAPI backend on http://localhost:{port}...")
+    print(f"🚀 [1/3] Starting FastAPI Backend on http://localhost:{port}...")
     proc = subprocess.Popen(
         cmd,
         cwd=str(PROJECT_ROOT),
@@ -107,10 +83,11 @@ def run_backend(port: int = 8000, reload: bool = False) -> subprocess.Popen:
 def run_frontend(port: int = 3000) -> subprocess.Popen:
     """Start the Next.js frontend server."""
     npm = shutil.which("npm.cmd" if sys.platform == "win32" else "npm") or "npm"
-    script = "start" if (FRONTEND_DIR / ".next" / "BUILD_ID").exists() else "dev"
+    build_id_path = FRONTEND_DIR / ".next" / "BUILD_ID"
+    script = "start" if build_id_path.exists() else "dev"
     cmd = [npm, "run", script]
 
-    print(f"🌐 Starting Next.js frontend ({script} mode) on http://localhost:{port}...")
+    print(f"🌐 [2/3] Starting Next.js Frontend ({script} mode) on http://localhost:{port}...")
     proc = subprocess.Popen(
         cmd,
         cwd=str(FRONTEND_DIR),
@@ -119,30 +96,13 @@ def run_frontend(port: int = 3000) -> subprocess.Popen:
     return proc
 
 
-def run_adk_loop() -> subprocess.Popen:
-    """Start the ADK background agent loop."""
+def run_adk_web(port: int = 8088) -> subprocess.Popen:
+    """Start Google ADK Web UI server."""
     python = find_python()
-    script = """
-import time
-import subprocess
-import sys
-import random
+    adk_script = f"import sys; from google.adk.cli import main; sys.argv=['adk', 'web', '--port', '{port}', 'lifeline_adk']; main()"
+    cmd = [python, "-c", adk_script]
 
-scenarios = [
-    "Scenario 1 - Mild",
-    "Scenario 2 - Moderate",
-    "Scenario 3 - Critical Cardiac"
-]
-
-print("🤖 ADK Root Orchestrator: Starting continuous agent loops...")
-while True:
-    scenario = random.choice(scenarios)
-    print(f"\\n🔄 [ADK LOOP] Dispatching scenario: {scenario}")
-    subprocess.run([sys.executable, "-m", "lifeline", "dispatch", scenario], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    time.sleep(20)
-"""
-    cmd = [python, "-c", script]
-    print(f"🤖 Starting ADK Continuous Multi-Agent Loop...")
+    print(f"🤖 [3/3] Starting Google ADK Visual Web UI on http://localhost:{port}...")
     proc = subprocess.Popen(
         cmd,
         cwd=str(PROJECT_ROOT),
@@ -158,51 +118,56 @@ def main():
     )
     parser.add_argument("--port", type=int, default=8000, help="FastAPI backend port (default: 8000)")
     parser.add_argument("--frontend-port", dest="frontend_port", type=int, default=3000, help="Next.js frontend port (default: 3000)")
+    parser.add_argument("--adk-port", dest="adk_port", type=int, default=8088, help="Google ADK Web port (default: 8088)")
     parser.add_argument("--backend-only", action="store_true", help="Start only the backend")
     parser.add_argument("--frontend-only", action="store_true", help="Start only the frontend")
     parser.add_argument("--reload", action="store_true", help="Enable auto-reload on backend")
     parser.add_argument("--no-browser", action="store_true", help="Do not automatically open the browser")
-    parser.add_argument("--no-adk", action="store_true", help="Do not start the continuous ADK dispatch loop")
+    parser.add_argument("--no-adk", action="store_true", help="Do not start the ADK Web server")
     args = parser.parse_args()
 
-    print("=" * 60)
-    print("🚑 LifeLine Agent — System Startup")
-    print("=" * 60)
+    print("=" * 70)
+    print("🚑 LifeLine Agent — Autonomous Emergency Dispatch & ADK Swarm")
+    print("   Next.js (3000) + FastAPI (8000) + Google ADK Web (8088)")
+    print("=" * 70)
 
     procs: list[subprocess.Popen] = []
 
     try:
+        # 1. Start Backend
         if not args.frontend_only:
             backend_proc = run_backend(port=args.port, reload=args.reload)
             procs.append(backend_proc)
 
+        # 2. Start Frontend
         if not args.backend_only and (FRONTEND_DIR / "package.json").exists():
             frontend_proc = run_frontend(port=args.frontend_port)
             procs.append(frontend_proc)
 
+        # 3. Start ADK Web
         if not args.no_adk and not args.frontend_only:
-            adk_proc = run_adk_loop()
+            adk_proc = run_adk_web(port=args.adk_port)
             procs.append(adk_proc)
 
-        # Wait for backend to be ready
-        if not args.frontend_only:
-            wait_for_port(args.port, timeout=10)
+        # Wait briefly for servers
+        time.sleep(2)
 
-        print("\n" + "=" * 60)
+        print("\n" + "=" * 70)
         print("✅ LifeLine Agent is now LIVE!")
-        if not args.backend_only:
-            print(f"   • Next.js Frontend: http://localhost:{args.frontend_port}/web")
-        if not args.frontend_only:
-            print(f"   • FastAPI Backend:  http://localhost:{args.port}")
-            print(f"   • API Docs:         http://localhost:{args.port}/docs")
-            print(f"   • Health Check:     http://localhost:{args.port}/health")
-        print("=" * 60)
-        print("\nPress Ctrl+C to terminate all running services.\n")
+        print(f"   • Web Showcase:          http://localhost:{args.frontend_port}")
+        print(f"   • Secret Admin & Demo:   http://localhost:{args.frontend_port}/og/admin")
+        print(f"   • Google ADK Web UI:     http://localhost:{args.adk_port}")
+        print(f"   • Login Portal:          http://localhost:{args.frontend_port}/login")
+        print(f"   • Backend API:           http://localhost:{args.port}")
+        print(f"   • Swagger Docs:          http://localhost:{args.port}/docs")
+        print(f"   • Health Check:          http://localhost:{args.port}/health")
+        print("=" * 70)
+        print("\nPress Ctrl+C to stop all services.\n")
 
         if not args.no_browser and not args.backend_only:
             try:
                 import webbrowser
-                webbrowser.open(f"http://localhost:{args.frontend_port}/web")
+                webbrowser.open(f"http://localhost:{args.frontend_port}")
             except Exception:
                 pass
 
@@ -214,12 +179,12 @@ def main():
             time.sleep(1)
 
     except KeyboardInterrupt:
-        print("\n🛑 Shutting down services...")
+        print("\n🛑 Shutting down all services...")
     finally:
         for p in procs:
             try:
                 p.terminate()
-                p.wait(timeout=3)
+                p.wait(timeout=2)
             except Exception:
                 p.kill()
         print("👋 All services stopped cleanly.")

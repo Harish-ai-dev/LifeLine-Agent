@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 title LifeLine Agent — Autonomous Emergency Dispatch & ADK Swarm
 setlocal enabledelayedexpansion
 
@@ -10,9 +11,6 @@ echo.
 
 :: Ensure working directory is project root
 cd /d "%~dp0"
-
-:: Add Python Scripts directories to PATH
-set "PATH=%PATH%;%APPDATA%\Python\Python314\Scripts;C:\Python314\Scripts;C:\Python313\Scripts;C:\Python312\Scripts;C:\Python311\Scripts"
 
 :: 1. Check Python
 where python >nul 2>&1
@@ -51,16 +49,7 @@ echo [2/3] Starting Next.js Frontend on port 3000...
 start "LifeLine-Frontend" /B cmd /c "cd frontend && npm run start"
 
 echo [3/3] Starting Google ADK Visual Web UI on port 8088...
-where adk >nul 2>&1
-if %ERRORLEVEL% EQU 0 (
-    start "LifeLine-ADK-Web" /B adk web --port 8088 lifeline_adk
-) else (
-    if exist "%APPDATA%\Python\Python314\Scripts\adk.exe" (
-        start "LifeLine-ADK-Web" /B "%APPDATA%\Python\Python314\Scripts\adk.exe" web --port 8088 lifeline_adk
-    ) else (
-        start "LifeLine-ADK-Web" /B python -m google.adk.cli.cli web --port 8088 lifeline_adk
-    )
-)
+start "LifeLine-ADK-Web" /B python -c "import sys; from google.adk.cli import main; sys.argv=['adk', 'web', '--port', '8088', 'lifeline_adk']; main()"
 
 echo.
 echo ===================================================================
