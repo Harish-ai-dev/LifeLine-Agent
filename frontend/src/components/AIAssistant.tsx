@@ -362,7 +362,7 @@ export function AIAssistant({ isOpen: externalIsOpen, onClose: externalOnClose }
 
         {/* TAB 2: ADK MULTI-LEVEL PIPELINE HIERARCHY */}
         {activeTab === 'pipeline' && (
-          <div className="flex-1 overflow-y-auto p-5 space-y-5 font-mono text-xs text-slate-700 bg-slate-50">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 font-mono text-xs text-slate-700 bg-slate-50">
             <div className="p-4 rounded-2xl bg-white border border-slate-200 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-sm text-sky-400 flex items-center gap-2">
@@ -468,6 +468,7 @@ export function AIAssistant({ isOpen: externalIsOpen, onClose: externalOnClose }
     </div>
   );
 }
+
 
 
 
