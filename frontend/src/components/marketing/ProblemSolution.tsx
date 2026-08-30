@@ -15,8 +15,8 @@ import {
 
 export const ProblemSolution: React.FC = () => {
   return (
-    <section id="problem" className="py-24 bg-[#F8FAFC] relative border-t border-slate-200 scroll-mt-20 w-full">
-      <div className="w-full w-full px-2 sm:px-4 lg:px-6 px-4 sm:px-6 lg:px-8 xl:px-10">
+    <section id="problem" className="py-12 bg-[#F8FAFC] relative border-t border-slate-200 scroll-mt-20 w-full">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-10">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto">
@@ -25,17 +25,17 @@ export const ProblemSolution: React.FC = () => {
             <span>The Golden Hour Crisis</span>
           </div>
           
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
             Why manual emergency dispatch is dangerously slow.
           </h2>
           
-          <p className="mt-4 text-base sm:text-lg text-slate-600 font-sans">
+          <p className="mt-4 text-sm sm:text-base text-slate-600 font-sans">
             When minutes determine irreversible brain damage or cardiac necrosis, emergency communication still relies on 1980s telephone chains, scratchpad notes, and hold music.
           </p>
         </div>
 
         {/* The 4 Failure Modes of Manual Dispatch */}
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="p-6 rounded-2xl bg-white border border-slate-200 hover:border-rose-500/40 transition-all group flex flex-col justify-between shadow-sm">
             <div>
               <div className="w-12 h-12 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-500 mb-4 group-hover:scale-105 transition-transform">
@@ -86,7 +86,7 @@ export const ProblemSolution: React.FC = () => {
         </div>
 
         {/* Interactive Comparison Timeline */}
-        <div className="mt-20 p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-md shadow-slate-100/55">
+        <div className="mt-10 p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-md shadow-slate-100/55">
           <div className="text-center mb-10">
             <h3 className="text-2xl sm:text-3xl font-bold text-slate-900">
               Manual Dispatch Pipeline vs. LifeLine Agent Swarm

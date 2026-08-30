@@ -68,14 +68,14 @@ async def chat_copilot(payload: ChatRequest):
     """
     Streaming chat endpoint proxying to Gemini API using google-genai.
     """
-    api_key = os.environ.get("GOOGLE_API_KEY")
+    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if not api_key or api_key == "your_gemini_api_key_here":
         # Fallback to local mock response if no key is configured, to avoid complete failure
         async def fallback_stream():
             yield "data: [MOCK] LifeLine Agent Co-Pilot (Live Gemini Key not configured in .env):\n\n"
-            yield f"Understood query from role: **{payload.context.role}**.\n"
-            yield "To enable real-time Gemini, please configure `GOOGLE_API_KEY` in the backend `.env` file."
-            yield "\n[DONE]\n"
+            yield f"data: Understood query from role: **{payload.context.role}**.\n\n"
+            yield "data: To enable real-time Gemini, please configure `GEMINI_API_KEY` in the backend `.env` file.\n\n"
+            yield "data: [DONE]\n\n"
         return StreamingResponse(fallback_stream(), media_type="text/event-stream")
 
     try:

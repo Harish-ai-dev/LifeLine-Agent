@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useDashboard } from '@/context/DashboardContext';
 import {
+  RefreshCw,
   LayoutDashboard,
   Siren,
   Users,
@@ -245,41 +246,44 @@ export function Sidebar() {
 
       {/* Live Agent Health Status Footer */}
       {!collapsed ? (
-        <div className="p-3 border-t border-slate-200 bg-slate-50 m-2 rounded-2xl">
-          <div className="flex items-center justify-between mb-2">
+        <div className="p-3 border-t border-slate-200 bg-slate-50 m-2 rounded-2xl shadow-sm">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-1.5">
-              <Cpu className="w-3.5 h-3.5 text-emerald-600" />
-              <span className="text-[11px] font-bold text-slate-800">ADK Multi-Level Pipeline</span>
+              <Cpu className="w-4 h-4 text-sky-600" />
+              <span className="text-xs font-black text-slate-800 tracking-tight">ADK Pipeline Engine</span>
             </div>
-            <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            <span className="flex h-2.5 w-2.5 relative" title="Pipeline Active & Looping">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-sky-500"></span>
             </span>
           </div>
-
-          <div className="space-y-1 font-mono text-[10px] text-slate-600">
-            <div className="flex justify-between items-center">
-              <span>L1 Orchestrator:</span>
-              <span className="text-emerald-700 font-bold">ACTIVE (0ms)</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>L2 Triage Loops:</span>
-              <span className="text-sky-700 font-bold">READY (NEWS2)</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>L3 Gemini 3.5:</span>
-              <span className="text-purple-700 font-bold">CONNECTED</span>
-            </div>
+  
+          <div className="grid grid-cols-[100px_1fr] gap-x-2 gap-y-1.5 font-mono text-[10px] text-slate-600 items-center">
+            <span>L1 Orchestrator:</span>
+            <span className="text-sky-700 font-bold flex items-center justify-end gap-1">
+              <RefreshCw className="w-2.5 h-2.5 animate-spin" /> LOOPING
+            </span>
+            
+            <span>L2 Triage Loops:</span>
+            <span className="text-sky-700 font-bold flex items-center justify-end gap-1">
+              <RefreshCw className="w-2.5 h-2.5 animate-spin" /> LOOPING
+            </span>
+            
+            <span>L3 Gemini 3.5:</span>
+            <span className="text-purple-700 font-bold flex items-center justify-end gap-1">
+              <RefreshCw className="w-2.5 h-2.5 animate-spin" /> LOOPING
+            </span>
           </div>
         </div>
       ) : (
-        <div className="p-3 border-t border-slate-200 flex justify-center">
-          <span className="flex h-2.5 w-2.5 relative" title="AI Agent Pipeline: Active">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+        <div className="p-3 border-t border-slate-200 flex justify-center bg-slate-50">
+          <span className="flex h-3 w-3 relative" title="AI Agent Pipeline: Looping">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
           </span>
         </div>
       )}
     </aside>
   );
 }
+

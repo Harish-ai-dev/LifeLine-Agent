@@ -15,6 +15,16 @@ import {
 } from 'lucide-react';
 import { useDashboard } from '../../context/DashboardContext';
 import { HospitalFacility, EmergencyIncidentAlert } from '../../types/dashboard';
+import dynamic from 'next/dynamic';
+
+const LeafletMap = dynamic(() => import('../maps/LeafletMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="absolute inset-0 flex items-center justify-center bg-slate-100 dark:bg-[#080d16] text-slate-400 font-mono text-xs">
+      INITIALIZING MAP SATELLITE UPLINK...
+    </div>
+  ),
+});
 
 export const JurisdictionMap: React.FC = () => {
   const { hospitals, alerts } = useDashboard();
@@ -57,52 +67,35 @@ export const JurisdictionMap: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Interactive Visual Radar / Map Canvas */}
         <div className="lg:col-span-2 bg-slate-50 dark:bg-[#080d16] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 relative min-h-[440px] overflow-hidden flex flex-col justify-between shadow-inner">
-          {/* Subtle Map Grid lines */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#cbd5e1_1px,transparent_1px),linear-gradient(to_bottom,#cbd5e1_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] opacity-30 pointer-events-none" />
+          
+          {/* Real Leaflet Map Canvas */}
+          <div className="absolute inset-0 z-0">
+            <LeafletMap 
+              markers={hospitals.map(h => ({
+                id: h.id,
+                lat: h.lat,
+                lng: h.lng,
+                color: h.isDiverting ? '#ef4444' : '#10b981',
+                popupHtml: `<b>` + h.name + `</b><br/>` + (h.isDiverting ? 'DIVERSION ACTIVE' : 'NORMAL INTAKE'),
+                isPulsing: h.isDiverting
+              }))}
+              selectedId={selectedHospital?.id}
+              onSelect={(id: string) => setSelectedHospital(hospitals.find(h => h.id === id) || null)}
+            />
+          </div>
 
           {/* District Header */}
-          <div className="relative z-10 flex items-center justify-between">
-            <div className="bg-white dark:bg-[#111728]/90 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold font-mono flex items-center gap-2 shadow-sm text-slate-800 dark:text-white">
+          <div className="relative z-10 flex items-center justify-between pointer-events-none">
+            <div className="bg-white dark:bg-[#111728]/90 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold font-mono flex items-center gap-2 shadow-sm text-slate-800 dark:text-white pointer-events-auto">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>RADAR SECTOR: MUMBAI-WEST / SOUTH METRO</span>
             </div>
-            <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900/80 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm">
-              OSRM Geodesic Mesh: Active
+            <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900/80 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm pointer-events-auto">
+              Live Satellite Feed
             </div>
           </div>
 
-          {/* Radar Nodes Simulation Display */}
-          <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 gap-3 my-6">
-            {hospitals.map((h) => {
-              const isSelected = selectedHospital?.id === h.id;
-              const isDiverting = h.isDiverting;
-
-              return (
-                <button
-                  key={h.id}
-                  onClick={() => setSelectedHospital(h)}
-                  className={`p-3.5 rounded-2xl border text-left transition-all ${
-                    isSelected
-                      ? 'bg-indigo-50 dark:bg-indigo-600/30 border-indigo-500 dark:border-indigo-400 text-slate-900 dark:text-white shadow-md'
-                      : isDiverting
-                      ? 'bg-red-50 dark:bg-red-950/20 border-red-300 dark:border-red-500/40 text-slate-700 dark:text-slate-300 hover:bg-red-100 dark:hover:bg-slate-900'
-                      : 'bg-white dark:bg-[#111728]/80 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-[#111728] shadow-sm'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                      {h.code}
-                    </span>
-                    <span className={`w-2 h-2 rounded-full ${isDiverting ? 'bg-red-500 animate-ping' : 'bg-emerald-500'}`} />
-                  </div>
-                  <div className="font-bold text-xs text-slate-900 dark:text-white truncate">{h.name}</div>
-                  <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 mt-1">
-                    {h.availableIcuBeds} ICU Beds · {h.availableTraumaBays} Bays Free
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+          <div className="flex-1 pointer-events-none" />
 
           {/* Bottom Live Dispatch Ticker */}
           <div className="relative z-10 bg-white dark:bg-[#111728]/90 backdrop-blur-md p-3 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs font-mono shadow-sm">
@@ -166,3 +159,4 @@ export const JurisdictionMap: React.FC = () => {
     </div>
   );
 };
+

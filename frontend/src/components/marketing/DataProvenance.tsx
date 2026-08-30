@@ -27,10 +27,10 @@ export const DataProvenance: React.FC = () => {
   });
 
   return (
-    <section id="real-vs-simulated" className="py-24 bg-[#F8FAFC] relative border-t border-slate-200 scroll-mt-20">
+    <section id="real-vs-simulated" className="py-12 bg-[#F8FAFC] relative border-t border-slate-200 scroll-mt-20">
       <div id="provenance" />
 
-      <div className="w-full px-2 sm:px-4 lg:px-6 px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto">
@@ -39,17 +39,17 @@ export const DataProvenance: React.FC = () => {
             <span>Honest Data Provenance</span>
           </div>
 
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
             Real vs. Simulated Data Matrix
           </h2>
 
-          <p className="mt-4 text-base sm:text-lg text-slate-655 font-sans">
+          <p className="mt-4 text-sm sm:text-base text-slate-655 font-sans">
             We are completely transparent about data provenance. Hospital locations, street routing networks, and NEWS2 clinical scoring are 100% real. Protected health information and bed occupancies are simulated safely.
           </p>
         </div>
 
         {/* Filter Controls */}
-        <div className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
           <div className="flex items-center space-x-2 w-full sm:w-auto">
             <button
               onClick={() => setFilterType('ALL')}

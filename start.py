@@ -119,6 +119,37 @@ def run_frontend(port: int = 3000) -> subprocess.Popen:
     return proc
 
 
+def run_adk_loop() -> subprocess.Popen:
+    """Start the ADK background agent loop."""
+    python = find_python()
+    script = """
+import time
+import subprocess
+import sys
+import random
+
+scenarios = [
+    "Scenario 1 - Mild",
+    "Scenario 2 - Moderate",
+    "Scenario 3 - Critical Cardiac"
+]
+
+print("🤖 ADK Root Orchestrator: Starting continuous agent loops...")
+while True:
+    scenario = random.choice(scenarios)
+    print(f"\\n🔄 [ADK LOOP] Dispatching scenario: {scenario}")
+    subprocess.run([sys.executable, "-m", "lifeline", "dispatch", scenario], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    time.sleep(20)
+"""
+    cmd = [python, "-c", script]
+    print(f"🤖 Starting ADK Continuous Multi-Agent Loop...")
+    proc = subprocess.Popen(
+        cmd,
+        cwd=str(PROJECT_ROOT),
+        env={**os.environ, "PYTHONUNBUFFERED": "1"},
+    )
+    return proc
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -131,6 +162,7 @@ def main():
     parser.add_argument("--frontend-only", action="store_true", help="Start only the frontend")
     parser.add_argument("--reload", action="store_true", help="Enable auto-reload on backend")
     parser.add_argument("--no-browser", action="store_true", help="Do not automatically open the browser")
+    parser.add_argument("--no-adk", action="store_true", help="Do not start the continuous ADK dispatch loop")
     args = parser.parse_args()
 
     print("=" * 60)
@@ -147,6 +179,10 @@ def main():
         if not args.backend_only and (FRONTEND_DIR / "package.json").exists():
             frontend_proc = run_frontend(port=args.frontend_port)
             procs.append(frontend_proc)
+
+        if not args.no_adk and not args.frontend_only:
+            adk_proc = run_adk_loop()
+            procs.append(adk_proc)
 
         # Wait for backend to be ready
         if not args.frontend_only:
