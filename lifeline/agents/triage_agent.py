@@ -101,7 +101,7 @@ def _validate_triage_consistency(output: TriageOutput, ti: TriageInput) -> tuple
     return True, "Valid"
 
 
-def run_triage(triage_input: TriageInput, max_loops: int = 3) -> TriageOutput:
+def run_triage(triage_input: TriageInput, max_loops: int = 0) -> TriageOutput:
     """
     Execute Triage Coordinator loop (up to max_loops iterations).
     Evaluates LLM triage, validates clinical consistency against NEWS2,

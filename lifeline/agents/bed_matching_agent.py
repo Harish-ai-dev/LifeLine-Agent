@@ -184,7 +184,7 @@ def _validate_hospital_allocation(choice: HospitalChoice, candidate_map: dict, s
     return True, "Valid"
 
 
-def run_bed_matching(bed_input: BedMatchingInput, max_loops: int = 3) -> BedMatchingOutput:
+def run_bed_matching(bed_input: BedMatchingInput, max_loops: int = 0) -> BedMatchingOutput:
     """
     Invoke Bed-Matching Coordinator loop synchronously via ADK Runner.
     Enriches candidate hospitals with location and OSRM ETA, validates bed availability,
