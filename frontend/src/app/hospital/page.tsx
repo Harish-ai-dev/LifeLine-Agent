@@ -128,7 +128,10 @@ export default function HospitalDashboardPage() {
                 )}
               </div>
 
-              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
+              <h1
+                className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3 whitespace-normal break-words leading-tight"
+                title={currentHospital.name}
+              >
                 {currentHospital.name}
               </h1>
 

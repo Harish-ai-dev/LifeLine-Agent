@@ -301,7 +301,8 @@ function LoginContent({ isModal = false }: { isModal?: boolean }) {
 
 // ── Login form (shown after portal selected) ─────────────────────────────────
 function LoginForm({ portal }: { portal: PortalDef }) {
-  const { login } = useDashboard();
+  const { login, hospitals } = useDashboard();
+  const [selectedFacilityId, setSelectedFacilityId] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
@@ -309,30 +310,61 @@ function LoginForm({ portal }: { portal: PortalDef }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  const isHospitalPortal = portal.id === 'hospital' || portal.id === 'staff';
+
+  const handleAutofillDemo = () => {
+    soundEffects.playTelemetryPing();
+    setError('');
+    if (isHospitalPortal) {
+      setSelectedFacilityId(hospitals[0]?.id || 'hosp-lilavati');
+      setUsername('dr_mehta');
+      setPassword('clinical2026');
+    } else if (portal.id === 'donor') {
+      setUsername('rahul_sharma');
+      setPassword('donor2026');
+    } else if (portal.id === 'government') {
+      setUsername('dir_sharma');
+      setPassword('gov2026');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!username.trim()) { setError('Please enter your username.'); return; }
-    if (!password.trim()) { setError('Please enter your password.'); return; }
+
+    if (isHospitalPortal && !selectedFacilityId) {
+      setError('Please select an accredited hospital/facility from the dropdown.');
+      soundEffects.playEmergencySiren();
+      return;
+    }
+
+    if (!username.trim()) {
+      setError('Please enter your staff ID / username.');
+      soundEffects.playEmergencySiren();
+      return;
+    }
+
+    if (!password.trim()) {
+      setError('Please enter your password / access code.');
+      soundEffects.playEmergencySiren();
+      return;
+    }
 
     setIsLoading(true);
     soundEffects.playAcknowledgeChime();
+
+    const targetHospId = selectedFacilityId || (isHospitalPortal ? hospitals[0]?.id : undefined);
 
     const match =
       DEMO_USERS.find(
         (u) => u.username.toLowerCase() === username.trim().toLowerCase() && u.role === portal.role
       ) || DEMO_USERS.find((u) => u.role === portal.role);
 
-    if (!match) {
-      setError(`No account found for "${username}" in this portal.`);
-      setIsLoading(false);
-      soundEffects.playEmergencySiren();
-      return;
-    }
+    const effectiveFacilityId = targetHospId || match?.facility_id;
 
     try {
-      setSuccess(`Authenticating ${match.username}…`);
-      await login(match.username, match.role, match.facility_id, match.donor_id);
+      setSuccess(`Authenticating ${username.trim()}…`);
+      await login(username.trim(), portal.role, effectiveFacilityId, match?.donor_id);
     } catch {
       setError('Authentication error. Please try again.');
       setIsLoading(false);
@@ -342,10 +374,40 @@ function LoginForm({ portal }: { portal: PortalDef }) {
 
   return (
     <form onSubmit={handleSubmit} className="px-7 py-6 space-y-4">
-      {/* Username */}
+      {/* 1. Facility Selector (Hospital / Clinical Staff Portals) */}
+      {isHospitalPortal && (
+        <div className="space-y-1.5">
+          <label className="block text-[10px] font-mono font-black uppercase tracking-widest text-slate-700 dark:text-slate-300 flex items-center justify-between">
+            <span>Hospital / Accredited Facility</span>
+            <span className="text-red-500 font-bold">*Required</span>
+          </label>
+          <div className="relative">
+            <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            <select
+              value={selectedFacilityId}
+              onChange={(e) => { setSelectedFacilityId(e.target.value); setError(''); }}
+              className={`w-full pl-10 pr-8 py-3 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 ${portal.ring} text-slate-900 dark:text-white font-mono transition-all appearance-none cursor-pointer`}
+            >
+              <option value="" disabled>
+                -- Select Accredited Hospital / Facility --
+              </option>
+              {hospitals.map((h) => (
+                <option key={h.id} value={h.id}>
+                  {h.name} — {h.tier} ({h.district})
+                </option>
+              ))}
+            </select>
+            <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-xs">
+              ▼
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. Staff Username / ID */}
       <div className="space-y-1.5">
-        <label className="block text-[10px] font-mono font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
-          Username
+        <label className="block text-[10px] font-mono font-black uppercase tracking-widest text-slate-700 dark:text-slate-300">
+          {isHospitalPortal ? 'Staff ID / Username' : 'Username'}
         </label>
         <div className="relative">
           <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -354,23 +416,23 @@ function LoginForm({ portal }: { portal: PortalDef }) {
             placeholder={portal.placeholder}
             value={username}
             onChange={(e) => { setUsername(e.target.value); setError(''); }}
-            autoFocus
+            autoFocus={!isHospitalPortal}
             className={`w-full pl-10 pr-4 py-3 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 ${portal.ring} text-slate-900 dark:text-white placeholder:text-slate-400 font-mono transition-all`}
             autoComplete="username"
           />
         </div>
       </div>
 
-      {/* Password */}
+      {/* 3. Password / Access Code */}
       <div className="space-y-1.5">
-        <label className="block text-[10px] font-mono font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
-          Password
+        <label className="block text-[10px] font-mono font-black uppercase tracking-widest text-slate-700 dark:text-slate-300">
+          Password / Access Code
         </label>
         <div className="relative">
           <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type={showPw ? 'text' : 'password'}
-            placeholder="Enter your password"
+            placeholder="Enter clinical access code"
             value={password}
             onChange={(e) => { setPassword(e.target.value); setError(''); }}
             className={`w-full pl-10 pr-11 py-3 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 ${portal.ring} text-slate-900 dark:text-white placeholder:text-slate-400 font-mono transition-all`}
@@ -386,7 +448,7 @@ function LoginForm({ portal }: { portal: PortalDef }) {
         </div>
       </div>
 
-      {/* Error / Success */}
+      {/* Error / Success Feedback */}
       {error && (
         <div className="flex items-center gap-2.5 p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-500/30 text-xs text-red-700 dark:text-red-300 font-mono">
           <AlertCircle className="w-3.5 h-3.5 shrink-0" />{error}
@@ -398,7 +460,7 @@ function LoginForm({ portal }: { portal: PortalDef }) {
         </div>
       )}
 
-      {/* Submit */}
+      {/* Submit Button */}
       <button
         type="submit"
         disabled={isLoading}
@@ -407,18 +469,19 @@ function LoginForm({ portal }: { portal: PortalDef }) {
         {isLoading ? (
           <><span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />AUTHENTICATING…</>
         ) : (
-          <><Zap className="w-4 h-4" />SIGN IN<ArrowRight className="w-4 h-4" /></>
+          <><Zap className="w-4 h-4" />SIGN IN TO CONSOLE<ArrowRight className="w-4 h-4" /></>
         )}
       </button>
 
-      {/* Demo hint */}
-      <div className={`flex items-start gap-2 p-3 rounded-xl border text-[11px] font-mono ${portal.hintBg} ${portal.hintColor}`}>
-        <span className="shrink-0 mt-0.5">💡</span>
-        <span>
-          <span className="font-bold opacity-70">Demo: </span>
-          {portal.hint}
-          <span className="block opacity-60 mt-0.5">Any password works in demo mode.</span>
-        </span>
+      {/* Explicit On-Demand Autofill Button for Evaluators */}
+      <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={handleAutofillDemo}
+          className="w-full py-2 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm"
+        >
+          <span>⚡ Autofill Demo Credentials</span>
+        </button>
       </div>
     </form>
   );

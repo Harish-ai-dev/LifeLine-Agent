@@ -286,20 +286,29 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
 
       // Resolve facility ID
       const targetFacilityId = facilityId || demoUser.facility_id;
+      let matchedFacilityId = INITIAL_HOSPITALS[0].id;
       if (targetFacilityId) {
         const matched = INITIAL_HOSPITALS.find(
           (h) => h.id === targetFacilityId || h.code.toLowerCase().includes(targetFacilityId.split('_').slice(-1)[0])
         );
-        if (matched) setActiveHospitalId(matched.id);
-        else setActiveHospitalId(INITIAL_HOSPITALS[0].id);
+        if (matched) {
+          matchedFacilityId = matched.id;
+          setActiveHospitalId(matched.id);
+        } else {
+          setActiveHospitalId(INITIAL_HOSPITALS[0].id);
+        }
       }
       if (donorId || demoUser.donor_id) {
         setActiveDonorId(donorId || demoUser.donor_id || 'donor-101');
       }
 
-      if (demoUser.role === 'hospital_staff') router.push('/hospital');
-      else if (demoUser.role === 'government_authority') router.push('/government');
-      else if (demoUser.role === 'blood_donor') router.push('/donor');
+      if (demoUser.role === 'hospital_staff') {
+        router.push(`/hospital/facility/${matchedFacilityId}`);
+      } else if (demoUser.role === 'government_authority') {
+        router.push('/government');
+      } else if (demoUser.role === 'blood_donor') {
+        router.push('/donor');
+      }
     },
     [router]
   );

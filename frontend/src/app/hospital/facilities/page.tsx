@@ -98,17 +98,20 @@ export default function FacilitiesDirectoryPage() {
                   <Link
                     href={`/hospital/facility/${hospital.id}`}
                     onClick={() => setActiveHospitalId(hospital.id)}
-                    className="hover:text-sky-600 transition-colors group"
+                    className="hover:text-sky-600 transition-colors group block"
                   >
-                    <h3 className="text-lg font-black text-slate-900 group-hover:text-sky-600 flex items-center justify-between">
+                    <h3
+                      className="text-lg font-black text-slate-900 group-hover:text-sky-600 leading-snug whitespace-normal break-words flex items-start justify-between gap-2"
+                      title={hospital.name}
+                    >
                       <span>{hospital.name}</span>
-                      <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-sky-600" />
+                      <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-sky-600 shrink-0 mt-1" />
                     </h3>
                   </Link>
                   <span className="text-xs font-mono font-bold text-sky-700">{hospital.tier}</span>
-                  <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span className="truncate">{hospital.address}</span>
+                  <p className="text-xs text-slate-500 mt-1 flex items-start gap-1">
+                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+                    <span className="whitespace-normal break-words" title={hospital.address}>{hospital.address}</span>
                   </p>
                 </div>
 

@@ -118,16 +118,19 @@ export default function DedicatedFacilityPage() {
                 </span>
               </div>
 
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              <h1
+                className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight whitespace-normal break-words"
+                title={hospital.name}
+              >
                 {hospital.name}
               </h1>
 
               <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 mt-1 font-mono">
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                  {hospital.address}
+                <span className="flex items-center gap-1" title={hospital.address}>
+                  <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span className="whitespace-normal break-words">{hospital.address}</span>
                 </span>
-                <span className="flex items-center gap-1 text-slate-700 font-bold">
+                <span className="flex items-center gap-1 text-slate-700 font-bold shrink-0">
                   <Phone className="w-3.5 h-3.5 text-slate-400" />
                   Emergency: {hospital.emergencyPhone}
                 </span>
