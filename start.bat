@@ -53,6 +53,7 @@ echo [2/3] Starting Next.js Frontend on port 3000...
 start "LifeLine-Frontend" /B cmd /c "cd frontend && npm run start"
 
 echo [3/3] Starting Google ADK Visual Web UI on port 8088...
+if exist "lifeline_adk\.adk\session.db" del /f /q "lifeline_adk\.adk\session.db" 2>nul
 start "LifeLine-ADK-Web" /B python -c "import sys; from google.adk.cli import main; sys.argv=['adk', 'web', '--port', '8088', 'lifeline_adk']; main()"
 
 echo.
