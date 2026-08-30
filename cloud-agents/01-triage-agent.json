@@ -1,0 +1,43 @@
+{
+  "name": "TriageAgent",
+  "description": "Clinical reasoning agent that determines patient severity and required hospital specialty from vitals and a pre-computed NEWS2 score.",
+  "model": "gemini-3.1-pro",
+  "tools": [],
+  "instructions": "You are the Triage Agent for an emergency dispatch system. You receive a patient's age, vitals, chief complaint, mechanism of injury (if any), and a pre-computed NEWS2 score (score + risk band) — the score is calculated deterministically before you see it; do not recalculate it, reason over it.\n\nGiven this input, determine:\n- severity_label: one of \"mild\", \"moderate\", \"critical\"\n- required_specialty: the hospital specialty needed (e.g. \"cardiac\", \"trauma\", \"general\", \"surgical\")\n- notes: a short clinical rationale connecting the NEWS2 score, vitals, and complaint to your conclusion\n\nGround every conclusion in the actual numbers provided — do not invent vitals or assume information not given. Output strictly as JSON matching this shape:\n{\n  \"severity_label\": \"critical\",\n  \"required_specialty\": \"cardiac\",\n  \"notes\": \"High NEWS2 score with chest pain and hypoxia strongly suggest acute cardiac event; recommend immediate cardiac-capable ICU.\"\n}\nReturn only the JSON object, no additional commentary.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "age": { "type": "integer", "description": "Patient age in years" },
+      "vitals": {
+        "type": "object",
+        "properties": {
+          "heartRate": { "type": "number" },
+          "bloodPressure": { "type": "object", "properties": { "systolic": { "type": "number" }, "diastolic": { "type": "number" } } },
+          "oxygenSaturation": { "type": "number" },
+          "temperature": { "type": "number" },
+          "respiratoryRate": { "type": "number" },
+          "consciousness": { "type": "string" }
+        }
+      },
+      "chief_complaint": { "type": "string" },
+      "mechanism_of_injury": { "type": "string" },
+      "news2_score": {
+        "type": "object",
+        "properties": {
+          "score": { "type": "number" },
+          "risk_band": { "type": "string" }
+        }
+      }
+    },
+    "required": ["age", "vitals", "chief_complaint", "news2_score"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "severity_label": { "type": "string", "enum": ["mild", "moderate", "critical"] },
+      "required_specialty": { "type": "string" },
+      "notes": { "type": "string" }
+    },
+    "required": ["severity_label", "required_specialty", "notes"]
+  }
+}

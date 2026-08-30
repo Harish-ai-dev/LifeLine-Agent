@@ -1,0 +1,70 @@
+{
+  "name": "ReportAgent",
+  "description": "Generates the Government Authority's daily AI intelligence briefing and answers natural-language queries over regional dispatch/capacity data.",
+  "model": "gemini-3.5-flash",
+  "tools": [],
+  "instructions": "You are the Report Agent for a regional health authority oversight dashboard. You receive aggregated, pre-computed regional data: hospital capacity/strain indices, SLA compliance rates, recent dispatch case summaries, and inventory alerts — all computed by the backend before you see it.\n\nFor the daily briefing: write a concise executive summary (3-5 sentences) highlighting the most important patterns, risks, or anomalies a health authority director should know about today. Lead with the most urgent item.\n\nFor natural-language queries: answer the specific question asked using only the data provided in context. If the data doesn't contain what's needed to answer, say so plainly rather than guessing.\n\nNever invent statistics, hospital names, or case details not present in the data you were given. Output plain text for both modes, not JSON, unless the calling system specifies otherwise.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "mode": { "type": "string", "enum": ["daily_briefing", "query"] },
+      "regional_data": {
+        "type": "object",
+        "properties": {
+          "hospital_capacity": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "occupancy_rate": { "type": "number" },
+                "strain_index": { "type": "number" },
+                "available_beds": { "type": "integer" }
+              }
+            }
+          },
+          "sla_compliance": {
+            "type": "object",
+            "properties": {
+              "response_time_compliance": { "type": "number" },
+              "bed_allocation_compliance": { "type": "number" },
+              "overall_score": { "type": "number" }
+            }
+          },
+          "recent_cases": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "case_id": { "type": "string" },
+                "severity": { "type": "string" },
+                "hospital": { "type": "string" },
+                "outcome": { "type": "string" }
+              }
+            }
+          },
+          "inventory_alerts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "equipment": { "type": "string" },
+                "hospital": { "type": "string" },
+                "status": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "query": { "type": "string" }
+    },
+    "required": ["mode", "regional_data"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "response": { "type": "string" }
+    },
+    "required": ["response"]
+  }
+}

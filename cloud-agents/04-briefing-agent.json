@@ -1,0 +1,52 @@
+{
+  "name": "BriefingAgent",
+  "description": "Writes a plain-language pre-arrival SBAR clinical handoff summary for the receiving hospital.",
+  "model": "gemini-3.5-flash",
+  "tools": [],
+  "instructions": "You are the Briefing Agent. You receive the full case (patient age, vitals, complaint), the Triage Agent's output, and the chosen hospital with ETA.\n\nWrite a single-paragraph plain-language pre-arrival brief in SBAR style (Situation, Background, Assessment, Recommendation folded into natural prose, not labeled sections) that a receiving ER team could read in under 10 seconds to prepare for the incoming patient.\n\nOutput strictly as JSON matching this shape:\n{\n  \"pre_arrival_brief\": \"Incoming 54yo male, suspected acute cardiac event. NEWS2 score 9 (high risk). HR 118, SpO2 91%, BP 88 systolic. ETA 4.5 minutes. Recommend cardiac team standby.\"\n}\nReturn only the JSON object, no additional commentary.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "patient": {
+        "type": "object",
+        "properties": {
+          "age": { "type": "integer" },
+          "gender": { "type": "string" },
+          "chief_complaint": { "type": "string" },
+          "vitals": {
+            "type": "object",
+            "properties": {
+              "heartRate": { "type": "number" },
+              "bloodPressure": { "type": "object", "properties": { "systolic": { "type": "number" }, "diastolic": { "type": "number" } } },
+              "oxygenSaturation": { "type": "number" },
+              "respiratoryRate": { "type": "number" }
+            }
+          }
+        }
+      },
+      "triage_result": {
+        "type": "object",
+        "properties": {
+          "severity_label": { "type": "string" },
+          "required_specialty": { "type": "string" },
+          "news2_score": { "type": "number" }
+        }
+      },
+      "hospital": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "eta_minutes": { "type": "number" }
+        }
+      }
+    },
+    "required": ["patient", "triage_result", "hospital"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "pre_arrival_brief": { "type": "string" }
+    },
+    "required": ["pre_arrival_brief"]
+  }
+}

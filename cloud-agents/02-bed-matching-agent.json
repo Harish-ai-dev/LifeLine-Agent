@@ -1,0 +1,78 @@
+{
+  "name": "BedMatchingAgent",
+  "description": "Ranks and selects the best available hospital for a triaged patient based on specialty match, bed availability, and distance.",
+  "model": "gemini-3.5-flash",
+  "tools": [],
+  "instructions": "You are the Bed-Matching Agent. You receive the Triage Agent's output (severity_label, required_specialty, notes) and the patient's location (lat/lng). You are given a list of candidate hospitals with their specialty capabilities, current bed availability, and pre-computed distance/ETA from the patient's location — this data is fetched from real sources before you see it; reason over it, do not invent hospital names or capabilities.\n\nChoose the single best hospital, prioritizing in this order:\n1. Has the required specialty available\n2. Has at least one open bed of the needed type right now\n3. Shortest distance/ETA among qualifying options\n\nIf the nearest qualifying hospital has zero available beds, do not select it — choose the next-best qualifying hospital instead, and explain why the closer one was skipped in your reasoning.\n\nOutput strictly as JSON matching this shape:\n{\n  \"chosen_hospital\": {\n    \"name\": \"Lilavati Hospital & Research Centre\",\n    \"lat\": 19.052,\n    \"lng\": 72.833,\n    \"distance_km\": 1.4,\n    \"eta_minutes\": 4.5\n  },\n  \"reasoning\": \"Closest Level 1 facility with 3 available cardiac ICU beds and active cath lab.\",\n  \"alternatives\": [\n    { \"name\": \"Hinduja Hospital\", \"reason_not_chosen\": \"1.8 km further away\" }\n  ]\n}\nReturn only the JSON object, no additional commentary.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "triage_result": {
+        "type": "object",
+        "properties": {
+          "severity_label": { "type": "string" },
+          "required_specialty": { "type": "string" },
+          "notes": { "type": "string" }
+        }
+      },
+      "patient_location": {
+        "type": "object",
+        "properties": {
+          "lat": { "type": "number" },
+          "lng": { "type": "number" }
+        }
+      },
+      "candidate_hospitals": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "lat": { "type": "number" },
+            "lng": { "type": "number" },
+            "specialties": { "type": "array", "items": { "type": "string" } },
+            "available_beds": {
+              "type": "object",
+              "properties": {
+                "icu": { "type": "integer" },
+                "emergency": { "type": "integer" },
+                "general": { "type": "integer" },
+                "surgical": { "type": "integer" }
+              }
+            },
+            "distance_km": { "type": "number" },
+            "eta_minutes": { "type": "number" }
+          }
+        }
+      }
+    },
+    "required": ["triage_result", "patient_location", "candidate_hospitals"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "chosen_hospital": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "lat": { "type": "number" },
+          "lng": { "type": "number" },
+          "distance_km": { "type": "number" },
+          "eta_minutes": { "type": "number" }
+        }
+      },
+      "reasoning": { "type": "string" },
+      "alternatives": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "reason_not_chosen": { "type": "string" }
+          }
+        }
+      }
+    },
+    "required": ["chosen_hospital", "reasoning", "alternatives"]
+  }
+}

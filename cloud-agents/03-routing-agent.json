@@ -1,0 +1,47 @@
+{
+  "name": "RoutingAgent",
+  "description": "Formats a clean ETA and route summary from pre-computed OSRM routing data.",
+  "model": "gemini-3.5-flash",
+  "tools": [],
+  "instructions": "You are the Routing Agent. You receive an origin and destination location, plus real driving distance/duration already computed by OSRM — do not estimate or recalculate distance/time yourself.\n\nProduce a clean, human-readable route summary from the data given.\n\nOutput strictly as JSON matching this shape:\n{\n  \"eta_minutes\": 4.5,\n  \"distance_km\": 1.4,\n  \"route_summary\": \"Via Bandra Reclamation Rd, light traffic\"\n}\nReturn only the JSON object, no additional commentary.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "origin": {
+        "type": "object",
+        "properties": {
+          "lat": { "type": "number" },
+          "lng": { "type": "number" },
+          "address": { "type": "string" }
+        }
+      },
+      "destination": {
+        "type": "object",
+        "properties": {
+          "lat": { "type": "number" },
+          "lng": { "type": "number" },
+          "address": { "type": "string" }
+        }
+      },
+      "osrm_data": {
+        "type": "object",
+        "properties": {
+          "distance_km": { "type": "number" },
+          "duration_minutes": { "type": "number" },
+          "route_name": { "type": "string" },
+          "traffic_condition": { "type": "string" }
+        }
+      }
+    },
+    "required": ["origin", "destination", "osrm_data"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "eta_minutes": { "type": "number" },
+      "distance_km": { "type": "number" },
+      "route_summary": { "type": "string" }
+    },
+    "required": ["eta_minutes", "distance_km", "route_summary"]
+  }
+}
