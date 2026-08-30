@@ -159,7 +159,7 @@ export function Navbar({
       </div>
 
       {/* 2. Main Navigation Header */}
-      <div className="w-full w-full px-2 sm:px-4 lg:px-6 px-4 sm:px-8 py-3">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-10 py-3">
         <div className="flex items-center justify-between w-full">
           
           {/* Logo Brand Block */}

@@ -17,6 +17,16 @@ import {
 } from 'lucide-react';
 import { useDashboard } from '../../context/DashboardContext';
 import { DonorRequest, MatchedDonorEntry, TravelMode } from '../../types/dashboard';
+import dynamic from 'next/dynamic';
+
+const LeafletMap = dynamic(() => import('../maps/LeafletMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="absolute inset-0 flex items-center justify-center bg-slate-100 text-slate-400 font-mono text-xs">
+      INITIALIZING MAP SATELLITE UPLINK...
+    </div>
+  ),
+});
 
 interface DonorNavigationMapProps {
   request: DonorRequest;
@@ -143,39 +153,33 @@ export const DonorNavigationMap: React.FC<DonorNavigationMapProps> = ({
         </div>
 
         {/* Central Visual Route between Donor and Destination Hospital */}
-        <div className="relative z-10 my-10 max-w-2xl mx-auto w-full">
-          <div className="flex items-center justify-between relative">
-            {/* Connecting Route Line with pulsing animation */}
-            <div className="absolute left-8 right-8 top-1/2 -translate-y-1/2 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-rose-500 via-sky-400 to-emerald-400 w-full animate-pulse" />
-            </div>
-
-            {/* Donor Start Location Pin */}
-            <div className="relative z-10 flex flex-col items-center text-center">
-              <div className="w-14 h-14 rounded-2xl bg-rose-600 text-white border-2 border-rose-300 shadow-xl flex items-center justify-center font-black animate-bounce">
-                <MapPin className="w-7 h-7" />
-              </div>
-              <span className="text-xs font-black text-white mt-2">You (Donor)</span>
-              <span className="text-[10px] text-slate-400 font-mono">{currentDonor.address}</span>
-            </div>
-
-            {/* Distance Indicator Marker in Center */}
-            <div className="relative z-10 bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-xl text-center shadow-lg">
-              <span className="text-[10px] uppercase font-bold text-slate-400 block">Distance</span>
-              <span className="text-xs font-black text-rose-300 font-mono">
-                {matchedEntry.distanceKm} km
-              </span>
-            </div>
-
-            {/* Destination Hospital Pin */}
-            <div className="relative z-10 flex flex-col items-center text-center">
-              <div className="w-14 h-14 rounded-2xl bg-emerald-600 text-white border-2 border-emerald-300 shadow-xl flex items-center justify-center font-black">
-                <Building2 className="w-7 h-7" />
-              </div>
-              <span className="text-xs font-black text-white mt-2">{loc.hospitalName}</span>
-              <span className="text-[10px] text-emerald-400 font-mono">{loc.department}</span>
-            </div>
-          </div>
+        <div className="relative z-0 mt-4 flex-1 min-h-[260px] rounded-2xl overflow-hidden border border-slate-800">
+          <LeafletMap 
+            markers={[
+              {
+                id: 'donor',
+                lat: currentDonor.lat,
+                lng: currentDonor.lng,
+                color: '#e11d48', // rose-600
+                popupHtml: '<b>You (Donor)</b><br/>' + currentDonor.address,
+                isPulsing: true
+              },
+              {
+                id: 'hospital',
+                lat: loc.lat,
+                lng: loc.lng,
+                color: '#059669', // emerald-600
+                popupHtml: '<b>' + loc.hospitalName + '</b><br/>' + loc.department
+              }
+            ]}
+            drawRoute={{
+              start: { lat: currentDonor.lat, lng: currentDonor.lng },
+              end: { lat: loc.lat, lng: loc.lng }
+            }}
+            centerLat={(currentDonor.lat + loc.lat) / 2}
+            centerLng={(currentDonor.lng + loc.lng) / 2}
+            zoom={13}
+          />
         </div>
 
         {/* Bottom Fast Action: Get Directions in Google Maps */}

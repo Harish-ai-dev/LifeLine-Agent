@@ -28,7 +28,7 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ onOpenDemo, onOpenWaitlist, onScrollToSimulator }) => {
   return (
-    <section className="relative w-full pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden bg-[#F8FAFC]">
+    <section className="relative w-full pt-24 pb-12 md:pt-28 md:pb-16 overflow-hidden bg-[#F8FAFC]">
       {/* Edge-to-edge Glowing Effects & Background Telemetry Grid */}
       <div className="absolute inset-0 w-full h-full bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(14,165,233,0.12),rgba(255,255,255,0))] pointer-events-none" />
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-cyan-500/5 blur-[130px] rounded-full pointer-events-none" />
@@ -43,10 +43,10 @@ export const Hero: React.FC<HeroProps> = ({ onOpenDemo, onOpenWaitlist, onScroll
         }}
       />
 
-      <div className="relative w-full w-full px-2 sm:px-4 lg:px-6 px-4 sm:px-6 lg:px-8 xl:px-10">
+      <div className="relative w-full px-4 sm:px-6 lg:px-8 xl:px-10">
         
         {/* Top Hackathon & Operational Pill */}
-        <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 mb-8">
+        <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 mb-6">
           <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-cyan-50 border border-cyan-200 shadow-sm">
             <span className="flex h-2 w-2 rounded-full bg-cyan-600 animate-ping" />
             <span className="text-xs font-mono font-bold text-cyan-700">
@@ -55,7 +55,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenDemo, onOpenWaitlist, onScroll
           </div>
 
           <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm">
-            <span className="text-xs font-mono text-slate-650">
+            <span className="text-[11px] sm:text-xs font-mono text-slate-650">
               ⚡ Multi-Agent Swarm on <span className="text-cyan-750 font-bold">Google Gemini 3.1 & 3.5</span>
             </span>
           </div>
@@ -65,7 +65,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenDemo, onOpenWaitlist, onScroll
         <div className="text-center max-w-4xl mx-auto">
           <h1 
             className="font-extrabold tracking-tight text-slate-900 leading-[1.1]"
-            style={{ fontSize: 'clamp(2rem, 4vw + 1rem, 4.5rem)' }}
+            style={{ fontSize: 'clamp(1.5rem, 3vw + 1rem, 3.5rem)' }}
           >
             <span className="block text-slate-700">Zero phone calls.</span>
             <span className="block text-slate-600">Zero hold music.</span>
@@ -74,7 +74,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenDemo, onOpenWaitlist, onScroll
             </span>
           </h1>
 
-          <p className="mt-6 text-base sm:text-lg lg:text-xl text-slate-655 font-normal leading-relaxed max-w-3xl mx-auto font-sans">
+          <p className="mt-4 text-sm sm:text-base lg:text-lg text-slate-655 font-normal leading-relaxed max-w-3xl mx-auto font-sans">
             In acute trauma and cardiac emergencies, the <span className="text-rose-650 font-semibold">golden hour</span> is lost to manual phone calls, fragmented radio channels, and hospital capacity uncertainty. <span className="text-slate-900 font-medium">LifeLine Agent</span> coordinates 6 autonomous AI agents on Google Gemini to triage vitals with NEWS2, calculate OSRM driving corridors, match hospital capabilities, and deliver plain-language trauma briefs before the ambulance rolls.
           </p>
 
