@@ -284,6 +284,58 @@ Present the brief clearly and concisely.
 )
 
 
+def dispatch_emergency_case(
+    patient_age: int,
+    chief_complaint: str,
+    heart_rate: int,
+    respiratory_rate: int,
+    systolic_bp: int,
+    spo2: int,
+    temperature_c: float,
+    consciousness: str = "alert",
+    patient_lat: float = 19.0522,
+    patient_lng: float = 72.8336,
+    mechanism_of_injury: str = "",
+) -> dict:
+    """
+    Execute the complete LifeLine 5-stage autonomous emergency dispatch pipeline:
+    NEWS2 scoring -> Triage -> Bed-Matching -> Routing -> SBAR Pre-Arrival Brief.
+
+    Args:
+        patient_age: Age of the patient in years.
+        chief_complaint: Presenting clinical complaint.
+        heart_rate: Heart rate in bpm.
+        respiratory_rate: Respiratory rate in breaths/min.
+        systolic_bp: Systolic blood pressure in mmHg.
+        spo2: Blood oxygen saturation percentage.
+        temperature_c: Body temperature in Celsius.
+        consciousness: Level of consciousness ('alert', 'confused', 'unresponsive').
+        patient_lat: Latitude of patient location (default: 19.0522).
+        patient_lng: Longitude of patient location (default: 72.8336).
+        mechanism_of_injury: Optional mechanism of injury description.
+
+    Returns:
+        Structured dispatch record with triage classification, chosen hospital, OSRM ETA, SBAR brief, and audit trail ID.
+    """
+    from lifeline.orchestrator import run_dispatch
+    vitals = Vitals(
+        heart_rate=heart_rate,
+        respiratory_rate=respiratory_rate,
+        systolic_bp=systolic_bp,
+        spo2=spo2,
+        temperature_c=temperature_c,
+        consciousness=consciousness,
+    )
+    case = Case(
+        patient_age=patient_age,
+        chief_complaint=chief_complaint,
+        mechanism_of_injury=mechanism_of_injury or None,
+        vitals=vitals,
+    )
+    loc = Location(lat=patient_lat, lng=patient_lng)
+    return run_dispatch(case, loc)
+
+
 # =============================================================================
 # LEVEL 1 — Orchestrator root_agent (what `adk web` discovers)
 # =============================================================================
@@ -326,10 +378,13 @@ STAGE 5 — DISPATCH SUMMARY
   ETA:       [minutes] min
   SBAR:      [pre_arrival_brief]
 
+Alternatively, call dispatch_emergency_case directly with the vitals to run the full pipeline in a single step.
+
 Rules:
 - Never skip a stage.
 - Never invent clinical data — use tool outputs only.
 - If any stage fails, report it and activate deterministic fallback.
 """,
+    tools=[dispatch_emergency_case],
     sub_agents=[triage_agent, bed_matching_agent, routing_agent, briefing_agent],
 )
