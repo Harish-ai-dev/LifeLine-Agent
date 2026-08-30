@@ -4,6 +4,11 @@ Clinical NEWS2 Calculation -> Triage Agent -> Bed-Matching Agent -> Routing Agen
 """
 
 import logging
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from lifeline.tools.news2 import news2_score
 from lifeline.tools.firestore_client import write_audit_record
 from lifeline.agents.triage_agent import run_triage
