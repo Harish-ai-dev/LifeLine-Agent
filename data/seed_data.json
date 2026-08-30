@@ -1,0 +1,1196 @@
+{
+  "dispatch_cases": [
+    {
+      "_id": "CASE-9021",
+      "_timestamp": "2026-08-29T16:30:00Z",
+      "_version": "0.1.0",
+      "_actor": "orchestrator",
+      "input_case": {
+        "patient_age": 54,
+        "vitals": {
+          "heart_rate": 118,
+          "respiratory_rate": 24,
+          "systolic_bp": 88,
+          "spo2": 91,
+          "temperature_c": 38.6,
+          "consciousness": "alert"
+        },
+        "chief_complaint": "Acute crushing chest pain",
+        "mechanism_of_injury": null
+      },
+      "patient_location": {
+        "lat": 19.055,
+        "lng": 72.840
+      },
+      "news2_score": {
+        "score": 9,
+        "risk_band": "high"
+      },
+      "triage_output": {
+        "severity_label": "critical",
+        "required_specialty": "cardiac",
+        "notes": "High NEWS2 score (9) with acute chest pain and hypoxia strongly indicates acute coronary syndrome. Cardiac ICU bed required immediately."
+      },
+      "bed_matching_output": {
+        "chosen_hospital": {
+          "name": "Lilavati Hospital & Research Centre",
+          "lat": 19.0522,
+          "lng": 72.8336,
+          "distance_km": 1.4,
+          "eta_minutes": 4.5
+        },
+        "reasoning": "Closest Level 1 facility with 3 available cardiac ICU beds and active cath lab.",
+        "alternatives": [
+          {
+            "name": "P. D. Hinduja National Hospital & Medical Research Centre",
+            "reason_not_chosen": "1.8 km further away, longer travel time in heavy evening traffic."
+          }
+        ]
+      },
+      "routing_output": {
+        "eta_minutes": 4.5,
+        "distance_km": 1.4,
+        "route_summary": "Via Bandra Reclamation Rd, light traffic"
+      },
+      "briefing_output": {
+        "pre_arrival_brief": "Incoming 54yo male, suspected STEMI. NEWS2 score 9 (high risk). Vitals: HR 118, BP 88/60, SpO2 91%. ETA 4.5 minutes. Cardiac team and Cath Lab prep requested."
+      }
+    },
+    {
+      "_id": "CASE-9022",
+      "_timestamp": "2026-08-29T15:45:00Z",
+      "_version": "0.1.0",
+      "_actor": "orchestrator",
+      "input_case": {
+        "patient_age": 33,
+        "vitals": {
+          "heart_rate": 130,
+          "respiratory_rate": 28,
+          "systolic_bp": 80,
+          "spo2": 89,
+          "temperature_c": 36.2,
+          "consciousness": "confused"
+        },
+        "chief_complaint": "Polytrauma with massive femoral hemorrhage",
+        "mechanism_of_injury": "High-speed motorcycle collision on Western Express Highway"
+      },
+      "patient_location": {
+        "lat": 19.030,
+        "lng": 72.855
+      },
+      "news2_score": {
+        "score": 11,
+        "risk_band": "high"
+      },
+      "triage_output": {
+        "severity_label": "critical",
+        "required_specialty": "trauma",
+        "notes": "Severe hemorrhagic shock and respiratory distress following vehicular trauma. Immediate trauma surgeon and blood transfusion protocol activation needed."
+      },
+      "bed_matching_output": {
+        "chosen_hospital": {
+          "name": "Lokmanya Tilak Municipal General Hospital (Sion Hospital)",
+          "lat": 19.0366,
+          "lng": 72.8601,
+          "distance_km": 1.2,
+          "eta_minutes": 3.8
+        },
+        "reasoning": "Premier trauma center with 9 available ICU beds, massive transfusion protocol, and 24/7 dedicated trauma bay.",
+        "alternatives": [
+          {
+            "name": "King Edward Memorial (KEM) Hospital",
+            "reason_not_chosen": "4.2 km away; patient instability requires immediate stabilization."
+          }
+        ]
+      },
+      "routing_output": {
+        "eta_minutes": 3.8,
+        "distance_km": 1.2,
+        "route_summary": "Via Sion Flyover / Eastern Express Hwy"
+      },
+      "briefing_output": {
+        "pre_arrival_brief": "Incoming 33yo male, polytrauma with active arterial bleeding. NEWS2 score 11. Vitals: HR 130, BP 80/50, SpO2 89%. ETA 3.8 minutes. Activate Red Blanket trauma code."
+      }
+    },
+    {
+      "_id": "CASE-9023",
+      "_timestamp": "2026-08-29T14:15:00Z",
+      "_version": "0.1.0",
+      "_actor": "orchestrator",
+      "input_case": {
+        "patient_age": 68,
+        "vitals": {
+          "heart_rate": 96,
+          "respiratory_rate": 22,
+          "systolic_bp": 178,
+          "spo2": 94,
+          "temperature_c": 37.2,
+          "consciousness": "confused"
+        },
+        "chief_complaint": "Acute right-sided hemiplegia and expressive aphasia",
+        "mechanism_of_injury": null
+      },
+      "patient_location": {
+        "lat": 18.980,
+        "lng": 72.820
+      },
+      "news2_score": {
+        "score": 6,
+        "risk_band": "medium"
+      },
+      "triage_output": {
+        "severity_label": "critical",
+        "required_specialty": "neurology",
+        "notes": "Onset of acute ischemic stroke within 90 minutes. Urgent stroke protocol, non-contrast CT, and thrombolysis candidacy evaluation required."
+      },
+      "bed_matching_output": {
+        "chosen_hospital": {
+          "name": "Breach Candy Hospital Trust",
+          "lat": 18.9723,
+          "lng": 72.8055,
+          "distance_km": 1.8,
+          "eta_minutes": 5.2
+        },
+        "reasoning": "Comprehensive stroke center with immediate MRI/CT capability and available neuro ICU beds.",
+        "alternatives": []
+      },
+      "routing_output": {
+        "eta_minutes": 5.2,
+        "distance_km": 1.8,
+        "route_summary": "Via Bhulabhai Desai Road"
+      },
+      "briefing_output": {
+        "pre_arrival_brief": "Incoming 68yo female with acute stroke signs (right hemiplegia, aphasia, onset 45 min ago). NEWS2: 6. Neuro team prep for rapid CT angiography."
+      }
+    }
+  ],
+  "donors": [
+    {
+      "_id": "donor_6721",
+      "_timestamp": "2026-08-29T16:30:00Z",
+      "_version": "0.1.0",
+      "_actor": "blood_donor",
+      "full_name": "Rahul Sharma",
+      "phone": "+91-98765-43210",
+      "email": "rahul.sharma@example.com",
+      "blood_group": "O+",
+      "is_organ_donor": true,
+      "donor_category": "Dual",
+      "location": {
+        "lat": 19.055,
+        "lng": 72.840,
+        "address": "Bandra West, Mumbai",
+        "pincode": "400050"
+      },
+      "status": "available",
+      "last_donation_date": "2026-05-10",
+      "eligibility_status": "eligible",
+      "total_donations": 4,
+      "badge_title": "Lifesaver Gold",
+      "active_match_request_id": null,
+      "donation_history": [
+        {
+          "donation_id": "don_hist_101",
+          "hospital_name": "Lilavati Hospital & Research Centre",
+          "date": "2026-05-10",
+          "units": 1,
+          "type": "blood"
+        },
+        {
+          "donation_id": "don_hist_102",
+          "hospital_name": "P. D. Hinduja National Hospital",
+          "date": "2026-01-14",
+          "units": 1,
+          "type": "blood"
+        }
+      ]
+    },
+    {
+      "_id": "donor_6722",
+      "_timestamp": "2026-08-29T16:30:00Z",
+      "_version": "0.1.0",
+      "_actor": "blood_donor",
+      "full_name": "Priya Nair",
+      "phone": "+91-98201-11223",
+      "email": "priya.nair@example.com",
+      "blood_group": "O-",
+      "is_organ_donor": true,
+      "donor_category": "Dual",
+      "location": {
+        "lat": 19.035,
+        "lng": 72.842,
+        "address": "Mahim West, Mumbai",
+        "pincode": "400016"
+      },
+      "status": "available",
+      "last_donation_date": "2026-04-18",
+      "eligibility_status": "eligible",
+      "total_donations": 7,
+      "badge_title": "Hero Platinum",
+      "active_match_request_id": null,
+      "donation_history": [
+        {
+          "donation_id": "don_hist_201",
+          "hospital_name": "P. D. Hinduja National Hospital",
+          "date": "2026-04-18",
+          "units": 1,
+          "type": "blood"
+        },
+        {
+          "donation_id": "don_hist_202",
+          "hospital_name": "Tata Memorial Hospital",
+          "date": "2025-11-20",
+          "units": 1,
+          "type": "blood"
+        }
+      ]
+    },
+    {
+      "_id": "donor_6723",
+      "_timestamp": "2026-08-29T16:30:00Z",
+      "_version": "0.1.0",
+      "_actor": "blood_donor",
+      "full_name": "Amitabh Deshmukh",
+      "phone": "+91-98192-33445",
+      "email": "amitabh.d@example.com",
+      "blood_group": "A+",
+      "is_organ_donor": false,
+      "donor_category": "Blood",
+      "location": {
+        "lat": 19.003,
+        "lng": 72.843,
+        "address": "Parel, Mumbai",
+        "pincode": "400012"
+      },
+      "status": "available",
+      "last_donation_date": "2026-06-02",
+      "eligibility_status": "eligible",
+      "total_donations": 3,
+      "badge_title": "Lifesaver Silver",
+      "active_match_request_id": null,
+      "donation_history": [
+        {
+          "donation_id": "don_hist_301",
+          "hospital_name": "KEM Hospital",
+          "date": "2026-06-02",
+          "units": 1,
+          "type": "blood"
+        }
+      ]
+    },
+    {
+      "_id": "donor_6724",
+      "_timestamp": "2026-08-29T16:30:00Z",
+      "_version": "0.1.0",
+      "_actor": "blood_donor",
+      "full_name": "Zoya Merchant",
+      "phone": "+91-98700-44556",
+      "email": "zoya.merchant@example.com",
+      "blood_group": "B+",
+      "is_organ_donor": true,
+      "donor_category": "Dual",
+      "location": {
+        "lat": 18.955,
+        "lng": 72.819,
+        "address": "Girgaon, Mumbai",
+        "pincode": "400004"
+      },
+      "status": "available",
+      "last_donation_date": "2026-03-25",
+      "eligibility_status": "eligible",
+      "total_donations": 5,
+      "badge_title": "Lifesaver Gold",
+      "active_match_request_id": null,
+      "donation_history": [
+        {
+          "donation_id": "don_hist_401",
+          "hospital_name": "Saifee Hospital",
+          "date": "2026-03-25",
+          "units": 1,
+          "type": "blood"
+        }
+      ]
+    },
+    {
+      "_id": "donor_6725",
+      "_timestamp": "2026-08-29T16:30:00Z",
+      "_version": "0.1.0",
+      "_actor": "blood_donor",
+      "full_name": "Karan Malhotra",
+      "phone": "+91-98334-55667",
+      "email": "karan.m@example.com",
+      "blood_group": "AB-",
+      "is_organ_donor": true,
+      "donor_category": "Dual",
+      "location": {
+        "lat": 19.120,
+        "lng": 72.915,
+        "address": "Powai, Mumbai",
+        "pincode": "400076"
+      },
+      "status": "available",
+      "last_donation_date": "2026-02-11",
+      "eligibility_status": "eligible",
+      "total_donations": 2,
+      "badge_title": "Lifesaver Bronze",
+      "active_match_request_id": null,
+      "donation_history": [
+        {
+          "donation_id": "don_hist_501",
+          "hospital_name": "Dr. L H Hiranandani Hospital",
+          "date": "2026-02-11",
+          "units": 1,
+          "type": "blood"
+        }
+      ]
+    },
+    {
+      "_id": "donor_6726",
+      "_timestamp": "2026-08-29T16:30:00Z",
+      "_version": "0.1.0",
+      "_actor": "blood_donor",
+      "full_name": "Sneha Kulkarni",
+      "phone": "+91-98211-66778",
+      "email": "sneha.k@example.com",
+      "blood_group": "A-",
+      "is_organ_donor": true,
+      "donor_category": "Dual",
+      "location": {
+        "lat": 19.098,
+        "lng": 72.842,
+        "address": "Vile Parle West, Mumbai",
+        "pincode": "400056"
+      },
+      "status": "available",
+      "last_donation_date": "2026-05-30",
+      "eligibility_status": "eligible",
+      "total_donations": 3,
+      "badge_title": "Lifesaver Silver",
+      "active_match_request_id": null,
+      "donation_history": [
+        {
+          "donation_id": "don_hist_601",
+          "hospital_name": "Nanavati Max Super Speciality Hospital",
+          "date": "2026-05-30",
+          "units": 1,
+          "type": "blood"
+        }
+      ]
+    },
+    {
+      "_id": "donor_6727",
+      "_timestamp": "2026-08-29T16:30:00Z",
+      "_version": "0.1.0",
+      "_actor": "blood_donor",
+      "full_name": "Farhan Ansari",
+      "phone": "+91-98670-77889",
+      "email": "farhan.a@example.com",
+      "blood_group": "B-",
+      "is_organ_donor": false,
+      "donor_category": "Blood",
+      "location": {
+        "lat": 19.037,
+        "lng": 72.861,
+        "address": "Sion West, Mumbai",
+        "pincode": "400022"
+      },
+      "status": "available",
+      "last_donation_date": "2026-01-20",
+      "eligibility_status": "eligible",
+      "total_donations": 6,
+      "badge_title": "Lifesaver Gold",
+      "active_match_request_id": null,
+      "donation_history": [
+        {
+          "donation_id": "don_hist_701",
+          "hospital_name": "Lokmanya Tilak Municipal General Hospital",
+          "date": "2026-01-20",
+          "units": 1,
+          "type": "blood"
+        }
+      ]
+    },
+    {
+      "_id": "donor_6728",
+      "_timestamp": "2026-08-29T16:30:00Z",
+      "_version": "0.1.0",
+      "_actor": "blood_donor",
+      "full_name": "Ananya Sen",
+      "phone": "+91-98190-88990",
+      "email": "ananya.sen@example.com",
+      "blood_group": "AB+",
+      "is_organ_donor": true,
+      "donor_category": "Dual",
+      "location": {
+        "lat": 18.940,
+        "lng": 72.830,
+        "address": "Marine Lines, Mumbai",
+        "pincode": "400020"
+      },
+      "status": "available",
+      "last_donation_date": "2026-06-12",
+      "eligibility_status": "eligible",
+      "total_donations": 1,
+      "badge_title": "Lifesaver Bronze",
+      "active_match_request_id": null,
+      "donation_history": [
+        {
+          "donation_id": "don_hist_801",
+          "hospital_name": "Bombay Hospital",
+          "date": "2026-06-12",
+          "units": 1,
+          "type": "blood"
+        }
+      ]
+    },
+    {
+      "_id": "donor_6729",
+      "_timestamp": "2026-08-29T16:30:00Z",
+      "_version": "0.1.0",
+      "_actor": "blood_donor",
+      "full_name": "Rohan Joshi",
+      "phone": "+91-98223-99001",
+      "email": "rohan.joshi@example.com",
+      "blood_group": "O-",
+      "is_organ_donor": true,
+      "donor_category": "Dual",
+      "location": {
+        "lat": 19.162,
+        "lng": 72.939,
+        "address": "Mulund West, Mumbai",
+        "pincode": "400080"
+      },
+      "status": "available",
+      "last_donation_date": "2026-03-05",
+      "eligibility_status": "eligible",
+      "total_donations": 8,
+      "badge_title": "Hero Platinum",
+      "active_match_request_id": null,
+      "donation_history": [
+        {
+          "donation_id": "don_hist_901",
+          "hospital_name": "Fortis Hospital Mulund",
+          "date": "2026-03-05",
+          "units": 1,
+          "type": "blood"
+        }
+      ]
+    },
+    {
+      "_id": "donor_6730",
+      "_timestamp": "2026-08-29T16:30:00Z",
+      "_version": "0.1.0",
+      "_actor": "blood_donor",
+      "full_name": "Meera Iyer",
+      "phone": "+91-98330-12345",
+      "email": "meera.iyer@example.com",
+      "blood_group": "O+",
+      "is_organ_donor": false,
+      "donor_category": "Blood",
+      "location": {
+        "lat": 19.130,
+        "lng": 72.828,
+        "address": "Andheri West, Mumbai",
+        "pincode": "400058"
+      },
+      "status": "available",
+      "last_donation_date": "2026-05-01",
+      "eligibility_status": "eligible",
+      "total_donations": 4,
+      "badge_title": "Lifesaver Gold",
+      "active_match_request_id": null,
+      "donation_history": [
+        {
+          "donation_id": "don_hist_1001",
+          "hospital_name": "Kokilaben Dhirubhai Ambani Hospital",
+          "date": "2026-05-01",
+          "units": 1,
+          "type": "blood"
+        }
+      ]
+    },
+    {
+      "_id": "donor_6731",
+      "_timestamp": "2026-08-29T16:30:00Z",
+      "_version": "0.1.0",
+      "_actor": "blood_donor",
+      "full_name": "Vikram Sethi",
+      "phone": "+91-98112-23344",
+      "email": "vikram.sethi@example.com",
+      "blood_group": "A+",
+      "is_organ_donor": true,
+      "donor_category": "Dual",
+      "location": {
+        "lat": 18.975,
+        "lng": 72.808,
+        "address": "Breach Candy, Mumbai",
+        "pincode": "400026"
+      },
+      "status": "available",
+      "last_donation_date": "2026-04-12",
+      "eligibility_status": "eligible",
+      "total_donations": 5,
+      "badge_title": "Lifesaver Gold",
+      "active_match_request_id": null,
+      "donation_history": [
+        {
+          "donation_id": "don_hist_1101",
+          "hospital_name": "Breach Candy Hospital",
+          "date": "2026-04-12",
+          "units": 1,
+          "type": "blood"
+        }
+      ]
+    },
+    {
+      "_id": "donor_6732",
+      "_timestamp": "2026-08-29T16:30:00Z",
+      "_version": "0.1.0",
+      "_actor": "blood_donor",
+      "full_name": "Kavita Rao",
+      "phone": "+91-98445-34567",
+      "email": "kavita.rao@example.com",
+      "blood_group": "B+",
+      "is_organ_donor": true,
+      "donor_category": "Dual",
+      "location": {
+        "lat": 19.002,
+        "lng": 72.841,
+        "address": "Parel, Mumbai",
+        "pincode": "400012"
+      },
+      "status": "available",
+      "last_donation_date": "2026-05-18",
+      "eligibility_status": "eligible",
+      "total_donations": 3,
+      "badge_title": "Lifesaver Silver",
+      "active_match_request_id": null,
+      "donation_history": [
+        {
+          "donation_id": "don_hist_1201",
+          "hospital_name": "Gleneagles Global Hospitals",
+          "date": "2026-05-18",
+          "units": 1,
+          "type": "blood"
+        }
+      ]
+    }
+  ],
+  "requests": [
+    {
+      "_id": "req_8812",
+      "_timestamp": "2026-08-29T16:20:00Z",
+      "_version": "0.1.0",
+      "_actor": "hosp_mumbai_01",
+      "request_tracking_number": "REQ-2026-0829-01",
+      "hospital_id": "hosp_mumbai_01",
+      "hospital_name": "Lilavati Hospital & Research Centre",
+      "patient_tracking_number": "DISP-2026-901",
+      "patient_name": "Pooja Verma",
+      "type": "blood",
+      "blood_group_needed": "O+",
+      "organ_needed": null,
+      "units_requested": 2,
+      "units_fulfilled": 0,
+      "urgency": "STAT_CRITICAL",
+      "clinical_indication": "Trauma laparotomy with hemorrhagic shock",
+      "status": "open",
+      "donation_location": {
+        "hospital_id": "hosp_mumbai_01",
+        "hospital_name": "Lilavati Hospital & Research Centre",
+        "department": "Emergency Blood Bank - 2nd Floor",
+        "address": "A-791, Bandra Reclamation, Bandra West, Mumbai",
+        "lat": 19.0522,
+        "lng": 72.8336,
+        "phone": "+91-22-2675-1000"
+      },
+      "matched_donors": []
+    },
+    {
+      "_id": "req_8813",
+      "_timestamp": "2026-08-29T16:10:00Z",
+      "_version": "0.1.0",
+      "_actor": "hosp_mumbai_11",
+      "request_tracking_number": "REQ-2026-0829-02",
+      "hospital_id": "hosp_mumbai_11",
+      "hospital_name": "Lokmanya Tilak Municipal General Hospital (Sion Hospital)",
+      "patient_tracking_number": "CASE-9022",
+      "patient_name": "Siddharth Gaikwad",
+      "type": "blood",
+      "blood_group_needed": "O-",
+      "organ_needed": null,
+      "units_requested": 4,
+      "units_fulfilled": 1,
+      "urgency": "STAT_CRITICAL",
+      "clinical_indication": "Severe vehicular polytrauma and vascular repair",
+      "status": "open",
+      "donation_location": {
+        "hospital_id": "hosp_mumbai_11",
+        "hospital_name": "Lokmanya Tilak Municipal General Hospital",
+        "department": "Trauma Blood Bank - Ground Floor",
+        "address": "Sion West, Mumbai",
+        "lat": 19.0366,
+        "lng": 72.8601,
+        "phone": "+91-22-2407-6381"
+      },
+      "matched_donors": [
+        {
+          "donor_id": "donor_6722",
+          "status": "accepted",
+          "eta_minutes": 12,
+          "travel_mode": "driving"
+        }
+      ]
+    },
+    {
+      "_id": "req_8814",
+      "_timestamp": "2026-08-29T15:30:00Z",
+      "_version": "0.1.0",
+      "_actor": "hosp_mumbai_04",
+      "request_tracking_number": "REQ-2026-0829-03",
+      "hospital_id": "hosp_mumbai_04",
+      "hospital_name": "King Edward Memorial (KEM) Hospital",
+      "patient_tracking_number": "DISP-2026-880",
+      "patient_name": "Manish Rathod",
+      "type": "blood",
+      "blood_group_needed": "AB-",
+      "organ_needed": null,
+      "units_requested": 2,
+      "units_fulfilled": 0,
+      "urgency": "HIGH",
+      "clinical_indication": "Emergency aortic aneurysm resection",
+      "status": "open",
+      "donation_location": {
+        "hospital_id": "hosp_mumbai_04",
+        "hospital_name": "King Edward Memorial (KEM) Hospital",
+        "department": "Main Blood Bank - Ward 4",
+        "address": "Acharya Donde Marg, Parel, Mumbai",
+        "lat": 19.0026,
+        "lng": 72.8423,
+        "phone": "+91-22-2410-7000"
+      },
+      "matched_donors": []
+    },
+    {
+      "_id": "req_8815",
+      "_timestamp": "2026-08-29T14:50:00Z",
+      "_version": "0.1.0",
+      "_actor": "hosp_mumbai_13",
+      "request_tracking_number": "REQ-2026-0829-04",
+      "hospital_id": "hosp_mumbai_13",
+      "hospital_name": "Fortis Hospital Mulund",
+      "patient_tracking_number": "TX-2026-104",
+      "patient_name": "Anil Kapoor",
+      "type": "organ",
+      "blood_group_needed": "O+",
+      "organ_needed": "Kidney",
+      "units_requested": 1,
+      "units_fulfilled": 0,
+      "urgency": "STAT_CRITICAL",
+      "clinical_indication": "Acute end-stage renal failure, ROTTO green corridor matching",
+      "status": "open",
+      "donation_location": {
+        "hospital_id": "hosp_mumbai_13",
+        "hospital_name": "Fortis Hospital Mulund",
+        "department": "Transplant Coordination Center - 3rd Floor",
+        "address": "Mulund Goregaon Link Rd, Bhandup West, Mumbai",
+        "lat": 19.1601,
+        "lng": 72.9372,
+        "phone": "+91-22-4365-4365"
+      },
+      "matched_donors": []
+    }
+  ],
+  "patients": [
+    {
+      "_id": "pat_1092",
+      "_timestamp": "2026-08-29T16:30:00Z",
+      "_version": "0.1.0",
+      "_actor": "orchestrator",
+      "tracking_number": "CASE-9021",
+      "full_name": "Vikram Patel",
+      "age": 54,
+      "gender": "Male",
+      "blood_type": "B+",
+      "severity": "critical",
+      "assigned_hospital_id": "hosp_mumbai_01",
+      "admission_status": "inbound",
+      "reserved_bed_type": "cardiac_icu",
+      "reserved_bay_id": "BAY-C3",
+      "eta_minutes": 4.5,
+      "vitals": {
+        "heart_rate": 118,
+        "respiratory_rate": 24,
+        "systolic_bp": 88,
+        "spo2": 91,
+        "temperature_c": 38.6,
+        "consciousness": "alert"
+      },
+      "news2_score": 9,
+      "chief_complaint": "Acute crushing chest pain",
+      "sbar_brief": "Incoming 54yo male, suspected STEMI, NEWS2 9. Cath lab prep requested."
+    },
+    {
+      "_id": "pat_1093",
+      "_timestamp": "2026-08-29T15:45:00Z",
+      "_version": "0.1.0",
+      "_actor": "orchestrator",
+      "tracking_number": "CASE-9022",
+      "full_name": "Siddharth Gaikwad",
+      "age": 33,
+      "gender": "Male",
+      "blood_type": "O-",
+      "severity": "critical",
+      "assigned_hospital_id": "hosp_mumbai_11",
+      "admission_status": "inbound",
+      "reserved_bed_type": "trauma_icu",
+      "reserved_bay_id": "BAY-T1",
+      "eta_minutes": 3.8,
+      "vitals": {
+        "heart_rate": 130,
+        "respiratory_rate": 28,
+        "systolic_bp": 80,
+        "spo2": 89,
+        "temperature_c": 36.2,
+        "consciousness": "confused"
+      },
+      "news2_score": 11,
+      "chief_complaint": "Polytrauma with massive femoral hemorrhage",
+      "sbar_brief": "Incoming 33yo male, motorcycle collision, NEWS2 11. Red Blanket trauma protocol."
+    },
+    {
+      "_id": "pat_1094",
+      "_timestamp": "2026-08-29T14:15:00Z",
+      "_version": "0.1.0",
+      "_actor": "dr_a_mehta",
+      "tracking_number": "CASE-9023",
+      "full_name": "Kamla Devi",
+      "age": 68,
+      "gender": "Female",
+      "blood_type": "A+",
+      "severity": "critical",
+      "assigned_hospital_id": "hosp_mumbai_03",
+      "admission_status": "admitted",
+      "reserved_bed_type": "neuro_icu",
+      "reserved_bay_id": "BAY-N2",
+      "bed_number": "ICU-NEURO-02",
+      "clinical_notes": "Admitted to Neuro ICU. tPA thrombolysis infused, post-procedure neuro check stable.",
+      "eta_minutes": 0.0,
+      "vitals": {
+        "heart_rate": 84,
+        "respiratory_rate": 18,
+        "systolic_bp": 142,
+        "spo2": 96,
+        "temperature_c": 37.0,
+        "consciousness": "alert"
+      },
+      "news2_score": 3,
+      "chief_complaint": "Acute right-sided hemiplegia and aphasia",
+      "sbar_brief": "68yo female post-thrombolytic therapy for ischemic stroke. Stable neuro ICU observation."
+    },
+    {
+      "_id": "pat_1095",
+      "_timestamp": "2026-08-29T13:30:00Z",
+      "_version": "0.1.0",
+      "_actor": "dr_r_shroff",
+      "tracking_number": "CASE-9018",
+      "full_name": "Rajeshwari Pillai",
+      "age": 42,
+      "gender": "Female",
+      "blood_type": "O+",
+      "severity": "critical",
+      "assigned_hospital_id": "hosp_mumbai_02",
+      "admission_status": "admitted",
+      "reserved_bed_type": "general_er",
+      "reserved_bay_id": "BAY-E4",
+      "bed_number": "ER-OBS-08",
+      "clinical_notes": "Acute exacerbation of bronchial asthma. Nebulized with bronchodilators, SpO2 improved to 97%.",
+      "eta_minutes": 0.0,
+      "vitals": {
+        "heart_rate": 88,
+        "respiratory_rate": 18,
+        "systolic_bp": 124,
+        "spo2": 97,
+        "temperature_c": 37.1,
+        "consciousness": "alert"
+      },
+      "news2_score": 1,
+      "chief_complaint": "Acute shortness of breath and wheezing",
+      "sbar_brief": "42yo female with severe asthma flare. Responding well to inhaled therapy."
+    },
+    {
+      "_id": "pat_1096",
+      "_timestamp": "2026-08-29T12:00:00Z",
+      "_version": "0.1.0",
+      "_actor": "dr_k_vora",
+      "tracking_number": "CASE-9015",
+      "full_name": "Sunil Nambiar",
+      "age": 59,
+      "gender": "Male",
+      "blood_type": "AB+",
+      "severity": "moderate",
+      "assigned_hospital_id": "hosp_mumbai_06",
+      "admission_status": "admitted",
+      "reserved_bed_type": "general_er",
+      "reserved_bay_id": "BAY-E1",
+      "bed_number": "SURG-302",
+      "clinical_notes": "Acute appendicitis confirmed on ultrasound. Laparoscopic appendectomy scheduled.",
+      "eta_minutes": 0.0,
+      "vitals": {
+        "heart_rate": 82,
+        "respiratory_rate": 16,
+        "systolic_bp": 120,
+        "spo2": 99,
+        "temperature_c": 38.2,
+        "consciousness": "alert"
+      },
+      "news2_score": 2,
+      "chief_complaint": "Right lower quadrant abdominal pain and low fever",
+      "sbar_brief": "59yo male with uncomplicated acute appendicitis for OR."
+    },
+    {
+      "_id": "pat_1097",
+      "_timestamp": "2026-08-29T11:15:00Z",
+      "_version": "0.1.0",
+      "_actor": "dr_t_chavan",
+      "tracking_number": "CASE-9010",
+      "full_name": "Arjun Saxena",
+      "age": 28,
+      "gender": "Male",
+      "blood_type": "A-",
+      "severity": "mild",
+      "assigned_hospital_id": "hosp_mumbai_01",
+      "admission_status": "discharged",
+      "reserved_bed_type": "general_er",
+      "reserved_bay_id": "BAY-E6",
+      "bed_number": null,
+      "clinical_notes": "Lateral ankle ligament sprain. Immobilized with air-cast splint, analgesics prescribed, discharged home.",
+      "eta_minutes": 0.0,
+      "vitals": {
+        "heart_rate": 74,
+        "respiratory_rate": 14,
+        "systolic_bp": 118,
+        "spo2": 99,
+        "temperature_c": 36.8,
+        "consciousness": "alert"
+      },
+      "news2_score": 0,
+      "chief_complaint": "Right ankle inversion injury during sport",
+      "sbar_brief": "28yo male sprain. Treated and discharged with outpatient orthopedics follow-up."
+    }
+  ],
+  "issues": [
+    {
+      "_id": "iss_501",
+      "_timestamp": "2026-08-29T14:10:00Z",
+      "_version": "0.1.0",
+      "_actor": "dr_a_mehta",
+      "hospital_id": "hosp_mumbai_01",
+      "hospital_name": "Lilavati Hospital & Research Centre",
+      "category": "equipment",
+      "title": "CT Scanner #2 Offline",
+      "description": "Calibration fault in primary CT gantry; neuro cases redirected to MRI and CT #1.",
+      "severity": "moderate",
+      "status": "investigating",
+      "reported_by": "Dr. A. Mehta",
+      "created_at": "2026-08-29T14:10:00Z",
+      "resolved_at": null
+    },
+    {
+      "_id": "iss_502",
+      "_timestamp": "2026-08-29T13:45:00Z",
+      "_version": "0.1.0",
+      "_actor": "eng_p_sawant",
+      "hospital_id": "hosp_mumbai_04",
+      "hospital_name": "King Edward Memorial (KEM) Hospital",
+      "category": "facility",
+      "title": "Oxygen Manifold Secondary Line Pressure Drop",
+      "description": "Minor pressure drop detected in secondary manifold in Wing C. Primary supply stable; biomedical engineer dispatched.",
+      "severity": "critical",
+      "status": "investigating",
+      "reported_by": "Biomed Engineer P. Sawant",
+      "created_at": "2026-08-29T13:45:00Z",
+      "resolved_at": null
+    },
+    {
+      "_id": "iss_503",
+      "_timestamp": "2026-08-29T11:20:00Z",
+      "_version": "0.1.0",
+      "_actor": "ops_s_rane",
+      "hospital_id": "hosp_mumbai_07",
+      "hospital_name": "Kokilaben Dhirubhai Ambani Hospital",
+      "category": "staffing",
+      "title": "ICU Full Capacity Diversion Active",
+      "description": "Cardiac ICU at 100% occupancy following triple bypass surge. Auto-rerouting incoming critical cardiac cases.",
+      "severity": "critical",
+      "status": "investigating",
+      "reported_by": "ER Ops Lead S. Rane",
+      "created_at": "2026-08-29T11:20:00Z",
+      "resolved_at": null
+    },
+    {
+      "_id": "iss_504",
+      "_timestamp": "2026-08-29T09:30:00Z",
+      "_version": "0.1.0",
+      "_actor": "eng_v_ghadge",
+      "hospital_id": "hosp_mumbai_11",
+      "hospital_name": "Lokmanya Tilak Municipal General Hospital (Sion Hospital)",
+      "category": "equipment",
+      "title": "Trauma Bay 2 Defibrillator Battery Replacement",
+      "description": "Routine preventative maintenance alert: Bay 2 LifePak battery cycle reached 90%. Backup unit deployed.",
+      "severity": "low",
+      "status": "resolved",
+      "reported_by": "Biomedical Team V. Ghadge",
+      "created_at": "2026-08-29T09:30:00Z",
+      "resolved_at": "2026-08-29T11:00:00Z"
+    },
+    {
+      "_id": "iss_505",
+      "_timestamp": "2026-08-29T08:00:00Z",
+      "_version": "0.1.0",
+      "_actor": "pharm_n_sharma",
+      "hospital_id": "hosp_mumbai_06",
+      "hospital_name": "Nanavati Max Super Speciality Hospital",
+      "category": "supplies",
+      "title": "O- Blood Stock Threshold Warning",
+      "description": "Emergency blood bank O- negative units dropped below reserve threshold of 6 units. Automated donor callout triggered.",
+      "severity": "moderate",
+      "status": "investigating",
+      "reported_by": "Chief Pharmacist N. Sharma",
+      "created_at": "2026-08-29T08:00:00Z",
+      "resolved_at": null
+    }
+  ],
+  "inventory": [
+    {
+      "_id": "inv_801",
+      "_timestamp": "2026-08-29T16:00:00Z",
+      "_version": "0.1.0",
+      "_actor": "inventory_manager",
+      "hospital_id": "hosp_mumbai_01",
+      "category": "blood_bank",
+      "item_name": "O- Packed Red Blood Cells",
+      "current_stock": 2,
+      "minimum_threshold": 6,
+      "unit": "units",
+      "is_low_stock": true,
+      "last_updated": "2026-08-29T16:00:00Z"
+    },
+    {
+      "_id": "inv_802",
+      "_timestamp": "2026-08-29T16:00:00Z",
+      "_version": "0.1.0",
+      "_actor": "inventory_manager",
+      "hospital_id": "hosp_mumbai_01",
+      "category": "blood_bank",
+      "item_name": "O+ Whole Blood Units",
+      "current_stock": 14,
+      "minimum_threshold": 8,
+      "unit": "units",
+      "is_low_stock": false,
+      "last_updated": "2026-08-29T16:00:00Z"
+    },
+    {
+      "_id": "inv_803",
+      "_timestamp": "2026-08-29T16:00:00Z",
+      "_version": "0.1.0",
+      "_actor": "inventory_manager",
+      "hospital_id": "hosp_mumbai_01",
+      "category": "medicine",
+      "item_name": "Epinephrine 1mg/mL Injectable",
+      "current_stock": 28,
+      "minimum_threshold": 15,
+      "unit": "vials",
+      "is_low_stock": false,
+      "last_updated": "2026-08-29T16:00:00Z"
+    },
+    {
+      "_id": "inv_804",
+      "_timestamp": "2026-08-29T16:00:00Z",
+      "_version": "0.1.0",
+      "_actor": "inventory_manager",
+      "hospital_id": "hosp_mumbai_01",
+      "category": "medicine",
+      "item_name": "Morphine Sulfate 10mg/mL",
+      "current_stock": 4,
+      "minimum_threshold": 10,
+      "unit": "ampoules",
+      "is_low_stock": true,
+      "last_updated": "2026-08-29T16:00:00Z"
+    },
+    {
+      "_id": "inv_805",
+      "_timestamp": "2026-08-29T16:00:00Z",
+      "_version": "0.1.0",
+      "_actor": "inventory_manager",
+      "hospital_id": "hosp_mumbai_11",
+      "category": "blood_bank",
+      "item_name": "O- Packed Red Blood Cells",
+      "current_stock": 1,
+      "minimum_threshold": 8,
+      "unit": "units",
+      "is_low_stock": true,
+      "last_updated": "2026-08-29T16:00:00Z"
+    },
+    {
+      "_id": "inv_806",
+      "_timestamp": "2026-08-29T16:00:00Z",
+      "_version": "0.1.0",
+      "_actor": "inventory_manager",
+      "hospital_id": "hosp_mumbai_11",
+      "category": "blood_bank",
+      "item_name": "B+ Fresh Frozen Plasma",
+      "current_stock": 18,
+      "minimum_threshold": 10,
+      "unit": "units",
+      "is_low_stock": false,
+      "last_updated": "2026-08-29T16:00:00Z"
+    },
+    {
+      "_id": "inv_807",
+      "_timestamp": "2026-08-29T16:00:00Z",
+      "_version": "0.1.0",
+      "_actor": "inventory_manager",
+      "hospital_id": "hosp_mumbai_04",
+      "category": "blood_bank",
+      "item_name": "AB- Platelet Concentrate",
+      "current_stock": 2,
+      "minimum_threshold": 5,
+      "unit": "units",
+      "is_low_stock": true,
+      "last_updated": "2026-08-29T16:00:00Z"
+    },
+    {
+      "_id": "inv_808",
+      "_timestamp": "2026-08-29T16:00:00Z",
+      "_version": "0.1.0",
+      "_actor": "inventory_manager",
+      "hospital_id": "hosp_mumbai_04",
+      "category": "medicine",
+      "item_name": "Tenecteplase 40mg Vials (Thrombolytic)",
+      "current_stock": 3,
+      "minimum_threshold": 6,
+      "unit": "vials",
+      "is_low_stock": true,
+      "last_updated": "2026-08-29T16:00:00Z"
+    },
+    {
+      "_id": "inv_809",
+      "_timestamp": "2026-08-29T16:00:00Z",
+      "_version": "0.1.0",
+      "_actor": "inventory_manager",
+      "hospital_id": "hosp_mumbai_02",
+      "category": "medicine",
+      "item_name": "Heparin Sodium 5000 IU/mL",
+      "current_stock": 45,
+      "minimum_threshold": 20,
+      "unit": "vials",
+      "is_low_stock": false,
+      "last_updated": "2026-08-29T16:00:00Z"
+    },
+    {
+      "_id": "inv_810",
+      "_timestamp": "2026-08-29T16:00:00Z",
+      "_version": "0.1.0",
+      "_actor": "inventory_manager",
+      "hospital_id": "hosp_mumbai_03",
+      "category": "equipment",
+      "item_name": "Adult Defibrillator Electrode Pads",
+      "current_stock": 16,
+      "minimum_threshold": 8,
+      "unit": "pairs",
+      "is_low_stock": false,
+      "last_updated": "2026-08-29T16:00:00Z"
+    },
+    {
+      "_id": "inv_811",
+      "_timestamp": "2026-08-29T16:00:00Z",
+      "_version": "0.1.0",
+      "_actor": "inventory_manager",
+      "hospital_id": "hosp_mumbai_06",
+      "category": "medicine",
+      "item_name": "Norepinephrine 4mg/4mL Ampoules",
+      "current_stock": 22,
+      "minimum_threshold": 12,
+      "unit": "ampoules",
+      "is_low_stock": false,
+      "last_updated": "2026-08-29T16:00:00Z"
+    },
+    {
+      "_id": "inv_812",
+      "_timestamp": "2026-08-29T16:00:00Z",
+      "_version": "0.1.0",
+      "_actor": "inventory_manager",
+      "hospital_id": "hosp_mumbai_07",
+      "category": "equipment",
+      "item_name": "Closed Circuit Ventilator Tubing Sets",
+      "current_stock": 8,
+      "minimum_threshold": 15,
+      "unit": "sets",
+      "is_low_stock": true,
+      "last_updated": "2026-08-29T16:00:00Z"
+    },
+    {
+      "_id": "inv_813",
+      "_timestamp": "2026-08-29T16:00:00Z",
+      "_version": "0.1.0",
+      "_actor": "inventory_manager",
+      "hospital_id": "hosp_mumbai_08",
+      "category": "blood_bank",
+      "item_name": "A+ Packed Red Blood Cells",
+      "current_stock": 24,
+      "minimum_threshold": 10,
+      "unit": "units",
+      "is_low_stock": false,
+      "last_updated": "2026-08-29T16:00:00Z"
+    },
+    {
+      "_id": "inv_814",
+      "_timestamp": "2026-08-29T16:00:00Z",
+      "_version": "0.1.0",
+      "_actor": "inventory_manager",
+      "hospital_id": "hosp_mumbai_13",
+      "category": "medicine",
+      "item_name": "Tranexamic Acid 500mg Vials",
+      "current_stock": 35,
+      "minimum_threshold": 15,
+      "unit": "vials",
+      "is_low_stock": false,
+      "last_updated": "2026-08-29T16:00:00Z"
+    }
+  ],
+  "reports": [
+    {
+      "_id": "rep_2026_0829",
+      "_timestamp": "2026-08-29T16:45:00Z",
+      "_version": "0.1.0",
+      "_actor": "gemini-3.5-flash",
+      "date": "2026-08-29",
+      "model_used": "gemini-3.5-flash",
+      "headline": "Mumbai Metro Regional Emergency Dispatch Intelligence Report",
+      "summary_markdown": "### Executive Briefing\n- **Incident Volume**: 48 total dispatches across Mumbai West and South. Cardiac emergencies accounted for 42% of critical cases.\n- **SLA Performance**: Average time to hospital bed assignment was 44.5 seconds with 97.2% compliance.\n- **Capacity Constraints**: Lilavati Hospital reached 85% ICU load at 15:00 UTC; 1 case automatically rerouted under Tier 1 auto-dispatch.\n- **Blood Bank Status**: O- inventory flagged low across 2 facilities; 3 donor callout requests successfully matched.",
+      "key_metrics": {
+        "total_cases": 48,
+        "critical_cases": 7,
+        "sla_compliance_pct": 97.2,
+        "auto_reroutes": 1
+      }
+    },
+    {
+      "_id": "rep_2026_0828",
+      "_timestamp": "2026-08-28T23:59:00Z",
+      "_version": "0.1.0",
+      "_actor": "gemini-3.5-flash",
+      "date": "2026-08-28",
+      "model_used": "gemini-3.5-flash",
+      "headline": "Daily Emergency Healthcare Logistics Summary - Greater Mumbai",
+      "summary_markdown": "### 24-Hour Regional Overview\n- **Total Dispatches**: 56 incidents managed autonomously by multi-agent dispatch mesh.\n- **Trauma Load**: Sion Hospital handled 14 major trauma admissions during peak monsoon evening commute.\n- **Donor Network**: 6 blood units coordinated in real-time across Bandra and Parel hubs.\n- **System Uptime**: 100% operational availability with 0 human dispatcher bottlenecks.",
+      "key_metrics": {
+        "total_cases": 56,
+        "critical_cases": 9,
+        "sla_compliance_pct": 98.4,
+        "auto_reroutes": 2
+      }
+    }
+  ]
+}

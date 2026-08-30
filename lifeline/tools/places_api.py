@@ -50,7 +50,8 @@ def fetch_hospitals_overpass(city: str = DEFAULT_CITY, timeout: int = 30) -> lis
 out center;
 """
 
-    resp = requests.post(OVERPASS_URL, data={"data": query}, timeout=timeout + 5)
+    headers = {"User-Agent": "LifeLineAgent/0.1.0 (emergency-dispatch-agent)"}
+    resp = requests.post(OVERPASS_URL, data={"data": query}, headers=headers, timeout=timeout + 5)
     resp.raise_for_status()
     elements = resp.json().get("elements", [])
 

@@ -1,0 +1,63 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: lifeline-agent
+  labels:
+    cloud.googleapis.com/location: us-central1
+    app: lifeline-agent
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/description: "LifeLine Agent Autonomous Emergency Dispatch Service"
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "10"
+        run.googleapis.com/cpu-throttling: "true"
+        run.googleapis.com/startup-cpu-boost: "true"
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 300
+      containers:
+        - image: gcr.io/PROJECT_ID/lifeline-agent:latest
+          name: lifeline-agent
+          ports:
+            - name: http1
+              containerPort: 8080
+          resources:
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          env:
+            - name: PORT
+              value: "8080"
+            - name: HOST
+              value: "0.0.0.0"
+            - name: DEMO_AUTH_MODE
+              value: "true"
+            - name: DEMO_CITY
+              value: "mumbai"
+            - name: FIRESTORE_COLLECTION
+              value: "dispatch_cases"
+            - name: FIRESTORE_PROJECT_ID
+              value: "PROJECT_ID"
+            - name: GOOGLE_API_KEY
+              value: ""
+            - name: VITE_API_BASE_URL
+              value: "http://localhost:8000"
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 3

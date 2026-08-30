@@ -5,16 +5,16 @@ Loads the service account from the admin encrypted config (set via
 `lifeline admin`) or from the GOOGLE_APPLICATION_CREDENTIALS env var
 (standard GCP default credentials for Cloud Run).
 
-Usage anywhere in the app:
-    from lifeline.firebase import db, auth
-    db.collection("dispatch_cases").add({...})
-    auth.verify_id_token(id_token)
+Gracefully falls back to offline/dev mode if credentials are not configured yet.
 """
 
 import os
 import json
+import logging
 import firebase_admin
 from firebase_admin import credentials, firestore, auth as firebase_auth
+
+logger = logging.getLogger(__name__)
 
 _app = None
 db = None
@@ -37,39 +37,58 @@ def _init():
             _app = firebase_admin.initialize_app(cred)
             db = firestore.client()
             auth = firebase_auth
+            logger.info("Firebase initialized via admin panel config.")
             return
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug(f"Option 1 Firebase init skipped: {e}")
 
     # ── Option 2: path to service account file via env var ────────────────────
-    sa_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
-    if sa_path and os.path.exists(sa_path):
-        cred = credentials.Certificate(sa_path)
-        _app = firebase_admin.initialize_app(cred)
+    try:
+        sa_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
+        if sa_path and os.path.exists(sa_path):
+            cred = credentials.Certificate(sa_path)
+            _app = firebase_admin.initialize_app(cred)
+            db = firestore.client()
+            auth = firebase_auth
+            logger.info("Firebase initialized via GOOGLE_APPLICATION_CREDENTIALS.")
+            return
+    except Exception as e:
+        logger.debug(f"Option 2 Firebase init skipped: {e}")
+
+    # ── Option 3: GCP default credentials (Cloud Run, GKE, etc.) ─────────────
+    try:
+        _app = firebase_admin.initialize_app()
         db = firestore.client()
         auth = firebase_auth
+        logger.info("Firebase initialized via GCP Application Default Credentials.")
         return
+    except Exception as e:
+        logger.warning(
+            "Firebase credentials not detected. Running in offline/dev audit mode. "
+            "Configure via 'lifeline admin' to enable live Firestore."
+        )
+        db = None
+        auth = None
 
-    # ── Option 3: GCP default credentials (Cloud Run, Cloud Build, etc.) ─────
-    _app = firebase_admin.initialize_app()
-    db = firestore.client()
-    auth = firebase_auth
 
-
-# Initialise on import so db/auth are immediately available
-_init()
+# Safe initialise on import
+try:
+    _init()
+except Exception as e:
+    logger.warning(f"Firebase background init deferred: {e}")
+    db = None
+    auth = None
 
 
 def get_db():
-    """Return the Firestore client (initialises if needed)."""
+    """Return the Firestore client or None if offline."""
     if db is None:
         _init()
     return db
 
 
 def get_auth():
-    """Return the Firebase Auth client (initialises if needed)."""
+    """Return the Firebase Auth client or None if offline."""
     if auth is None:
         _init()
     return auth
-

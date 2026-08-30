@@ -8,11 +8,11 @@ just vibes — to classify severity and required specialty.
 """
 
 import json
-import asyncio
 from google.adk.agents import LlmAgent
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types as genai_types
+from lifeline.async_utils import run_async
 from lifeline.models import AGENT_MODELS
 from lifeline.schemas import TriageInput, TriageOutput
 
@@ -72,14 +72,14 @@ Output ONLY a valid JSON object with keys:
 """
 
 
-# ── ADK Agent ─────────────────────────────────────────────────────────────────
-triage_agent = LlmAgent(
-    name="triage_agent",
-    model=AGENT_MODELS["triage_agent"],
-    instruction=TRIAGE_SYSTEM_PROMPT,
-    output_schema=TriageOutput,
-    output_key="triage_result",
-)
+def _get_triage_agent():
+    return LlmAgent(
+        name="triage_agent",
+        model=AGENT_MODELS["triage_agent"],
+        instruction=TRIAGE_SYSTEM_PROMPT,
+        output_schema=TriageOutput,
+        output_key="triage_result",
+    )
 
 
 def run_triage(triage_input: TriageInput) -> TriageOutput:
@@ -88,46 +88,72 @@ def run_triage(triage_input: TriageInput) -> TriageOutput:
     Computes a NEWS2 score, builds the prompt, runs the agent,
     and returns a fully-typed TriageOutput.
     """
-    session_service = InMemorySessionService()
-    runner = Runner(
-        agent=triage_agent,
-        app_name=APP_NAME,
-        session_service=session_service,
-    )
-
-    session = asyncio.get_event_loop().run_until_complete(
-        session_service.create_session(app_name=APP_NAME, user_id="dispatch")
-    )
-
-    prompt_text = _build_triage_prompt(triage_input)
-    user_message = genai_types.Content(
-        role="user",
-        parts=[genai_types.Part(text=prompt_text)],
-    )
-
-    final_response = None
-    for event in runner.run(
-        user_id="dispatch",
-        session_id=session.id,
-        new_message=user_message,
-    ):
-        if event.is_final_response() and event.content:
-            final_response = event.content.parts[0].text
-            break
-
-    if not final_response:
-        raise RuntimeError("Triage agent returned no response")
-
-    # Parse the JSON output into the Pydantic schema
-    # ADK with output_schema may return structured data directly; handle both
     try:
-        data = json.loads(final_response)
-    except json.JSONDecodeError:
-        # Strip markdown code fences if present
-        cleaned = final_response.strip().strip("```json").strip("```").strip()
-        data = json.loads(cleaned)
+        agent = _get_triage_agent()
+        session_service = InMemorySessionService()
+        runner = Runner(
+            agent=agent,
+            app_name=APP_NAME,
+            session_service=session_service,
+        )
 
-    return TriageOutput(**data)
+        session = run_async(
+            session_service.create_session(app_name=APP_NAME, user_id="dispatch")
+        )
+
+        prompt_text = _build_triage_prompt(triage_input)
+        user_message = genai_types.Content(
+            role="user",
+            parts=[genai_types.Part(text=prompt_text)],
+        )
+
+        final_response = None
+        for event in runner.run(
+            user_id="dispatch",
+            session_id=session.id,
+            new_message=user_message,
+        ):
+            if event.is_final_response() and event.content:
+                final_response = event.content.parts[0].text
+                break
+
+        if final_response:
+            try:
+                data = json.loads(final_response)
+            except json.JSONDecodeError:
+                cleaned = final_response.strip().strip("```json").strip("```").strip()
+                data = json.loads(cleaned)
+            return TriageOutput(**data)
+    except Exception as ex:
+        pass  # Fallback to deterministic clinical rule-based triage
+
+    # ── Deterministic Clinical Fallback (NEWS2 Grounded) ──────────────────────
+    score = triage_input.news2_score.score
+    risk = triage_input.news2_score.risk_band.lower()
+    complaint = (triage_input.chief_complaint or "").lower()
+    injury = (triage_input.mechanism_of_injury or "").lower()
+
+    if score >= 7 or "chest pain" in complaint or "unresponsive" in str(triage_input.vitals.consciousness):
+        severity = "critical"
+    elif score >= 5 or risk == "medium":
+        severity = "moderate"
+    else:
+        severity = "mild"
+
+    if any(k in complaint or k in injury for k in ("chest", "cardiac", "heart", "palpitation")):
+        specialty = "cardiac"
+    elif any(k in complaint or k in injury for k in ("fall", "crash", "bleed", "fracture", "collision", "trauma")):
+        specialty = "trauma"
+    elif triage_input.patient_age <= 16:
+        specialty = "pediatric"
+    else:
+        specialty = "general"
+
+    return TriageOutput(
+        severity_label=severity,
+        required_specialty=specialty,
+        notes=f"Clinical Rule Engine: NEWS2 score {score}/20 ({risk.upper()}). Severity classified as {severity.upper()} for {specialty.capitalize()} care.",
+    )
 
 
 

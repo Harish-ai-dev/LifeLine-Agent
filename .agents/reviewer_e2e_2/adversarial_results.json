@@ -1,0 +1,218 @@
+{
+  "model_compliance": {
+    "Triage Agent Model": {
+      "passed": true,
+      "details": "TRIAGE_MODEL=gemini-3.1-pro"
+    },
+    "Default Model (Bed, Brief, Report)": {
+      "passed": true,
+      "details": "DEFAULT_MODEL=gemini-3.5-flash"
+    },
+    "Fallback Model": {
+      "passed": true,
+      "details": "FALLBACK_MODEL=gemini-3.7-flash"
+    },
+    "AGENT_MODELS Mapping Triage": {
+      "passed": true,
+      "details": "triage_agent=gemini-3.1-pro"
+    },
+    "AGENT_MODELS Mapping Bed-Matching": {
+      "passed": true,
+      "details": "bed_matching_agent=gemini-3.5-flash"
+    },
+    "AGENT_MODELS Mapping Routing": {
+      "passed": true,
+      "details": "routing_agent=gemini-3.5-flash"
+    },
+    "AGENT_MODELS Mapping Briefing": {
+      "passed": true,
+      "details": "briefing_agent=gemini-3.5-flash"
+    },
+    "AGENT_MODELS Mapping Reporting": {
+      "passed": true,
+      "details": "reporting_agent=gemini-3.5-flash"
+    },
+    "DailyReportResponse Default Model": {
+      "passed": true,
+      "details": "model_used=gemini-3.5-flash"
+    }
+  },
+  "role_strings": {
+    "UserRole Schema Literal": {
+      "passed": true,
+      "details": "schema_roles={'blood_donor', 'government_authority', 'hospital_staff'}"
+    },
+    "Auth Route VALID_ROLES": {
+      "passed": true,
+      "details": "VALID_ROLES={'blood_donor', 'government_authority', 'hospital_staff'}"
+    },
+    "Reject invalid role 'admin'": {
+      "passed": true,
+      "details": "status=422"
+    },
+    "Reject invalid role 'superadmin'": {
+      "passed": true,
+      "details": "status=422"
+    },
+    "Reject invalid role 'donor'": {
+      "passed": true,
+      "details": "status=422"
+    },
+    "Reject invalid role 'doctor'": {
+      "passed": true,
+      "details": "status=422"
+    },
+    "Reject invalid role 'hospital'": {
+      "passed": true,
+      "details": "status=422"
+    },
+    "Reject invalid role 'government'": {
+      "passed": true,
+      "details": "status=422"
+    },
+    "Reject invalid role 'gov_authority'": {
+      "passed": true,
+      "details": "status=422"
+    },
+    "Reject invalid role 'blood-donor'": {
+      "passed": true,
+      "details": "status=422"
+    },
+    "Reject invalid role ''": {
+      "passed": true,
+      "details": "status=422"
+    }
+  },
+  "mock_token_format": {
+    "Token generation for blood_donor": {
+      "passed": true,
+      "details": "token=lifeline_mock_blood_donor_usr_valid_user"
+    },
+    "Token verification for blood_donor": {
+      "passed": true,
+      "details": "user={'id': 'usr_valid_user', 'username': 'valid_user', 'role': 'blood_donor', 'facility_id': None, 'facility_name': None}"
+    },
+    "Token generation for government_authority": {
+      "passed": true,
+      "details": "token=lifeline_mock_government_authority_usr_valid_user"
+    },
+    "Token verification for government_authority": {
+      "passed": true,
+      "details": "user={'id': 'usr_valid_user', 'username': 'valid_user', 'role': 'government_authority', 'facility_id': None, 'facility_name': None}"
+    },
+    "Token generation for hospital_staff": {
+      "passed": true,
+      "details": "token=lifeline_mock_hospital_staff_usr_valid_user"
+    },
+    "Token verification for hospital_staff": {
+      "passed": true,
+      "details": "user={'id': 'usr_valid_user', 'username': 'valid_user', 'role': 'hospital_staff', 'facility_id': 'hosp_mumbai_01', 'facility_name': 'Lilavati Hospital & Research Centre'}"
+    },
+    "Adversarial token: No Bearer Prefix": {
+      "passed": true,
+      "details": "status=401, body={'detail': \"Missing or malformed Authorization header. Expected 'Bearer <token>'\", 'code': 'UNAUTHORIZED'}"
+    },
+    "Adversarial token: Invalid Prefix": {
+      "passed": true,
+      "details": "status=401, body={'detail': \"Invalid mock token format. Expected 'lifeline_mock_<role>_<uid>'\", 'code': 'UNAUTHORIZED'}"
+    },
+    "Adversarial token: Unknown Role in Token": {
+      "passed": true,
+      "details": "status=401, body={'detail': 'Unknown role in token payload.', 'code': 'UNAUTHORIZED'}"
+    },
+    "Adversarial token: Malformed Short Token": {
+      "passed": true,
+      "details": "status=401, body={'detail': \"Invalid mock token format. Expected 'lifeline_mock_<role>_<uid>'\", 'code': 'UNAUTHORIZED'}"
+    },
+    "Adversarial token: Empty Bearer": {
+      "passed": true,
+      "details": "status=401, body={'detail': \"Invalid mock token format. Expected 'lifeline_mock_<role>_<uid>'\", 'code': 'UNAUTHORIZED'}"
+    },
+    "Adversarial token: No Header": {
+      "passed": true,
+      "details": "status=401, body={'detail': \"Missing or malformed Authorization header. Expected 'Bearer <token>'\", 'code': 'UNAUTHORIZED'}"
+    }
+  },
+  "error_response_consistency": {
+    "400 Bad Request (Invalid Query)": {
+      "passed": true,
+      "details": "status=400, code=BAD_REQUEST, detail=Query string cannot be empty"
+    },
+    "401 Unauthorized (Missing Token)": {
+      "passed": true,
+      "details": "status=401, code=UNAUTHORIZED, detail=Missing or malformed Authorization header. Expected 'Bearer <token>'"
+    },
+    "404 Not Found (Missing Donor)": {
+      "passed": true,
+      "details": "status=404, code=RESOURCE_NOT_FOUND, detail=Donor with ID 'donor_ghost_9999' not found"
+    },
+    "404 Not Found (Missing Patient)": {
+      "passed": true,
+      "details": "status=404, code=RESOURCE_NOT_FOUND, detail=Patient record 'pat_ghost_9999' not found"
+    },
+    "404 Not Found (Missing Issue)": {
+      "passed": true,
+      "details": "status=404, code=RESOURCE_NOT_FOUND, detail=Issue with ID 'iss_ghost_9999' not found"
+    },
+    "404 Not Found (Missing Inventory)": {
+      "passed": true,
+      "details": "status=404, code=RESOURCE_NOT_FOUND, detail=Inventory item with ID 'inv_ghost_9999' not found"
+    },
+    "404 Not Found (Missing Request Respond)": {
+      "passed": true,
+      "details": "status=404, code=RESOURCE_NOT_FOUND, detail=Resource request with ID 'req_ghost_9999' not found"
+    },
+    "422 Validation Error (Missing required fields)": {
+      "passed": true,
+      "details": "status=422, code=VALIDATION_ERROR, detail=4 validation errors:\n  {'type': 'missing', 'loc': ('body', 'phone'), 'msg': 'Field required', 'input': {'full_name': 'Incomplete'}}\n  {'type': 'missing', 'loc': ('body', 'email'), 'msg': 'Field required', 'input': {'full_name': 'Incomplete'}}\n  {'type': 'missing', 'loc': ('body', 'blood_group'), 'msg': 'Field required', 'input': {'full_name': 'Incomplete'}}\n  {'type': 'missing', 'loc': ('body', 'location'), 'msg': 'Field required', 'input': {'full_name': 'Incomplete'}}\n\n  File \"c:\\Users\\shado\\Documents\\GitHub\\ LifeLine Agent\\lifeline\\routes\\donors.py\", line 12, in register_donor\n    POST /donors"
+    },
+    "422 Validation Error (Invalid Vitals Schema)": {
+      "passed": true,
+      "details": "status=422, code=VALIDATION_ERROR, detail=1 validation error:\n  {'type': 'literal_error', 'loc': ('body', 'admission_status'), 'msg': \"Input should be 'inbound', 'admitted', 'transferred' or 'discharged'\", 'input': 'INVALID_STATUS', 'ctx': {'expected': \"'inbound', 'admitted', 'transferred' or 'discharged'\"}}\n\n  File \"c:\\Users\\shado\\Documents\\GitHub\\ LifeLine Agent\\lifeline\\routes\\patients.py\", line 52, in update_patient\n    PATCH /patients/{id}"
+    },
+    "409 Conflict (Request already fulfilled)": {
+      "passed": true,
+      "details": "status=409, body={'detail': \"Request 'req_34e958' is already fulfilled\", 'code': 'CONFLICT'}"
+    }
+  },
+  "offline_resilience": {
+    "Triage Agent offline fallback": {
+      "passed": true,
+      "details": "out=severity_label='critical' required_specialty='cardiac' notes='Clinical Rule Engine: NEWS2 score 9/20 (HIGH). Severity classified as CRITICAL for Cardiac care.'"
+    },
+    "Bed-Matching Agent offline fallback": {
+      "passed": true,
+      "details": "hospital=Lilavati Hospital & Research Centre"
+    },
+    "Routing Agent fallback": {
+      "passed": true,
+      "details": "routing=eta_minutes=2.3 distance_km=1.09 route_summary='1.09 km drive \u00b7 approx 2.3 min by road'"
+    },
+    "Briefing Agent fallback": {
+      "passed": true,
+      "details": "brief=INCOMING EN ROUTE to Lilavati Hospital & Research Centre: 54yo patient presenting with Acute crushing chest pain. Triage classified as CRITICAL (cardiac). Vitals: HR 118, BP 88, SpO2 91%. ETA is approximately 2.3 minutes. Please prepare receiving resuscitation bay."
+    },
+    "Daily Report offline fallback": {
+      "passed": true,
+      "details": "headline=Mumbai Metro Regional Emergency Dispatch Intelligence Report"
+    },
+    "Report Query offline fallback": {
+      "passed": true,
+      "details": "answer=Based on current network telemetry, Lilavati Hospital (1 available) is experiencing tight ICU capacity. In contrast, Breach Candy and KEM Hospital have 4 and 6 open beds."
+    },
+    "DataStore in-memory auto-seed": {
+      "passed": true,
+      "details": "counts: hosp=14, donors=12"
+    }
+  },
+  "integrity_checks": {
+    "NEWS2 deterministic engine calculation": {
+      "passed": true,
+      "details": "low=0, high=17"
+    },
+    "Transfer Reroute selects alternative hospital": {
+      "passed": true,
+      "details": "prev=Lilavati Hospital & Research Centre, dest=P. D. Hinduja National Hospital & Medical Research Centre"
+    }
+  }
+}

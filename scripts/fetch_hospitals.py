@@ -1,15 +1,15 @@
 """
 Run once on Day 1: pulls real hospitals for the locked demo city
-(see docs/03-decision-log.md) via Google Places API, saves raw results.
-Usage: python3 scripts/fetch_hospitals.py
+via OpenStreetMap Overpass API, saves raw results.
+Usage: python scripts/fetch_hospitals.py
 """
 import json
-from src.tools.places_api import search_hospitals
+from lifeline.tools.places_api import fetch_hospitals_overpass
 
-DEMO_CITY = "mumbai"  # From docs/03-decision-log.md
+DEMO_CITY = "mumbai"
 
 if __name__ == "__main__":
-    hospitals = search_hospitals(DEMO_CITY, max_results=10)
-    with open("data/hospitals_raw.json", "w") as f:
+    hospitals = fetch_hospitals_overpass(DEMO_CITY)
+    with open("data/hospitals_raw.json", "w", encoding="utf-8") as f:
         json.dump(hospitals, f, indent=2)
     print(f"Saved {len(hospitals)} hospitals to data/hospitals_raw.json")
