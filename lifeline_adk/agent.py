@@ -4,11 +4,11 @@ LifeLine Agent â€” ADK Web entry point.
 Exposes the real multi-level dispatch pipeline to `adk web` so the hierarchy
 you see in the dev UI matches exactly what runs in production:
 
-  LifeLineOrchestrator  (root, gemini-3.5-flash)
-  â”œâ”€â”€ TriageAgent        (gemini-3.1-pro)  â€” NEWS2 + severity classification
-  â”œâ”€â”€ BedMatchingAgent   (gemini-3.5-flash) â€” hospital selection + OSRM ETA
-  â”œâ”€â”€ RoutingAgent       (gemini-3.5-flash) â€” driving directions
-  â””â”€â”€ BriefingAgent      (gemini-3.5-flash) â€” SBAR pre-arrival handoff note
+  LifeLineOrchestrator  (root, gemini-3.7-flash)
+  â”œâ”€â”€ TriageAgent        (gemini-3.7-flash)  â€” NEWS2 + severity classification
+  â”œâ”€â”€ BedMatchingAgent   (gemini-3.7-flash) â€” hospital selection + OSRM ETA
+  â”œâ”€â”€ RoutingAgent       (gemini-3.7-flash) â€” driving directions
+  â””â”€â”€ BriefingAgent      (gemini-3.7-flash) â€” SBAR pre-arrival handoff note
 
 All tools call the real, tested backend functions.
 No Google Search, no URL context, no duplicate logic.
@@ -90,7 +90,7 @@ def run_triage_tool(
     mechanism_of_injury: str = "",
 ) -> dict:
     """
-    Run the Triage Agent (gemini-3.1-pro) to classify severity and required specialty.
+    Run the Triage Agent (gemini-3.7-flash) to classify severity and required specialty.
 
     Args:
         patient_age: Age in years.
@@ -132,7 +132,7 @@ def run_bed_matching_tool(
     patient_lng: float,
 ) -> dict:
     """
-    Run the Bed-Matching Agent (gemini-3.5-flash) to select the best hospital.
+    Run the Bed-Matching Agent (gemini-3.7-flash) to select the best hospital.
 
     Args:
         severity_label: 'mild', 'moderate', or 'critical'.
@@ -226,13 +226,13 @@ def run_briefing_tool(
 
 triage_agent = LlmAgent(
     name="TriageAgent",
-    model=TRIAGE_MODEL,   # gemini-3.1-pro â€” clinical reasoning
+    model=TRIAGE_MODEL,   # gemini-3.7-flash â€” clinical reasoning
     description=(
         "Classifies patient severity and required specialty using real NEWS2 clinical "
-        "scoring. Uses gemini-3.1-pro per docs/03-decision-log.md."
+        "scoring. Uses gemini-3.7-flash per docs/03-decision-log.md."
     ),
     instruction="""\
-You are the LifeLine Triage Agent (gemini-3.1-pro).
+You are the LifeLine Triage Agent (gemini-3.7-flash).
 Given a patient case:
 1. Call compute_news2 with vitals to get the real clinical NEWS2 score.
 2. Call run_triage_tool with all patient details for severity and specialty classification.
@@ -244,13 +244,13 @@ Never invent a NEWS2 score. Never downgrade a HIGH NEWS2 to 'mild'.
 
 bed_matching_agent = LlmAgent(
     name="BedMatchingAgent",
-    model=DEFAULT_MODEL,  # gemini-3.5-flash
+    model=DEFAULT_MODEL,  # gemini-3.7-flash
     description=(
         "Selects the best available hospital based on specialty match, bed availability, "
         "and real OSRM driving ETA."
     ),
     instruction="""\
-You are the LifeLine Bed-Matching Agent (gemini-3.5-flash).
+You are the LifeLine Bed-Matching Agent (gemini-3.7-flash).
 Given triage output and patient location:
 1. Call run_bed_matching_tool with severity, specialty, notes, and patient coordinates.
 2. Report: chosen hospital, ETA, distance, reasoning, and rejected alternatives.
@@ -261,10 +261,10 @@ For critical patients: always prioritise ICU bed availability over proximity.
 
 routing_agent = LlmAgent(
     name="RoutingAgent",
-    model=DEFAULT_MODEL,  # gemini-3.5-flash
+    model=DEFAULT_MODEL,  # gemini-3.7-flash
     description="Computes driving ETA and route from patient location to the chosen hospital.",
     instruction="""\
-You are the LifeLine Routing Agent (gemini-3.5-flash).
+You are the LifeLine Routing Agent (gemini-3.7-flash).
 Call run_routing_tool with patient and hospital coordinates.
 Report ETA in minutes, distance in km, and route summary.
 """,
@@ -273,10 +273,10 @@ Report ETA in minutes, distance in km, and route summary.
 
 briefing_agent = LlmAgent(
     name="BriefingAgent",
-    model=DEFAULT_MODEL,  # gemini-3.5-flash
+    model=DEFAULT_MODEL,  # gemini-3.7-flash
     description="Generates the SBAR pre-arrival clinical handoff note for the receiving team.",
     instruction="""\
-You are the LifeLine Briefing Agent (gemini-3.5-flash).
+You are the LifeLine Briefing Agent (gemini-3.7-flash).
 Call run_briefing_tool to generate the SBAR note for the receiving hospital team.
 Present the brief clearly and concisely.
 """,
@@ -342,7 +342,7 @@ def dispatch_emergency_case(
 
 root_agent = LlmAgent(
     name="Orchestrator",
-    model=DEFAULT_MODEL,  # gemini-3.5-flash (coordinator, not clinical)
+    model=DEFAULT_MODEL,  # gemini-3.7-flash (coordinator, not clinical)
     description=(
         "LifeLine Emergency Dispatch Orchestrator — autonomously coordinates the full "
         "5-stage pipeline: NEWS2 → Triage → Bed-Matching → Routing → SBAR Briefing. "
