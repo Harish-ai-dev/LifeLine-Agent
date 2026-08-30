@@ -49,7 +49,15 @@ export default function App() {
       if (!res.ok) throw new Error('API request failed');
       const data = await res.json();
 
-      // Simulate step progression for better UX
+      // Check if Supervisor Agent paused for human approval
+      if (data.supervisor_state === "NEEDS_HUMAN_APPROVAL") {
+        setStep(5); // Human Approval state
+        setResult(data);
+        setLoading(false);
+        return;
+      }
+
+      // Simulate step progression for better UX (if it didn't pause)
       await new Promise(resolve => setTimeout(resolve, 800));
       setStep(2);
 
@@ -60,7 +68,7 @@ export default function App() {
       setStep(4);
 
       await new Promise(resolve => setTimeout(resolve, 800));
-      setStep(5);
+      setStep(6); // 6 is complete
 
       setResult(data);
     } catch (err: any) {
@@ -69,6 +77,16 @@ export default function App() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleHumanApproval = async (action: 'approve' | 'override') => {
+    // In a real app, this would hit a /dispatch/resume endpoint
+    // For now, we simulate the supervisor finishing after approval
+    setLoading(true);
+    setStep(6);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setResult({ ...result, supervisor_state: "COMPLETED" });
+    setLoading(false);
   };
 
   return (
@@ -161,22 +179,22 @@ export default function App() {
         {result && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Agent Pipeline Timeline */}
-            <div className="relative">
+            <div className="relative mb-8">
               <div className="absolute inset-0 w-0.5 bg-red-600/20"></div>
-              {['triage', 'bedMatch', 'routing', 'briefing'].map((agent, index) => (
-                <div key={agent} className="relative z-10">
-                  <div className="absolute left-0 -translate-x-1/2 -top-2.5 w-5 h-5 rounded-full bg-red-600 border-2 border-slate-950
-                    {step > index + 1 ? 'bg-red-500' : step === index + 1 ? 'animate-pulse bg-red-400' : 'bg-slate-800'}">
+              {['triage', 'bedMatch', 'routing', 'briefing', 'supervisor'].map((agent, index) => (
+                <div key={agent} className="relative z-10 mb-6">
+                  <div className={`absolute left-0 -translate-x-1/2 -top-1.5 w-4 h-4 rounded-full border-2 border-slate-950
+                    ${step > index + 1 ? 'bg-green-500' : step === index + 1 ? 'bg-yellow-400 animate-pulse' : 'bg-slate-800'}`}>
                   </div>
-                  <div className="ml-6 space-y-2">
+                  <div className="ml-6 space-y-1">
                     <div className="flex items-center space-x-3">
-                      <h3 className="text-lg font-semibold text-slate-200">{getAgentName(agent)}</h3>
-                      <div className="text-xs px-2 py-0.5 rounded
-                        {step > index + 1 ? 'bg-green-600/20 text-green-400' :
+                      <h3 className="text-base font-semibold text-slate-200">{getAgentName(agent)}</h3>
+                      <div className={`text-[10px] px-2 py-0.5 rounded uppercase tracking-wider font-bold
+                        ${step > index + 1 ? 'bg-green-600/20 text-green-400' :
                          step === index + 1 ? 'bg-yellow-600/20 text-yellow-400 animate-pulse' :
-                         'bg-slate-700/20 text-slate-400'}"
+                         'bg-slate-700/20 text-slate-400'}`}
                       >
-                        {step > index + 1 ? 'Completed' : step === index + 1 ? 'Processing...' : 'Pending'}
+                        {step > index + 1 ? 'Completed' : step === index + 1 ? (agent === 'supervisor' && result?.supervisor_state === 'NEEDS_HUMAN_APPROVAL' ? 'Waiting for You' : 'Processing...') : 'Pending'}
                       </div>
                     </div>
                     <p className="text-sm text-slate-400">{getAgentDescription(agent)}</p>
@@ -184,6 +202,47 @@ export default function App() {
                 </div>
               ))}
             </div>
+
+            {/* Human In The Loop Modal */}
+            {result?.supervisor_state === "NEEDS_HUMAN_APPROVAL" && (
+              <div className="bg-yellow-900/30 border border-yellow-600/50 rounded-xl p-6 mb-8 animate-pulse-slow backdrop-blur-sm shadow-[0_0_30px_rgba(202,138,4,0.15)] relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                  <AlertTriangle className="w-32 h-32 text-yellow-500" />
+                </div>
+                <div className="relative z-10">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="bg-yellow-600 p-2 rounded-lg">
+                      <AlertTriangle className="w-6 h-6 text-yellow-50" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-yellow-400">Supervisor Requires Human Approval</h3>
+                      <p className="text-yellow-200/70 text-sm">The AI Task Manager paused the dispatch pipeline.</p>
+                    </div>
+                  </div>
+                  <div className="bg-black/40 border border-yellow-600/30 rounded-lg p-4 mb-6">
+                    <p className="text-yellow-100 font-medium leading-relaxed">
+                      "{result.human_prompt}"
+                    </p>
+                  </div>
+                  <div className="flex space-x-4">
+                    <button
+                      onClick={() => handleHumanApproval('approve')}
+                      className="flex-1 bg-yellow-600 hover:bg-yellow-500 text-yellow-950 font-bold py-3 px-4 rounded-xl flex items-center justify-center space-x-2 transition-colors"
+                    >
+                      <CheckCircle2 className="w-5 h-5" />
+                      <span>Approve & Continue</span>
+                    </button>
+                    <button
+                      onClick={() => handleHumanApproval('override')}
+                      className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 px-4 rounded-xl flex items-center justify-center space-x-2 transition-colors border border-slate-700"
+                    >
+                      <Building2 className="w-5 h-5" />
+                      <span>Override Destination</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Detailed Results Cards */}
             <div className="space-y-6">
@@ -220,7 +279,7 @@ export default function App() {
               )}
 
               {/* Bed Match Output */}
-              {result.bedMatch && (
+              {result.bed_match && (
                 <div className="bg-slate-900/50 border border-slate-800/30 rounded-xl p-6 backdrop-blur-sm relative overflow-hidden">
                   <div className="absolute top-0 right-0 p-4 opacity-20">
                     <Building2 className="w-16 h-16 text-orange-500" />
@@ -234,32 +293,32 @@ export default function App() {
                         <p className="text-sm text-slate-400">Selected Destination</p>
                         <p className="text-2xl font-bold text-slate-100 flex items-center space-x-2">
                           <CheckCircle2 className="w-5 h-5 text-green-500" />
-                          <span>{result.bedMatch.chosen_hospital?.name || '—'}</span>
+                          <span>{result.bed_match.chosen_hospital?.name || '—'}</span>
                         </p>
                       </div>
-                      {result.bedMatch.chosen_hospital?.eta_minutes && (
+                      {result.bed_match.chosen_hospital?.eta_minutes && (
                         <div className="text-right bg-slate-950/50 px-3 py-1.5 rounded-lg border border-slate-800/30">
                           <p className="text-xs text-slate-400">ETA</p>
-                          <p className="font-bold text-xl text-green-400">{result.bedMatch.chosen_hospital.eta_minutes} min</p>
+                          <p className="font-bold text-xl text-green-400">{result.bed_match.chosen_hospital.eta_minutes} min</p>
                         </div>
                       )}
                     </div>
                     <div>
                       <p className="text-sm text-slate-400">Reasoning</p>
-                      <p className="text-slate-300 italic">{result.bedMatch.reasoning}</p>
+                      <p className="text-slate-300 italic">{result.bed_match.reasoning}</p>
                     </div>
-                    {result.bedMatch.alternatives && result.bedMatch.alternatives.length > 0 && (
+                    {result.bed_match.alternatives && result.bed_match.alternatives.length > 0 && (
                       <div className="mt-4">
                         <p className="text-sm font-medium text-slate-300 mb-2">Alternative Options Considered:</p>
                         <div className="space-y-2">
-                          {result.bedMatch.alternatives.map((alt: any, index: number) => (
+                          {result.bed_match.alternatives.map((alt: any, index: number) => (
                             <div key={index} className="bg-slate-800/30 p-3 rounded-lg">
                               <p className="font-medium">{alt.name}</p>
                               <p className="text-xs text-slate-400 italic">{alt.reason_not_chosen}</p>
                             </div>
                           ))}
                         </div>
-                      )
+                      </div>
                     )}
                   </div>
                 </div>
