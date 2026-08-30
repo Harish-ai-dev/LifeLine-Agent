@@ -26,8 +26,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} h-screen overflow-hidden flex select-none bg-slate-50 text-slate-900 dark:bg-[#080c14] dark:text-slate-100`}>
+    <html lang="en" className="">
+      <body className={`${inter.className} h-screen overflow-hidden flex select-none bg-slate-50 text-slate-900`}>
         <ErrorBoundary isRoot={true}>
           <ThemeProvider>
             <DashboardProvider>

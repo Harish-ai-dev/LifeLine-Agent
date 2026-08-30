@@ -4,7 +4,7 @@ setlocal enabledelayedexpansion
 
 echo ===================================================================
 echo 🚑 LifeLine Agent — Autonomous Emergency Dispatch System
-echo    Next.js (3000) + FastAPI (8000) + Google ADK Web (8501)
+echo    Next.js (3000) + FastAPI (8000) + Google ADK Web (8088)
 echo ===================================================================
 echo.
 
@@ -50,15 +50,15 @@ start "LifeLine-Backend" /B python -m uvicorn lifeline.main:app --host 0.0.0.0 -
 echo [2/3] Starting Next.js Frontend on port 3000...
 start "LifeLine-Frontend" /B cmd /c "cd frontend && npm run start"
 
-echo [3/3] Starting Google ADK Visual Web UI on port 8501...
+echo [3/3] Starting Google ADK Visual Web UI on port 8088...
 where adk >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
-    start "LifeLine-ADK-Web" /B adk web --port 8501 lifeline_adk
+    start "LifeLine-ADK-Web" /B adk web --port 8088 lifeline_adk
 ) else (
     if exist "%APPDATA%\Python\Python314\Scripts\adk.exe" (
-        start "LifeLine-ADK-Web" /B "%APPDATA%\Python\Python314\Scripts\adk.exe" web --port 8501 lifeline_adk
+        start "LifeLine-ADK-Web" /B "%APPDATA%\Python\Python314\Scripts\adk.exe" web --port 8088 lifeline_adk
     ) else (
-        start "LifeLine-ADK-Web" /B python -m google.adk.cli.cli web --port 8501 lifeline_adk
+        start "LifeLine-ADK-Web" /B python -m google.adk.cli.cli web --port 8088 lifeline_adk
     )
 )
 
@@ -67,9 +67,9 @@ echo ===================================================================
 echo ✅ LifeLine Agent is now LIVE!
 echo    • Web Showcase:          http://localhost:3000
 echo    • Secret Admin & Demo:   http://localhost:3000/og/admin
+echo    • Google ADK Web UI:     http://localhost:8088
 echo    • Login Portal:          http://localhost:3000/login
 echo    • Backend API:           http://localhost:8000
-echo    • Google ADK Web UI:     http://localhost:8501
 echo    • Swagger Docs:          http://localhost:8000/docs
 echo    • Health Check:          http://localhost:8000/health
 echo ===================================================================

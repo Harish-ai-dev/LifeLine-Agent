@@ -44,7 +44,7 @@ export default function GovernmentPage() {
   const regionalOccupancy = Math.round(((totalIcuCapacity - totalIcuAvailable) / Math.max(1, totalIcuCapacity)) * 100);
 
   return (
-    <div className="space-y-6 max-w-[1600px] mx-auto pb-16">
+    <div className="space-y-6 w-full pb-16">
       {/* ── 1. REGIONAL AUTHORITY HERO COMMAND BANNER ────────────────────── */}
       <div className="bg-white dark:bg-[#0d1424] p-6 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
@@ -303,3 +303,4 @@ export default function GovernmentPage() {
     </div>
   );
 }
+

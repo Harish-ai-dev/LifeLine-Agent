@@ -66,7 +66,7 @@ export default function DonorDonationsPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-16">
+    <div className="space-y-6 w-full pb-16">
       {/* Page Header */}
       <div className="bg-white dark:bg-[#0d1424] p-6 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
         <div className="flex items-center gap-2 mb-1">
@@ -186,3 +186,4 @@ export default function DonorDonationsPage() {
     </div>
   );
 }
+

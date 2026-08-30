@@ -39,7 +39,7 @@ Output ONLY valid JSON matching this schema:
 def _get_issue_classifier_agent():
     return LlmAgent(
         name="issue_classifier_agent",
-        model=AGENT_MODELS.get("issue_classifier_agent", "gemini-3.5-flash"),
+        model=AGENT_MODELS["issue_classifier_agent"],
         instruction=ISSUE_CLASSIFIER_SYSTEM_PROMPT,
         output_key="issue_classification_result",
     )

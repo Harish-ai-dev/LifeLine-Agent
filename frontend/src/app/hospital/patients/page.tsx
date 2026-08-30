@@ -12,7 +12,7 @@ export default function PatientsPage() {
   const criticalCount = hospitalAlerts.filter((a) => a.severity === 'critical').length;
 
   return (
-    <div className="space-y-6 max-w-[1600px] mx-auto pb-16">
+    <div className="space-y-6 w-full pb-16">
       {/* Header Banner */}
       <div className="bg-white dark:bg-[#0d1424] p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
@@ -55,3 +55,4 @@ export default function PatientsPage() {
     </div>
   );
 }
+

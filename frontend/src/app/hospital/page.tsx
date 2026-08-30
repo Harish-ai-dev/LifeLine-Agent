@@ -92,7 +92,7 @@ export default function HospitalDashboardPage() {
   );
 
   return (
-    <div className="space-y-6 max-w-[1600px] mx-auto pb-12">
+    <div className="space-y-6 w-full pb-12">
       {/* ── 1. COMMAND CENTER HERO BANNER & REAL-TIME CONTROLS ──────────────── */}
       <div className="bg-white dark:bg-[#0d1424] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
@@ -640,3 +640,4 @@ export default function HospitalDashboardPage() {
     </div>
   );
 }
+
