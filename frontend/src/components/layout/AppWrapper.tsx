@@ -10,31 +10,18 @@ import { Topbar } from './Topbar';
 
 export function AppWrapper({ children }: { children: React.ReactNode }) {
   const [initializing, setInitializing] = useState(true);
-  const [transitioning, setTransitioning] = useState(false);
   const pathname = usePathname();
-  const { currentUser, authToken } = useDashboard();
 
   useEffect(() => {
-    const timer = setTimeout(() => setInitializing(false), 1200);
+    const timer = setTimeout(() => setInitializing(false), 300);
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    if (initializing) return;
-    setTransitioning(true);
-    const timer = setTimeout(() => setTransitioning(false), 400);
-    return () => clearTimeout(timer);
-  }, [pathname, initializing]);
-
-  if (initializing || transitioning) return <LoadingScreen />;
+  if (initializing) return <LoadingScreen />;
 
   const isHospitalRoute = pathname.startsWith('/hospital');
   const isGovRoute = pathname.startsWith('/government');
   const isDonorRoute = pathname.startsWith('/donor');
-
-  if ((isHospitalRoute || isGovRoute || isDonorRoute) && (!authToken || !currentUser)) {
-    return null;
-  }
 
   let content = <>{children}</>;
   if (isHospitalRoute) {
@@ -48,8 +35,6 @@ export function AppWrapper({ children }: { children: React.ReactNode }) {
   const isDashboardRoute = isHospitalRoute || isGovRoute || isDonorRoute || pathname.startsWith('/emergency');
 
   if (isDashboardRoute) {
-    // Copilot pages use internal scroll regions — main must NOT scroll
-    // All other dashboard pages keep overflow-y-auto (page-level scroll)
     const isCopilotPage = pathname.endsWith('/copilot');
     return (
       <>
@@ -74,8 +59,8 @@ export function AppWrapper({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <main className="flex-1 overflow-y-auto w-full h-full bg-slate-50 text-slate-900 dark:bg-[#080c14] dark:text-slate-100">
+    <div className="flex-1 overflow-y-auto w-full h-full bg-slate-50 text-slate-900 dark:bg-[#080c14] dark:text-slate-100">
       {content}
-    </main>
+    </div>
   );
 }

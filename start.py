@@ -105,13 +105,12 @@ def run_backend(port: int = 8000, reload: bool = False) -> subprocess.Popen:
 
 
 def run_frontend(port: int = 3000) -> subprocess.Popen:
-    """Start the Next.js frontend development server."""
+    """Start the Next.js frontend server."""
     npm = shutil.which("npm.cmd" if sys.platform == "win32" else "npm") or "npm"
-    # Port is already embedded in package.json "dev" script (next dev -p 3000).
-    # Do NOT pass -- -p <port> again or Next.js receives duplicate -p flags.
-    cmd = [npm, "run", "dev"]
+    script = "start" if (FRONTEND_DIR / ".next" / "BUILD_ID").exists() else "dev"
+    cmd = [npm, "run", script]
 
-    print(f"🌐 Starting Next.js frontend on http://localhost:{port}...")
+    print(f"🌐 Starting Next.js frontend ({script} mode) on http://localhost:{port}...")
     proc = subprocess.Popen(
         cmd,
         cwd=str(FRONTEND_DIR),
@@ -156,7 +155,7 @@ def main():
         print("\n" + "=" * 60)
         print("✅ LifeLine Agent is now LIVE!")
         if not args.backend_only:
-            print(f"   • Next.js Frontend: http://localhost:{args.frontend_port}")
+            print(f"   • Next.js Frontend: http://localhost:{args.frontend_port}/web")
         if not args.frontend_only:
             print(f"   • FastAPI Backend:  http://localhost:{args.port}")
             print(f"   • API Docs:         http://localhost:{args.port}/docs")
@@ -167,7 +166,7 @@ def main():
         if not args.no_browser and not args.backend_only:
             try:
                 import webbrowser
-                webbrowser.open(f"http://localhost:{args.frontend_port}")
+                webbrowser.open(f"http://localhost:{args.frontend_port}/web")
             except Exception:
                 pass
 
