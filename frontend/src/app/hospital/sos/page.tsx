@@ -184,7 +184,7 @@ export default function HospitalSOSPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-16">
+    <div className="space-y-6 w-full pb-16">
       {/* Header Banner */}
       <div className="bg-white dark:bg-[#0d1424] p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -441,3 +441,4 @@ export default function HospitalSOSPage() {
     </div>
   );
 }
+

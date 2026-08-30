@@ -44,7 +44,7 @@ export function AppWrapper({ children }: { children: React.ReactNode }) {
           <main
             className={[
               'flex-1 flex flex-col min-h-0',
-              'bg-slate-50 dark:bg-[#080c14] text-slate-900 dark:text-slate-100',
+              'bg-slate-50 text-slate-900',
               'transition-colors duration-150',
               isCopilotPage
                 ? 'overflow-hidden p-4 sm:p-5'

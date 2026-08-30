@@ -69,6 +69,7 @@ async def list_issues(
 async def create_issue(payload: IssueCreateRequest):
     """
     Log a new operational, equipment, or facility issue for a hospital.
+    Automatically classifies severity and recommended action via Issue Triage Agent.
     """
     store = get_data_store()
     issue_dict = payload.model_dump()
@@ -79,6 +80,26 @@ async def create_issue(payload: IssueCreateRequest):
     now_iso = datetime.datetime.utcnow().isoformat() + "Z"
     issue_dict["created_at"] = now_iso
     issue_dict["resolved_at"] = None
+
+    # ── Run Issue Triage Agent (AI Classification) ───────────────────────────
+    try:
+        from lifeline.agents.issue_classifier_agent import run_issue_classification
+        classification = run_issue_classification(
+            title=payload.title,
+            description=payload.description,
+            hospital_id=payload.hospital_id,
+        )
+        # Merge agent output — only overwrite if not already set by caller
+        if not issue_dict.get("severity") and classification.get("severity"):
+            issue_dict["severity"] = classification["severity"]
+        if not issue_dict.get("category") and classification.get("category"):
+            issue_dict["category"] = classification["category"]
+        if classification.get("recommended_action"):
+            issue_dict["recommended_action"] = classification["recommended_action"]
+        if classification.get("estimated_resolution_hours"):
+            issue_dict["estimated_resolution_hours"] = classification["estimated_resolution_hours"]
+    except Exception:
+        pass  # Deterministic fallback already inside run_issue_classification
 
     created = await store.async_create("issues", issue_dict, actor=payload.reported_by)
     created["id"] = created["_id"]

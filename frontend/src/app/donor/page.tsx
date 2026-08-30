@@ -39,7 +39,7 @@ export default function DonorPage() {
   const matchedEntry = activeMatch?.matchedDonors.find((m) => m.donorId === currentDonor.id);
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-16">
+    <div className="space-y-6 w-full pb-16">
       {/* ── 1. DONOR HERO BADGE PASS ──────────────────────────────────────── */}
       <div className="bg-white dark:bg-[#0d1424] p-6 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
@@ -174,3 +174,4 @@ export default function DonorPage() {
     </div>
   );
 }
+

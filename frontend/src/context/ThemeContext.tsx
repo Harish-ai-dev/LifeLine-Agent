@@ -13,25 +13,20 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Default to 'light' as requested by the user
+  // ALWAYS default to light — clear any stale dark preference
   const [theme, setThemeState] = useState<Theme>('light');
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    // Wipe any old dark-mode preference from localStorage
+    // so every fresh load starts in light mode
     const saved = localStorage.getItem('lifeline_theme') as Theme | null;
-    if (saved === 'dark' || saved === 'light') {
-      setThemeState(saved);
-      if (saved === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-    } else {
-      // Default light mode
-      setThemeState('light');
-      document.documentElement.classList.remove('dark');
+    if (saved === 'dark') {
+      // Override: reset to light
+      localStorage.setItem('lifeline_theme', 'light');
     }
+    // Always ensure html element has no 'dark' class
+    document.documentElement.classList.remove('dark');
+    setThemeState('light');
   }, []);
 
   const setTheme = (newTheme: Theme) => {
