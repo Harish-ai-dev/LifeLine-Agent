@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
 import {
   Siren,
@@ -10,13 +10,9 @@ import {
   Activity,
   Send,
   HeartPulse,
-  AlertTriangle,
   CheckCircle2,
   Cpu,
   Sparkles,
-  MapPin,
-  Clock,
-  ShieldAlert,
 } from 'lucide-react';
 import { api } from '@/utils/apiClient';
 
@@ -26,7 +22,7 @@ interface FloatingSOSProps {
 }
 
 export function FloatingSOS({ isOpen: externalIsOpen, onClose: externalOnClose }: FloatingSOSProps) {
-  const { currentUser, currentHospital, activeHospitalId } = useDashboard();
+  const { currentHospital } = useDashboard();
   const [internalIsOpen, setInternalIsOpen] = useState(false);
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
   const setIsOpen = (open: boolean) => {
@@ -96,7 +92,11 @@ export function FloatingSOS({ isOpen: externalIsOpen, onClose: externalOnClose }
   const severityLabel =
     calculatedScore >= 7 ? 'CRITICAL (HIGH RISK)' : calculatedScore >= 5 ? 'MODERATE (MEDIUM RISK)' : 'MILD (LOW RISK)';
   const severityColor =
-    calculatedScore >= 7 ? 'text-red-400 bg-red-500/20 border-red-500/40' : calculatedScore >= 5 ? 'text-amber-400 bg-amber-500/20 border-amber-500/40' : 'text-emerald-400 bg-emerald-500/20 border-emerald-500/40';
+    calculatedScore >= 7
+      ? 'text-red-700 bg-red-100 border-red-300'
+      : calculatedScore >= 5
+      ? 'text-amber-800 bg-amber-100 border-amber-300'
+      : 'text-emerald-800 bg-emerald-100 border-emerald-300';
 
   const handleVoiceDictation = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -192,26 +192,26 @@ export function FloatingSOS({ isOpen: externalIsOpen, onClose: externalOnClose }
 
   return (
     <>
-      {/* Emergency Modal / Drawer */}
+      {/* Emergency Modal */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto">
-          <div className="bg-[#0e1422] border border-red-500/40 rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col my-8">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
+          <div className="bg-white border border-slate-200 rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col my-8 ring-1 ring-slate-900/5">
             {/* Modal Header */}
-            <div className="p-5 bg-gradient-to-r from-red-950/80 via-[#111728] to-[#111728] border-b border-red-500/30 flex items-center justify-between">
+            <div className="p-5 bg-gradient-to-r from-red-50/80 via-white to-rose-50/50 border-b border-red-100 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-red-600/30 text-red-400 border border-red-500/50 flex items-center justify-center font-black shadow-lg">
+                <div className="w-10 h-10 rounded-2xl bg-red-100 text-red-600 border border-red-200 flex items-center justify-center font-black shadow-sm">
                   <Siren className="w-5 h-5 animate-pulse" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-base font-black text-white tracking-tight">
+                    <h2 className="text-base font-extrabold text-slate-900 tracking-tight">
                       Emergency SOS Intake &amp; Autonomous Dispatch
                     </h2>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-red-500/20 text-red-300 border border-red-500/40 font-bold">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200 font-bold">
                       STAT PRIORITY
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400 font-mono">
+                  <p className="text-xs text-slate-500 font-mono">
                     Google ADK Multi-Level Agent Pipeline · Real-time NEWS2 Grounding
                   </p>
                 </div>
@@ -221,7 +221,7 @@ export function FloatingSOS({ isOpen: externalIsOpen, onClose: externalOnClose }
                   setIsOpen(false);
                   setSubmissionResult(null);
                 }}
-                className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors"
+                className="p-2 text-slate-400 hover:text-slate-700 rounded-xl hover:bg-slate-100 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -230,34 +230,34 @@ export function FloatingSOS({ isOpen: externalIsOpen, onClose: externalOnClose }
             {/* Modal Body */}
             {submissionResult ? (
               <div className="p-6 space-y-6 animate-in zoom-in-95 duration-200">
-                <div className="p-5 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 text-center space-y-2">
-                  <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto text-xl">
+                <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-2">
+                  <div className="w-12 h-12 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-600 flex items-center justify-center mx-auto text-xl">
                     <CheckCircle2 className="w-6 h-6" />
                   </div>
-                  <h3 className="text-lg font-black text-white">
+                  <h3 className="text-lg font-black text-slate-900">
                     Multi-Agent Emergency Dispatch Activated!
                   </h3>
-                  <p className="text-xs text-emerald-300 font-mono">
+                  <p className="text-xs text-emerald-800 font-mono">
                     Tracking Number: {submissionResult.case_id || 'CASE-SOS-9821'} · Destination: {submissionResult.bed_match?.chosen_hospital?.name || currentHospital.name}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 text-xs font-mono">
-                  <div className="p-3.5 rounded-xl bg-[#131b2f] border border-slate-800">
-                    <span className="text-slate-400 block text-[10px] uppercase">Clinical NEWS2 Score</span>
-                    <span className="text-xl font-bold text-red-400">{calculatedScore} ({severityLabel})</span>
+                  <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="text-slate-500 block text-[10px] uppercase font-bold">Clinical NEWS2 Score</span>
+                    <span className="text-xl font-bold text-red-600">{calculatedScore} ({severityLabel})</span>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-[#131b2f] border border-slate-800">
-                    <span className="text-slate-400 block text-[10px] uppercase">Allocated Specialty &amp; Bay</span>
-                    <span className="text-xl font-bold text-sky-400">Cardiology · Trauma Bay #1</span>
+                  <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="text-slate-500 block text-[10px] uppercase font-bold">Allocated Specialty &amp; Bay</span>
+                    <span className="text-xl font-bold text-sky-700">Cardiology · Trauma Bay #1</span>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-[#131b2f] border border-slate-800 text-xs space-y-1 font-sans">
-                  <span className="font-bold text-slate-300 flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-purple-400" /> SBAR Hospital Pre-Arrival Brief (Gemini Generated):
+                <div className="p-4 rounded-xl bg-purple-50/60 border border-purple-100 text-xs space-y-1 font-sans">
+                  <span className="font-bold text-purple-900 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-purple-600" /> SBAR Hospital Pre-Arrival Brief (Gemini Generated):
                   </span>
-                  <p className="text-slate-400 italic text-[11px] leading-relaxed">
+                  <p className="text-slate-700 italic text-[11px] leading-relaxed">
                     {submissionResult.briefing?.pre_arrival_brief ||
                       `SBAR: ${patientAge}yo with acute cardiac distress. Vitals: HR ${hr}, BP ${sbp}/${dbp}, SpO2 ${spo2}%. NEWS2: ${calculatedScore}. Cath lab prep recommended.`}
                   </p>
@@ -269,56 +269,56 @@ export function FloatingSOS({ isOpen: externalIsOpen, onClose: externalOnClose }
                       setSubmissionResult(null);
                       setIsOpen(false);
                     }}
-                    className="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition-colors"
+                    className="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors border border-slate-200"
                   >
                     Close Dossier
                   </button>
                   <button
                     onClick={() => setSubmissionResult(null)}
-                    className="px-6 py-2.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-xl transition-colors shadow-lg shadow-sky-600/30"
+                    className="px-6 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl transition-colors shadow-md shadow-sky-600/20"
                   >
                     Register Another Inbound Case
                   </button>
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleSubmitCase} className="p-6 space-y-6 overflow-y-auto max-h-[75vh]">
+              <form onSubmit={handleSubmitCase} className="p-6 space-y-5 overflow-y-auto max-h-[75vh]">
                 {/* Live NEWS2 Gauge Header */}
-                <div className="p-4 rounded-2xl bg-[#131b2e] border border-slate-800 flex items-center justify-between">
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <HeartPulse className="w-7 h-7 text-red-400 animate-pulse" />
+                    <HeartPulse className="w-7 h-7 text-red-600 animate-pulse" />
                     <div>
-                      <span className="text-[10px] uppercase font-bold text-slate-400 font-mono">
+                      <span className="text-[10px] uppercase font-bold text-slate-500 font-mono">
                         Deterministic NEWS2 Grounding
                       </span>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-2xl font-black text-white font-mono">{calculatedScore}</span>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${severityColor}`}>
+                        <span className="text-2xl font-black text-slate-900 font-mono">{calculatedScore}</span>
+                        <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${severityColor}`}>
                           {severityLabel}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="text-right text-[11px] text-slate-400 font-mono">
-                    <div>Facility: <strong className="text-white">{currentHospital.name}</strong></div>
-                    <div>Trauma Bays Free: <strong className="text-emerald-400">{currentHospital.availableTraumaBays}</strong></div>
+                  <div className="text-right text-[11px] text-slate-600 font-mono">
+                    <div>Facility: <strong className="text-slate-900">{currentHospital.name}</strong></div>
+                    <div>Trauma Bays Free: <strong className="text-emerald-700">{currentHospital.availableTraumaBays}</strong></div>
                   </div>
                 </div>
 
                 {/* Chief Complaint with Voice Dictation */}
                 <div>
                   <div className="flex justify-between items-center mb-1.5">
-                    <label className="text-xs font-bold text-slate-200">
+                    <label className="text-xs font-bold text-slate-800">
                       Chief Complaint &amp; Clinical Symptoms
                     </label>
                     <button
                       type="button"
                       onClick={handleVoiceDictation}
-                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all border ${
                         isRecording
-                          ? 'bg-red-600 text-white animate-pulse shadow-md shadow-red-600/40'
-                          : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                          ? 'bg-red-600 text-white border-red-600 animate-pulse shadow-md shadow-red-600/30'
+                          : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
                       }`}
                       title="Hands-free Voice-to-Text Input"
                     >
@@ -331,7 +331,7 @@ export function FloatingSOS({ isOpen: externalIsOpen, onClose: externalOnClose }
                     onChange={(e) => setChiefComplaint(e.target.value)}
                     rows={2}
                     required
-                    className="w-full bg-[#0a0f1b] border border-slate-700 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-red-500 font-sans"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 font-sans transition-colors"
                     placeholder="E.g., Severe shortness of breath, crushing retrosternal pain, unresponsive..."
                   />
                 </div>
@@ -339,131 +339,131 @@ export function FloatingSOS({ isOpen: externalIsOpen, onClose: externalOnClose }
                 {/* Demographics */}
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div>
-                    <label className="block font-bold text-slate-300 mb-1">Patient Age</label>
+                    <label className="block font-bold text-slate-700 mb-1">Patient Age</label>
                     <input
                       type="number"
                       value={patientAge}
                       onChange={(e) => setPatientAge(Number(e.target.value))}
-                      className="w-full bg-[#0a0f1b] border border-slate-700 rounded-xl p-2.5 text-white font-mono focus:outline-none focus:border-red-500"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 font-mono focus:bg-white focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-300 mb-1">Mechanism / Context</label>
+                    <label className="block font-bold text-slate-700 mb-1">Mechanism / Context</label>
                     <input
                       type="text"
                       value={injuryMechanism}
                       onChange={(e) => setInjuryMechanism(e.target.value)}
-                      className="w-full bg-[#0a0f1b] border border-slate-700 rounded-xl p-2.5 text-white focus:outline-none focus:border-red-500"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 focus:bg-white focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-colors"
                     />
                   </div>
                 </div>
 
                 {/* Vitals Grid (Updates NEWS2 in Real Time) */}
                 <div>
-                  <div className="text-xs font-bold text-slate-200 mb-2 flex items-center justify-between">
+                  <div className="text-xs font-bold text-slate-800 mb-2 flex items-center justify-between">
                     <span>Clinical Vitals Matrix</span>
-                    <span className="text-[10px] text-slate-400 font-normal">
+                    <span className="text-[10px] text-slate-500 font-normal">
                       Adjust values to see real-time NEWS2 updates
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 text-xs font-mono">
-                    <div className="p-2.5 rounded-xl bg-[#0a0f1b] border border-slate-800">
-                      <span className="text-[10px] text-slate-400 block">HR (bpm)</span>
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5 text-xs font-mono">
+                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100/80 transition-colors">
+                      <span className="text-[10px] text-slate-500 uppercase font-semibold block">HR (bpm)</span>
                       <input
                         type="number"
                         value={hr}
                         onChange={(e) => setHr(Number(e.target.value))}
-                        className="w-full bg-transparent font-bold text-white text-sm focus:outline-none mt-1"
+                        className="w-full bg-transparent font-bold text-slate-900 text-sm focus:outline-none focus:text-red-600 mt-0.5"
                       />
                     </div>
 
-                    <div className="p-2.5 rounded-xl bg-[#0a0f1b] border border-slate-800">
-                      <span className="text-[10px] text-slate-400 block">Systolic BP (mmHg)</span>
+                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100/80 transition-colors">
+                      <span className="text-[10px] text-slate-500 uppercase font-semibold block">Systolic BP (mmHg)</span>
                       <input
                         type="number"
                         value={sbp}
                         onChange={(e) => setSbp(Number(e.target.value))}
-                        className="w-full bg-transparent font-bold text-white text-sm focus:outline-none mt-1"
+                        className="w-full bg-transparent font-bold text-slate-900 text-sm focus:outline-none focus:text-red-600 mt-0.5"
                       />
                     </div>
 
-                    <div className="p-2.5 rounded-xl bg-[#0a0f1b] border border-slate-800">
-                      <span className="text-[10px] text-slate-400 block">SpO2 (%)</span>
+                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100/80 transition-colors">
+                      <span className="text-[10px] text-slate-500 uppercase font-semibold block">SpO2 (%)</span>
                       <input
                         type="number"
                         value={spo2}
                         onChange={(e) => setSpo2(Number(e.target.value))}
-                        className="w-full bg-transparent font-bold text-white text-sm focus:outline-none mt-1"
+                        className="w-full bg-transparent font-bold text-slate-900 text-sm focus:outline-none focus:text-red-600 mt-0.5"
                       />
                     </div>
 
-                    <div className="p-2.5 rounded-xl bg-[#0a0f1b] border border-slate-800">
-                      <span className="text-[10px] text-slate-400 block">Resp Rate (/min)</span>
+                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100/80 transition-colors">
+                      <span className="text-[10px] text-slate-500 uppercase font-semibold block">Resp Rate (/min)</span>
                       <input
                         type="number"
                         value={rr}
                         onChange={(e) => setRr(Number(e.target.value))}
-                        className="w-full bg-transparent font-bold text-white text-sm focus:outline-none mt-1"
+                        className="w-full bg-transparent font-bold text-slate-900 text-sm focus:outline-none focus:text-red-600 mt-0.5"
                       />
                     </div>
 
-                    <div className="p-2.5 rounded-xl bg-[#0a0f1b] border border-slate-800">
-                      <span className="text-[10px] text-slate-400 block">Temp (°C)</span>
+                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100/80 transition-colors">
+                      <span className="text-[10px] text-slate-500 uppercase font-semibold block">Temp (°C)</span>
                       <input
                         type="number"
                         step="0.1"
                         value={temp}
                         onChange={(e) => setTemp(Number(e.target.value))}
-                        className="w-full bg-transparent font-bold text-white text-sm focus:outline-none mt-1"
+                        className="w-full bg-transparent font-bold text-slate-900 text-sm focus:outline-none focus:text-red-600 mt-0.5"
                       />
                     </div>
 
-                    <div className="p-2.5 rounded-xl bg-[#0a0f1b] border border-slate-800">
-                      <span className="text-[10px] text-slate-400 block">Consciousness (AVPU)</span>
+                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100/80 transition-colors">
+                      <span className="text-[10px] text-slate-500 uppercase font-semibold block">Consciousness (AVPU)</span>
                       <select
                         value={loc}
                         onChange={(e) => setLoc(e.target.value as any)}
-                        className="w-full bg-transparent font-bold text-white text-xs focus:outline-none mt-1"
+                        className="w-full bg-white font-bold text-slate-900 text-xs rounded-lg border border-slate-200 p-1 focus:outline-none focus:border-red-500 mt-0.5"
                       >
-                        <option value="A" className="bg-slate-900">Alert (A)</option>
-                        <option value="V" className="bg-slate-900">Voice (V)</option>
-                        <option value="P" className="bg-slate-900">Pain (P)</option>
-                        <option value="U" className="bg-slate-900">Unresponsive (U)</option>
+                        <option value="A">Alert (A)</option>
+                        <option value="V">Voice (V)</option>
+                        <option value="P">Pain (P)</option>
+                        <option value="U">Unresponsive (U)</option>
                       </select>
                     </div>
 
-                    <div className="p-2.5 rounded-xl bg-[#0a0f1b] border border-slate-800 col-span-3 sm:col-span-2 flex items-center justify-between">
-                      <span className="text-[10px] text-slate-400">Supplemental Oxygen</span>
+                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 col-span-3 sm:col-span-2 flex items-center justify-between hover:bg-slate-100/80 transition-colors">
+                      <span className="text-[10px] text-slate-600 font-semibold uppercase">Supplemental Oxygen</span>
                       <input
                         type="checkbox"
                         checked={supplementalO2}
                         onChange={(e) => setSupplementalO2(e.target.checked)}
-                        className="w-4 h-4 rounded text-red-600 focus:ring-0 cursor-pointer"
+                        className="w-4 h-4 rounded text-red-600 focus:ring-red-500 border-slate-300 cursor-pointer"
                       />
                     </div>
                   </div>
                 </div>
 
                 {/* Submit Action */}
-                <div className="flex items-center justify-between pt-4 border-t border-slate-800">
-                  <span className="text-xs text-slate-400 flex items-center gap-1.5">
-                    <Cpu className="w-3.5 h-3.5 text-sky-400" />
-                    Auto-dispatches via Google ADK + Gemini 3.1 Pro
+                <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+                  <span className="text-xs text-slate-500 flex items-center gap-1.5">
+                    <Cpu className="w-3.5 h-3.5 text-sky-600" />
+                    Auto-dispatches via Google ADK + Gemini
                   </span>
 
-                  <div className="flex gap-3">
+                  <div className="flex gap-2.5">
                     <button
                       type="button"
                       onClick={() => setIsOpen(false)}
-                      className="px-4 py-2.5 text-slate-400 hover:text-white text-xs font-bold"
+                      className="px-4 py-2.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl text-xs font-bold transition-colors border border-slate-200"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="px-6 py-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-lg shadow-red-600/30 flex items-center gap-2 transition-all"
+                      className="px-6 py-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 disabled:opacity-50 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-red-600/25 flex items-center gap-2 transition-all active:scale-95"
                     >
                       {isSubmitting ? (
                         <>

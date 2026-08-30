@@ -3,16 +3,18 @@ Model configuration — single source of truth for all Gemini model strings.
 Change here to upgrade all agents at once.
 """
 
+import os
+
 # ── Primary Models ────────────────────────────────────────────────────────────
 
-# Used by Triage Agent — clinical reasoning (gemini-3.1-pro per docs/03-decision-log.md)
-TRIAGE_MODEL = "gemini-3.1-pro"
+# Used by Triage Agent — clinical reasoning
+TRIAGE_MODEL = os.environ.get("TRIAGE_MODEL", "gemini-3.1-pro")
 
 # Used by all other agents — fast, frontier-level, cost-efficient
-DEFAULT_MODEL = "gemini-3.5-flash"
+DEFAULT_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.7-flash")
 
 # Fallback if primary unavailable
-FALLBACK_MODEL = "gemini-3.5-flash"
+FALLBACK_MODEL = os.environ.get("FALLBACK_MODEL", DEFAULT_MODEL)
 
 # ── Per-Agent Assignment ──────────────────────────────────────────────────────
 AGENT_MODELS = {

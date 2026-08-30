@@ -32,7 +32,7 @@ def get_driving_eta(origin: Location, destination: Location) -> dict:
         "steps": "false",
     }
 
-    resp = requests.get(url, params=params, timeout=10)
+    resp = requests.get(url, params=params, timeout=2)
     resp.raise_for_status()
     data = resp.json()
 

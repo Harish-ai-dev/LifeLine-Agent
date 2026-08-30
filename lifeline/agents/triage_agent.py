@@ -82,50 +82,86 @@ def _get_triage_agent():
     )
 
 
-def run_triage(triage_input: TriageInput) -> TriageOutput:
+def _validate_triage_consistency(output: TriageOutput, ti: TriageInput) -> tuple[bool, str]:
     """
-    Invoke the Triage Agent synchronously via ADK Runner.
-    Computes a NEWS2 score, builds the prompt, runs the agent,
-    and returns a fully-typed TriageOutput.
+    Validate clinical consistency between NEWS2 score, vitals, and triage output.
+    Returns (is_valid, critique_feedback).
     """
-    try:
-        agent = _get_triage_agent()
-        session_service = InMemorySessionService()
-        runner = Runner(
-            agent=agent,
-            app_name=APP_NAME,
-            session_service=session_service,
-        )
+    score = ti.news2_score.score
+    severity = output.severity_label.lower()
+    
+    # Critical Rule: High NEWS2 (>=7) must never be classified as mild
+    if score >= 7 and severity == "mild":
+        return False, f"Clinical Violation: Patient has high NEWS2 score of {score}/20 (high risk). Severity cannot be 'mild'. Escalate to 'critical'."
+    
+    # Critical Rule: Unresponsive / confused patient with low BP must be critical
+    if "unresponsive" in str(ti.vitals.consciousness).lower() and severity == "mild":
+        return False, "Clinical Violation: Unresponsive patient must be triaged as 'critical'."
 
-        session = run_async(
-            session_service.create_session(app_name=APP_NAME, user_id="dispatch")
-        )
+    return True, "Valid"
 
-        prompt_text = _build_triage_prompt(triage_input)
-        user_message = genai_types.Content(
-            role="user",
-            parts=[genai_types.Part(text=prompt_text)],
-        )
 
-        final_response = None
-        for event in runner.run(
-            user_id="dispatch",
-            session_id=session.id,
-            new_message=user_message,
-        ):
-            if event.is_final_response() and event.content:
-                final_response = event.content.parts[0].text
-                break
+def run_triage(triage_input: TriageInput, max_loops: int = 0) -> TriageOutput:
+    """
+    Execute Triage Coordinator loop (up to max_loops iterations).
+    Evaluates LLM triage, validates clinical consistency against NEWS2,
+    and loops with critique feedback if inconsistencies are detected.
+    """
+    session_service = InMemorySessionService()
+    runner = None
+    session = None
+    critique = ""
 
-        if final_response:
-            try:
-                data = json.loads(final_response)
-            except json.JSONDecodeError:
-                cleaned = final_response.strip().strip("```json").strip("```").strip()
-                data = json.loads(cleaned)
-            return TriageOutput(**data)
-    except Exception as ex:
-        pass  # Fallback to deterministic clinical rule-based triage
+    for loop_idx in range(1, max_loops + 1):
+        try:
+            agent = _get_triage_agent()
+            if runner is None:
+                runner = Runner(
+                    agent=agent,
+                    app_name=APP_NAME,
+                    session_service=session_service,
+                )
+                session = run_async(
+                    session_service.create_session(app_name=APP_NAME, user_id="dispatch")
+                )
+
+            base_prompt = _build_triage_prompt(triage_input)
+            if critique:
+                prompt_text = f"{base_prompt}\n\nCOORDINATOR CRITIQUE (Iteration {loop_idx}):\n{critique}\nPlease self-correct and return updated JSON."
+            else:
+                prompt_text = base_prompt
+
+            user_message = genai_types.Content(
+                role="user",
+                parts=[genai_types.Part(text=prompt_text)],
+            )
+
+            final_response = None
+            for event in runner.run(
+                user_id="dispatch",
+                session_id=session.id,
+                new_message=user_message,
+            ):
+                if event.is_final_response() and event.content:
+                    final_response = event.content.parts[0].text
+                    break
+
+            if final_response:
+                try:
+                    data = json.loads(final_response)
+                except json.JSONDecodeError:
+                    cleaned = final_response.strip().strip("```json").strip("```").strip()
+                    data = json.loads(cleaned)
+
+                triage_candidate = TriageOutput(**data)
+                is_valid, feedback = _validate_triage_consistency(triage_candidate, triage_input)
+                if is_valid:
+                    return triage_candidate
+                
+                critique = feedback
+                continue
+        except Exception:
+            break
 
     # ── Deterministic Clinical Fallback (NEWS2 Grounded) ──────────────────────
     score = triage_input.news2_score.score

@@ -4,6 +4,11 @@ Clinical NEWS2 Calculation -> Triage Agent -> Bed-Matching Agent -> Routing Agen
 """
 
 import logging
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from lifeline.tools.news2 import news2_score
 from lifeline.tools.firestore_client import write_audit_record
 from lifeline.agents.triage_agent import run_triage
@@ -21,10 +26,14 @@ def run_dispatch(case: Case, patient_location: Location) -> dict:
     Uses clinical NEWS2 calculation + Triage + Bed Matching + Routing + Briefing,
     backed by resilient deterministic clinical engine fallbacks.
     """
-    # ── 1. NEWS2 Deterministic Calculation ──────────────────────────────────
+    import time
+    t0 = time.time()
+    
     n2 = news2_score(case.vitals)
+    t1 = time.time()
+    print(f"[TIME] NEWS2: {t1-t0:.2f}s")
 
-    # ── 2. Triage Reasoning Agent ───────────────────────────────────────────
+    # ── 2. Triage Reasoning Agent (Instant Deterministic Path) ──────────────
     triage_in = TriageInput(
         patient_age=case.patient_age,
         vitals=case.vitals,
@@ -32,21 +41,29 @@ def run_dispatch(case: Case, patient_location: Location) -> dict:
         mechanism_of_injury=case.mechanism_of_injury,
         news2_score=n2,
     )
-    triage_out = run_triage(triage_in)
+    triage_out = run_triage(triage_in, max_loops=0)
+    t2 = time.time()
+    print(f"[TIME] Triage Agent: {t2-t1:.2f}s")
 
-    # ── 3. Bed-Matching Specialist Agent ────────────────────────────────────
+    # ── 3. Bed-Matching Specialist Agent (Instant Deterministic Path) ───────
     bed_in = BedMatchingInput(
         triage_result=triage_out,
         patient_location=patient_location,
     )
-    bed_out = run_bed_matching(bed_in)
+    bed_out = run_bed_matching(bed_in, max_loops=0)
+    t3 = time.time()
+    print(f"[TIME] Bed Matching Agent: {t3-t2:.2f}s")
 
     # ── 4. Routing & Telemetry Agent ────────────────────────────────────────
     dest_loc = Location(lat=bed_out.chosen_hospital.lat, lng=bed_out.chosen_hospital.lng)
     routing_out = run_routing(patient_location, dest_loc)
+    t4 = time.time()
+    print(f"[TIME] Routing Agent: {t4-t3:.2f}s")
 
-    # ── 5. Clinical Briefing (SBAR) Agent ───────────────────────────────────
-    briefing_out = run_briefing(case, triage_out, bed_out, routing_out)
+    # ── 5. Clinical Briefing (SBAR) Agent (Instant Deterministic Path) ──────
+    briefing_out = run_briefing(case, triage_out, bed_out, routing_out, max_loops=0)
+    t5 = time.time()
+    print(f"[TIME] Briefing Agent: {t5-t4:.2f}s")
 
     record = {
         "case": case.model_dump(),

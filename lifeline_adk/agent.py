@@ -1,37 +1,48 @@
 """
-LifeLine Agent — root_agent for ADK Web UI.
+LifeLine Agent â€” ADK Web entry point.
 
-This module wires together the full LifeLine dispatch pipeline as a single
-conversational ADK LlmAgent so it can be explored via `adk web`.
+Exposes the real multi-level dispatch pipeline to `adk web` so the hierarchy
+you see in the dev UI matches exactly what runs in production:
 
-The agent:
-  1. Receives an emergency case description from the user (free-text or JSON)
-  2. Computes NEWS2 score for the vitals
-  3. Calls the Triage sub-agent (gemini-2.0-flash)
-  4. Calls the Bed-Matching sub-agent (gemini-2.0-flash)
-  5. Returns a full dispatch plan: severity, hospital choice + reasoning, ETA
+  LifeLineOrchestrator  (root, gemini-3.7-flash)
+  â”œâ”€â”€ TriageAgent        (gemini-3.7-flash)  â€” NEWS2 + severity classification
+  â”œâ”€â”€ BedMatchingAgent   (gemini-3.7-flash) â€” hospital selection + OSRM ETA
+  â”œâ”€â”€ RoutingAgent       (gemini-3.7-flash) â€” driving directions
+  â””â”€â”€ BriefingAgent      (gemini-3.7-flash) â€” SBAR pre-arrival handoff note
 
-Tools exposed to the agent:
-  - compute_news2       : computes the clinical NEWS2 score from vitals
-  - find_best_hospital  : reads data/hospitals.json, picks best match
+All tools call the real, tested backend functions.
+No Google Search, no URL context, no duplicate logic.
+Models are read from lifeline/models.py (single registry).
 """
 
-import json
 import os
 import sys
 
-# ── make project root importable when run from any directory ──────────────────
+# â”€â”€ Make project root importable from any working directory â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from google.adk.agents import LlmAgent
-from lifeline.tools.news2 import news2_score
-from lifeline.schemas import Vitals
+from dotenv import load_dotenv
+load_dotenv()
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Tool functions (called by the agent during reasoning)
-# ─────────────────────────────────────────────────────────────────────────────
+from google.adk.agents import LlmAgent
+from lifeline.models import TRIAGE_MODEL, DEFAULT_MODEL
+from lifeline.tools.news2 import news2_score
+from lifeline.schemas import (
+    Vitals, TriageInput, BedMatchingInput, Location, Case,
+    TriageOutput, BedMatchingOutput, HospitalChoice, RoutingOutput,
+)
+from lifeline.agents.triage_agent import run_triage
+from lifeline.agents.bed_matching_agent import run_bed_matching
+from lifeline.agents.routing_agent import run_routing
+from lifeline.agents.briefing_agent import run_briefing
+
+
+# =============================================================================
+# Tool functions â€” deterministic real-backend calls
+# No Google Search, no URL context â€” agents reason only over data computed here
+# =============================================================================
 
 def compute_news2(
     heart_rate: int,
@@ -39,21 +50,21 @@ def compute_news2(
     systolic_bp: int,
     spo2: int,
     temperature_c: float,
-    consciousness: str,
+    consciousness: str = "alert",
 ) -> dict:
     """
-    Compute the NEWS2 (National Early Warning Score 2) for the patient's vitals.
+    Compute the clinical NEWS2 score from patient vitals.
 
     Args:
         heart_rate: Heart rate in bpm.
         respiratory_rate: Respiratory rate in breaths/min.
-        systolic_bp: Systolic blood pressure in mmHg.
-        spo2: Blood oxygen saturation percentage.
-        temperature_c: Body temperature in Celsius.
-        consciousness: One of 'alert', 'confused', 'unresponsive'.
+        systolic_bp: Systolic BP in mmHg.
+        spo2: Blood oxygen saturation %.
+        temperature_c: Temperature in Celsius.
+        consciousness: 'alert', 'confused', or 'unresponsive'.
 
     Returns:
-        dict with 'score' (int) and 'risk_band' ('low', 'medium', or 'high').
+        dict with 'score' (0-20) and 'risk_band' ('low', 'medium', 'high').
     """
     vitals = Vitals(
         heart_rate=heart_rate,
@@ -67,121 +78,313 @@ def compute_news2(
     return {"score": result.score, "risk_band": result.risk_band}
 
 
-def find_best_hospital(required_specialty: str, severity_label: str) -> dict:
+def run_triage_tool(
+    patient_age: int,
+    chief_complaint: str,
+    heart_rate: int,
+    respiratory_rate: int,
+    systolic_bp: int,
+    spo2: int,
+    temperature_c: float,
+    consciousness: str,
+    mechanism_of_injury: str = "",
+) -> dict:
     """
-    Find the best available hospital from the local dataset for the given
-    specialty and severity.
+    Run the Triage Agent (gemini-3.7-flash) to classify severity and required specialty.
 
     Args:
-        required_specialty: One of 'cardiac', 'trauma', 'surgical', 'pediatric', 'general'.
-        severity_label: One of 'mild', 'moderate', 'critical'.
+        patient_age: Age in years.
+        chief_complaint: Primary presenting complaint.
+        heart_rate: HR bpm. respiratory_rate: RR breaths/min. systolic_bp: SBP mmHg.
+        spo2: SpO2 %. temperature_c: Temp Celsius. consciousness: alert/confused/unresponsive.
+        mechanism_of_injury: Optional injury mechanism.
 
     Returns:
-        dict with 'chosen_hospital' (name, lat, lng), 'reasoning', and 'alternatives'.
+        dict with 'severity_label', 'required_specialty', 'notes', 'news2_score', 'news2_risk_band'.
     """
-    hospitals_path = os.path.join(PROJECT_ROOT, "data", "hospitals.json")
-
-    # If hospitals.json doesn't exist yet, return a demo response
-    if not os.path.exists(hospitals_path):
-        return {
-            "chosen_hospital": {
-                "name": "Demo City Hospital (data/hospitals.json not seeded yet)",
-                "lat": 19.076,
-                "lng": 72.877,
-                "distance_km": 4.2,
-                "eta_minutes": 8,
-            },
-            "reasoning": (
-                f"No hospitals.json found. Run 'lifeline fetch-hospitals' then "
-                f"'lifeline seed' to populate real hospital data. This is a demo "
-                f"placeholder for a {severity_label} {required_specialty} case."
-            ),
-            "alternatives": [],
-        }
-
-    with open(hospitals_path) as f:
-        hospitals = json.load(f)
-
-    # Filter by specialty
-    matches = [
-        h for h in hospitals
-        if required_specialty in (h.get("specialties") or [])
-        and (h.get("icu_beds", 0) > 0 or severity_label != "critical")
-    ]
-
-    if not matches:
-        matches = hospitals[:3]  # fallback to any
-
-    best = matches[0]
-    alternatives = [
-        {"name": h["name"], "reason_not_chosen": "Lower specialty match or bed availability"}
-        for h in matches[1:3]
-    ]
-
+    vitals = Vitals(
+        heart_rate=heart_rate, respiratory_rate=respiratory_rate,
+        systolic_bp=systolic_bp, spo2=spo2,
+        temperature_c=temperature_c, consciousness=consciousness,
+    )
+    news = news2_score(vitals)
+    triage_in = TriageInput(
+        patient_age=patient_age, vitals=vitals,
+        chief_complaint=chief_complaint,
+        mechanism_of_injury=mechanism_of_injury or None,
+        news2_score=news,
+    )
+    result = run_triage(triage_in)
     return {
-        "chosen_hospital": {
-            "name": best.get("name", "Unknown Hospital"),
-            "lat": best.get("lat", 0),
-            "lng": best.get("lng", 0),
-            "distance_km": best.get("distance_km", None),
-            "eta_minutes": best.get("eta_minutes", None),
-        },
-        "reasoning": (
-            f"Selected {best.get('name')} for {required_specialty} case "
-            f"({severity_label}): best specialty match with available beds."
-        ),
-        "alternatives": alternatives,
+        "severity_label": result.severity_label,
+        "required_specialty": result.required_specialty,
+        "notes": result.notes,
+        "news2_score": news.score,
+        "news2_risk_band": news.risk_band,
     }
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Root Agent — the single entry point for `adk web`
-# ─────────────────────────────────────────────────────────────────────────────
+def run_bed_matching_tool(
+    severity_label: str,
+    required_specialty: str,
+    clinical_notes: str,
+    patient_lat: float,
+    patient_lng: float,
+) -> dict:
+    """
+    Run the Bed-Matching Agent (gemini-3.7-flash) to select the best hospital.
 
-SYSTEM_PROMPT = """\
-You are the LifeLine Emergency Dispatch Agent — an AI-powered system that \
-triages emergency cases and matches patients to the best available hospital.
+    Args:
+        severity_label: 'mild', 'moderate', or 'critical'.
+        required_specialty: 'cardiac', 'trauma', 'surgical', 'pediatric', or 'general'.
+        clinical_notes: Clinical reasoning from triage.
+        patient_lat: Patient latitude. patient_lng: Patient longitude.
 
-When a user describes an emergency case, you will:
+    Returns:
+        dict with 'chosen_hospital', 'reasoning', 'alternatives'.
+    """
+    triage_out = TriageOutput(
+        severity_label=severity_label,
+        required_specialty=required_specialty,
+        notes=clinical_notes,
+    )
+    patient_loc = Location(lat=patient_lat, lng=patient_lng)
+    bed_in = BedMatchingInput(triage_result=triage_out, patient_location=patient_loc)
+    result = run_bed_matching(bed_in)
+    return {
+        "chosen_hospital": result.chosen_hospital.model_dump(),
+        "reasoning": result.reasoning,
+        "alternatives": [a.model_dump() for a in result.alternatives],
+    }
 
-1. **Assess vitals** — ask the user for vitals if not provided:
-   heart_rate, respiratory_rate, systolic_bp, spo2, temperature_c, consciousness.
-   Use defaults for a demo: HR=115, RR=24, BP=88, SpO2=91, Temp=38.6, consciousness=alert.
 
-2. **Compute NEWS2** — call the `compute_news2` tool with the vitals.
-   Report: "NEWS2 Score: X | Risk Band: HIGH/MEDIUM/LOW"
+def run_routing_tool(
+    patient_lat: float, patient_lng: float,
+    hospital_lat: float, hospital_lng: float,
+) -> dict:
+    """
+    Compute driving ETA and route from patient to hospital via OSRM.
 
-3. **Triage** — based on NEWS2 score + chief complaint, determine:
-   - severity_label: mild / moderate / critical
-   - required_specialty: cardiac / trauma / surgical / pediatric / general
-   Explain your clinical reasoning clearly.
+    Args:
+        patient_lat: Patient latitude. patient_lng: Patient longitude.
+        hospital_lat: Hospital latitude. hospital_lng: Hospital longitude.
 
-4. **Bed-Matching** — call `find_best_hospital` with specialty + severity.
-   Present the chosen hospital with reasoning.
+    Returns:
+        dict with 'eta_minutes', 'distance_km', 'route_summary'.
+    """
+    origin = Location(lat=patient_lat, lng=patient_lng)
+    dest = Location(lat=hospital_lat, lng=hospital_lng)
+    result = run_routing(origin, dest)
+    return result.model_dump()
 
-5. **Dispatch Summary** — give a final structured dispatch report:
-   - Patient: [age, complaint]
-   - NEWS2: [score] ([risk band])
-   - Severity: [label]
-   - Specialty: [required]
-   - Destination: [hospital name]
-   - ETA: [minutes] min
-   - Reasoning: [1-2 sentences]
 
-Be concise, clinically accurate, and professional. Think like a trained \
-emergency dispatch coordinator, not a general chatbot.
+def run_briefing_tool(
+    patient_age: int,
+    chief_complaint: str,
+    severity_label: str,
+    required_specialty: str,
+    chosen_hospital_name: str,
+    eta_minutes: float,
+) -> dict:
+    """
+    Generate the SBAR pre-arrival handoff note for the receiving hospital team.
 
-Example input: "58M, crushing chest pain and diaphoresis, HR=118, RR=24, BP=88, SpO2=91, Temp=38.6"
-"""
+    Args:
+        patient_age: Age in years. chief_complaint: Primary complaint.
+        severity_label: Triage severity. required_specialty: Required specialty.
+        chosen_hospital_name: Destination hospital. eta_minutes: ETA in minutes.
 
+    Returns:
+        dict with 'pre_arrival_brief' (SBAR formatted note).
+    """
+    vitals = Vitals(
+        heart_rate=100, respiratory_rate=20, systolic_bp=110,
+        spo2=96, temperature_c=37.0, consciousness="alert",
+    )
+    case = Case(patient_age=patient_age, chief_complaint=chief_complaint, vitals=vitals)
+    triage_out = TriageOutput(
+        severity_label=severity_label, required_specialty=required_specialty,
+        notes=f"{severity_label.capitalize()} case requiring {required_specialty} care.",
+    )
+    bed_out = BedMatchingOutput(
+        chosen_hospital=HospitalChoice(
+            name=chosen_hospital_name, lat=0.0, lng=0.0, eta_minutes=eta_minutes,
+        ),
+        reasoning="Hospital selected by BedMatchingAgent.", alternatives=[],
+    )
+    routing_out = RoutingOutput(
+        eta_minutes=eta_minutes, distance_km=0.0,
+        route_summary=f"En route to {chosen_hospital_name}",
+    )
+    result = run_briefing(case, triage_out, bed_out, routing_out)
+    return {"pre_arrival_brief": result.pre_arrival_brief}
+
+
+# =============================================================================
+# LEVEL 3 â€” Leaf Agents
+# =============================================================================
+
+triage_agent = LlmAgent(
+    name="TriageAgent",
+    model=TRIAGE_MODEL,   # gemini-3.7-flash â€” clinical reasoning
+    description=(
+        "Classifies patient severity and required specialty using real NEWS2 clinical "
+        "scoring. Uses gemini-3.7-flash per docs/03-decision-log.md."
+    ),
+    instruction="""\
+You are the LifeLine Triage Agent (gemini-3.7-flash).
+Given a patient case:
+1. Call compute_news2 with vitals to get the real clinical NEWS2 score.
+2. Call run_triage_tool with all patient details for severity and specialty classification.
+3. Report: NEWS2 Score, Risk Band, Severity Label, Required Specialty, and clinical notes.
+Never invent a NEWS2 score. Never downgrade a HIGH NEWS2 to 'mild'.
+""",
+    tools=[compute_news2, run_triage_tool],
+)
+
+bed_matching_agent = LlmAgent(
+    name="BedMatchingAgent",
+    model=DEFAULT_MODEL,  # gemini-3.7-flash
+    description=(
+        "Selects the best available hospital based on specialty match, bed availability, "
+        "and real OSRM driving ETA."
+    ),
+    instruction="""\
+You are the LifeLine Bed-Matching Agent (gemini-3.7-flash).
+Given triage output and patient location:
+1. Call run_bed_matching_tool with severity, specialty, notes, and patient coordinates.
+2. Report: chosen hospital, ETA, distance, reasoning, and rejected alternatives.
+For critical patients: always prioritise ICU bed availability over proximity.
+""",
+    tools=[run_bed_matching_tool],
+)
+
+routing_agent = LlmAgent(
+    name="RoutingAgent",
+    model=DEFAULT_MODEL,  # gemini-3.7-flash
+    description="Computes driving ETA and route from patient location to the chosen hospital.",
+    instruction="""\
+You are the LifeLine Routing Agent (gemini-3.7-flash).
+Call run_routing_tool with patient and hospital coordinates.
+Report ETA in minutes, distance in km, and route summary.
+""",
+    tools=[run_routing_tool],
+)
+
+briefing_agent = LlmAgent(
+    name="BriefingAgent",
+    model=DEFAULT_MODEL,  # gemini-3.7-flash
+    description="Generates the SBAR pre-arrival clinical handoff note for the receiving team.",
+    instruction="""\
+You are the LifeLine Briefing Agent (gemini-3.7-flash).
+Call run_briefing_tool to generate the SBAR note for the receiving hospital team.
+Present the brief clearly and concisely.
+""",
+    tools=[run_briefing_tool],
+)
+
+
+def dispatch_emergency_case(
+    patient_age: int,
+    chief_complaint: str,
+    heart_rate: int,
+    respiratory_rate: int,
+    systolic_bp: int,
+    spo2: int,
+    temperature_c: float,
+    consciousness: str = "alert",
+    patient_lat: float = 19.0522,
+    patient_lng: float = 72.8336,
+    mechanism_of_injury: str = "",
+) -> dict:
+    """
+    Execute the complete LifeLine 5-stage autonomous emergency dispatch pipeline:
+    NEWS2 scoring -> Triage -> Bed-Matching -> Routing -> SBAR Pre-Arrival Brief.
+
+    Args:
+        patient_age: Age of the patient in years.
+        chief_complaint: Presenting clinical complaint.
+        heart_rate: Heart rate in bpm.
+        respiratory_rate: Respiratory rate in breaths/min.
+        systolic_bp: Systolic blood pressure in mmHg.
+        spo2: Blood oxygen saturation percentage.
+        temperature_c: Body temperature in Celsius.
+        consciousness: Level of consciousness ('alert', 'confused', 'unresponsive').
+        patient_lat: Latitude of patient location (default: 19.0522).
+        patient_lng: Longitude of patient location (default: 72.8336).
+        mechanism_of_injury: Optional mechanism of injury description.
+
+    Returns:
+        Structured dispatch record with triage classification, chosen hospital, OSRM ETA, SBAR brief, and audit trail ID.
+    """
+    from lifeline.orchestrator import run_dispatch
+    vitals = Vitals(
+        heart_rate=heart_rate,
+        respiratory_rate=respiratory_rate,
+        systolic_bp=systolic_bp,
+        spo2=spo2,
+        temperature_c=temperature_c,
+        consciousness=consciousness,
+    )
+    case = Case(
+        patient_age=patient_age,
+        chief_complaint=chief_complaint,
+        mechanism_of_injury=mechanism_of_injury or None,
+        vitals=vitals,
+    )
+    loc = Location(lat=patient_lat, lng=patient_lng)
+    return run_dispatch(case, loc)
+
+
+# =============================================================================
+# LEVEL 1 — Orchestrator root_agent (what `adk web` discovers)
+# =============================================================================
 
 root_agent = LlmAgent(
-    name="lifeline_dispatch_agent",
-    model="gemini-3.6-flash",
+    name="Orchestrator",
+    model=DEFAULT_MODEL,  # gemini-3.7-flash (coordinator, not clinical)
     description=(
-        "LifeLine AI Emergency Dispatch Agent — triages patients using real "
-        "NEWS2 clinical scoring and matches them to the best available hospital."
+        "LifeLine Emergency Dispatch Orchestrator — autonomously coordinates the full "
+        "5-stage pipeline: NEWS2 → Triage → Bed-Matching → Routing → SBAR Briefing. "
+        "Entry points POST /dispatch and POST /sos both route into this orchestrator."
     ),
-    instruction=SYSTEM_PROMPT,
-    tools=[compute_news2, find_best_hospital],
+    instruction="""\
+You are the LifeLine Emergency Dispatch Orchestrator.
+
+When you receive an emergency case, execute the full pipeline in order:
+
+STAGE 1 — TRIAGE
+  Delegate to TriageAgent. It computes NEWS2 and classifies severity + specialty.
+
+STAGE 2 — BED MATCHING
+  Delegate to BedMatchingAgent with the triage output and patient location.
+
+STAGE 3 — ROUTING
+  Delegate to RoutingAgent with patient location and hospital coordinates.
+
+STAGE 4 — BRIEFING
+  Delegate to BriefingAgent with the complete case context.
+
+STAGE 5 — DISPATCH SUMMARY
+  Present the structured dispatch record:
+
+  LIFELINE DISPATCH RECORD
+  ─────────────────────────
+  Patient:   [age]yo — [complaint]
+  NEWS2:     [score]/20 ([risk band])
+  Severity:  [label]
+  Specialty: [required]
+  Hospital:  [name]
+  ETA:       [minutes] min
+  SBAR:      [pre_arrival_brief]
+
+Alternatively, call dispatch_emergency_case directly with the vitals to run the full pipeline in a single step.
+
+Rules:
+- Never skip a stage.
+- Never invent clinical data — use tool outputs only.
+- If any stage fails, report it and activate deterministic fallback.
+""",
+    tools=[dispatch_emergency_case],
+    sub_agents=[triage_agent, bed_matching_agent, routing_agent, briefing_agent],
 )

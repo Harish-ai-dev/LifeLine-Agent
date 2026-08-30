@@ -86,49 +86,51 @@ def run_briefing(
     triage: TriageOutput,
     bed_match: BedMatchingOutput,
     routing: Optional[RoutingOutput] = None,
+    max_loops: int = 3,
 ) -> BriefingOutput:
     """
     Invoke Briefing Agent synchronously via ADK Runner.
     Returns structured BriefingOutput.
     """
-    try:
-        agent = _get_briefing_agent()
-        session_service = InMemorySessionService()
-        runner = Runner(
-            agent=agent,
-            app_name=APP_NAME,
-            session_service=session_service,
-        )
+    if max_loops > 0:
+        try:
+            agent = _get_briefing_agent()
+            session_service = InMemorySessionService()
+            runner = Runner(
+                agent=agent,
+                app_name=APP_NAME,
+                session_service=session_service,
+            )
 
-        session = run_async(
-            session_service.create_session(app_name=APP_NAME, user_id="dispatch")
-        )
+            session = run_async(
+                session_service.create_session(app_name=APP_NAME, user_id="dispatch")
+            )
 
-        prompt_text = _build_briefing_prompt(case, triage, bed_match, routing)
-        user_message = genai_types.Content(
-            role="user",
-            parts=[genai_types.Part(text=prompt_text)],
-        )
+            prompt_text = _build_briefing_prompt(case, triage, bed_match, routing)
+            user_message = genai_types.Content(
+                role="user",
+                parts=[genai_types.Part(text=prompt_text)],
+            )
 
-        final_response = None
-        for event in runner.run(
-            user_id="dispatch",
-            session_id=session.id,
-            new_message=user_message,
-        ):
-            if event.is_final_response() and event.content:
-                final_response = event.content.parts[0].text
-                break
+            final_response = None
+            for event in runner.run(
+                user_id="dispatch",
+                session_id=session.id,
+                new_message=user_message,
+            ):
+                if event.is_final_response() and event.content:
+                    final_response = event.content.parts[0].text
+                    break
 
-        if final_response:
-            try:
-                data = json.loads(final_response)
-            except json.JSONDecodeError:
-                cleaned = final_response.strip().strip("```json").strip("```").strip()
-                data = json.loads(cleaned)
-            return BriefingOutput(**data)
-    except Exception:
-        pass
+            if final_response:
+                try:
+                    data = json.loads(final_response)
+                except json.JSONDecodeError:
+                    cleaned = final_response.strip().strip("```json").strip("```").strip()
+                    data = json.loads(cleaned)
+                return BriefingOutput(**data)
+        except Exception:
+            pass
 
     # Graceful fallback briefing
     eta_val = (

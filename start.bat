@@ -1,18 +1,20 @@
 @echo off
-title LifeLine Agent — Autonomous Emergency Dispatch & ADK Swarm
 setlocal enabledelayedexpansion
 
+:: Ensure UTF-8 console output
+chcp 65001 >nul
+
+:: Set window title
+title LifeLine Agent - Autonomous Emergency Dispatch and ADK Orchestrator
+
 echo ===================================================================
-echo 🚑 LifeLine Agent — Autonomous Emergency Dispatch System
-echo    Next.js (3000) + FastAPI (8000) + Google ADK Web (8088)
+echo  LifeLine Agent - Autonomous Emergency Dispatch System
+echo  Next.js (3000) + FastAPI (8000) + Google ADK Web (8088)
 echo ===================================================================
 echo.
 
 :: Ensure working directory is project root
 cd /d "%~dp0"
-
-:: Add Python Scripts directories to PATH
-set "PATH=%PATH%;%APPDATA%\Python\Python314\Scripts;C:\Python314\Scripts;C:\Python313\Scripts;C:\Python312\Scripts;C:\Python311\Scripts"
 
 :: 1. Check Python
 where python >nul 2>&1
@@ -51,27 +53,21 @@ echo [2/3] Starting Next.js Frontend on port 3000...
 start "LifeLine-Frontend" /B cmd /c "cd frontend && npm run start"
 
 echo [3/3] Starting Google ADK Visual Web UI on port 8088...
-where adk >nul 2>&1
-if %ERRORLEVEL% EQU 0 (
-    start "LifeLine-ADK-Web" /B adk web --port 8088 lifeline_adk
-) else (
-    if exist "%APPDATA%\Python\Python314\Scripts\adk.exe" (
-        start "LifeLine-ADK-Web" /B "%APPDATA%\Python\Python314\Scripts\adk.exe" web --port 8088 lifeline_adk
-    ) else (
-        start "LifeLine-ADK-Web" /B python -m google.adk.cli.cli web --port 8088 lifeline_adk
-    )
-)
+if exist "lifeline_adk\.adk\session.db" del /f /q "lifeline_adk\.adk\session.db" 2>nul
+start "LifeLine-ADK-Web" /B python -c "import sys; from google.adk.cli import main; sys.argv=['adk', 'web', '--port', '8088', 'lifeline_adk']; main()"
 
 echo.
 echo ===================================================================
-echo ✅ LifeLine Agent is now LIVE!
-echo    • Web Showcase:          http://localhost:3000
-echo    • Secret Admin & Demo:   http://localhost:3000/og/admin
-echo    • Google ADK Web UI:     http://localhost:8088
-echo    • Login Portal:          http://localhost:3000/login
-echo    • Backend API:           http://localhost:8000
-echo    • Swagger Docs:          http://localhost:8000/docs
-echo    • Health Check:          http://localhost:8000/health
+echo  LifeLine Agent is now LIVE
+echo  * Web Showcase:     http://localhost:3000
+echo  * Login Portal:     http://localhost:3000/login
+echo  * ADK Web UI:       http://localhost:8088
+echo  * Backend API:      http://localhost:8000
+echo  * Swagger Docs:     http://localhost:8000/docs
+echo  * Health Check:     http://localhost:8000/health
+echo ===================================================================
+echo  Co-Pilot in the UI connects directly to the Orchestrator.
+echo  All 5 emergency scenarios can be triggered from UI, ADK, or CLI.
 echo ===================================================================
 echo.
 

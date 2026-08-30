@@ -78,7 +78,7 @@ export default function MarketingLayout({
         {/* Demo Video Modal */}
         {isDemoOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-            <div className="relative w-full max-w-4xl rounded-3xl bg-[#080D1A] border border-cyan-800 shadow-2xl overflow-hidden font-mono text-xs">
+            <div className="relative w-full max-w-4xl rounded-3xl bg-white border border-slate-200 shadow-2xl overflow-hidden font-mono text-xs">
               <div className="p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between text-slate-700 dark:text-slate-200">
                 <span className="font-bold flex items-center space-x-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
