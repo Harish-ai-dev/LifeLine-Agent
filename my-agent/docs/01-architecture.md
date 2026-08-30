@@ -3,7 +3,7 @@
 ## System Diagram
 
 ```
-[React / Streamlit UI: Role Dashboards & Scenario Dispatch]
+[Next.js UI: Marketing, Dashboards & Simulator]
             |
             v
 [FastAPI Gateway: /dispatch, /donors, /patients, /reports]  (lifeline/main.py)

@@ -875,7 +875,7 @@ The table below lists all required and optional environment variables across bac
 | `DEMO_AUTH_MODE` | No | `true` | When `true`, enables zero-friction demo auth token generation. |
 | `DEMO_CITY` | No | `mumbai` | Default city for hospital geospatial queries. |
 | `PORT` | No | `8000` | FastAPI server port. |
-| `VITE_API_BASE_URL` | No | `http://localhost:8000` | Backend API URL used by React frontend. |
+| `NEXT_PUBLIC_API_BASE_URL` | No | `http://localhost:8000` | Backend API URL used by React frontend. |
 
 ---
 

@@ -30,7 +30,7 @@
 └───────────────────┘
         │
         ▼
-   [Streamlit UI: live agent log + final decision]
+   [Next.js UI: Live Agent Telemetry + Role Dashboards]
         │
    [Firestore: persisted case + decision trail = audit log]
         │
@@ -76,7 +76,7 @@
 - Add OSRM call for ETA/Distance.
 - Wrap pipeline in FastAPI app (`POST /dispatch`), deploy to Cloud Run.
 - Add Firestore write after each run.
-- Build Streamlit front end.
+- Build Next.js full-stack front end.
 
 ### Day 3 — Polish, docs, video, submit
 - Freeze features.

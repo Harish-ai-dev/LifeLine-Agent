@@ -11,75 +11,71 @@
 
 ---
 
-## 1. Clone & Install
+## 1. Clone & Unified Install
 
 ```bash
 git clone https://github.com/your-org/lifeline-agent.git
 cd lifeline-agent
-pip install -e ".[dev]"
+lifeline install
+# or: python -m lifeline install
 ```
 
-After install, the `lifeline` CLI is available:
-```bash
-lifeline --help
-```
+This single command checks prerequisites (Python ≥ 3.11, Node.js ≥ 18, npm) and installs both backend Python packages and Next.js frontend dependencies with zero direct npm exposure.
 
 ---
 
-## 2. First-Run: Configure API Keys (Super Admin Panel)
+## 2. Interactive Key Setup & Validation
 
+```bash
+lifeline setup
+# or reconfigure a single key:
+lifeline setup --key gemini
+```
+
+The interactive setup wizard walks through all credentials with **live validation** (including a live `gemini-3.5-flash` ping):
+- **Gemini API Key (Mandatory)** → [aistudio.google.com/apikey](https://aistudio.google.com/apikey)
+- **GCP / Firestore Project ID (Optional)** → e.g. `lifeline-3725b`
+- **Firebase Service Account JSON (Optional)** → Project Settings → Service Accounts
+- **Firebase Web API Key (Optional)** → Client Auth
+- **Demo City & Auth Mode** → e.g. `mumbai`, `DEMO_AUTH_MODE=true`
+
+All credentials are saved to `.env` and **AES-256 encrypted at rest** (`.admin_config.enc`).
+
+Alternatively, access the web-based Super Admin Panel at:
 ```bash
 lifeline admin
-# or: python start.py
 ```
-
-This opens the **Super Admin Panel** in your browser.
-
-1. **First visit** → Setup Wizard: create your Firebase admin email + password
-2. **Login** with those credentials
-3. Go to **🔑 API Keys** tab and fill in:
-   - `Gemini API Key` → [aistudio.google.com/apikey](https://aistudio.google.com/apikey)
-   - `GCP Project ID` → your Firebase/GCP project ID
-   - `Firebase Web API Key` → Firebase Console → Project Settings → General
-   - `Firebase Service Account JSON` → Firebase Console → Project Settings → Service Accounts → Generate New Key (paste full JSON)
-   - `Firestore Collection` → `dispatch_cases`
-   - `Demo City` → e.g. `mumbai`
-
-Keys are **AES-256 encrypted** on disk and never written to source code.
 
 ---
 
-## 3. Pull Real Hospital Data & Seed
+## 3. Verify Health & Status
 
 ```bash
-lifeline fetch-hospitals --city mumbai
+lifeline status
+```
+
+Displays live system health, API key validation states, dataset files, Gemini model tiers, and Firestore connectivity/offline mode.
+
+---
+
+## 4. Pull Real Hospital Data & Seed
+
+```bash
+lifeline fetch-hospitals mumbai
 lifeline seed
 ```
 
 ---
 
-## 4. Run the API Server
+## 5. Start the Full Application Stack
 
 ```bash
 lifeline run
-# or: python -m uvicorn lifeline.main:app --port 8000 --reload
 ```
 
-API live at: `http://localhost:8000`  
-Health check: `http://localhost:8000/health`  
-API docs: `http://localhost:8000/docs`
+Pre-flight checks validate mandatory keys before booting FastAPI backend (`http://localhost:8000`) and Next.js frontend (`http://localhost:3000`) concurrently.
 
----
-
-## 5. Launch the Frontend UI
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Opens Frontend Portal at `http://localhost:3000` or `http://localhost:5173`.
+Use `--backend-only` to launch just the API server.
 
 ---
 

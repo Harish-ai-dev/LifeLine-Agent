@@ -30,7 +30,7 @@ export default function FacilitiesDirectoryPage() {
   );
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-16">
+    <div className="space-y-6 w-full px-2 sm:px-4 lg:px-6 pb-16">
       {/* Header */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>

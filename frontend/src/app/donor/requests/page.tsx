@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { soundEffects } from '../../../utils/soundEffects';
 
+import { DonorResponseStatus } from '../../../types/dashboard';
+
 export default function DonorRequestsPage() {
   const { currentDonor, donorRequests, respondToDonorRequest } = useDashboard();
   const [activeRequestTab, setActiveRequestTab] = useState<'all' | 'my-active'>('all');
@@ -35,13 +37,13 @@ export default function DonorRequestsPage() {
 
   const displayedRequests = activeRequestTab === 'all' ? relevantRequests : myMatchedRequests;
 
-  const handleResponse = (requestId: string, statusType: any) => {
+  const handleResponse = (requestId: string, statusType: DonorResponseStatus) => {
     soundEffects.playAcknowledgeChime();
     respondToDonorRequest(requestId, currentDonor.id, statusType);
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-16">
+    <div className="space-y-6 w-full pb-16">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-[#0d1424] p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
         <div>

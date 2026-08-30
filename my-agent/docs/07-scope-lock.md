@@ -26,7 +26,7 @@
 - **Government Authority Intelligence Dashboard**: Regional network overview, hospital capacity strain indices, SLA compliance rates, AI-generated Daily Intelligence Briefing (`GET /reports/daily`) via **`gemini-3.5-flash`**, and interactive NL query assistant (`POST /reports/query`).
 
 ### 1.4. Frontend UI
-- **React + Vite + TypeScript Application**: Dedicated role-based screens with responsive layouts, dark clinical aesthetic, and real-time state management.
+- **Next.js App Router + TypeScript Application**: Dedicated role-based screens with responsive layouts, dark clinical aesthetic, and real-time state management.
 
 ---
 

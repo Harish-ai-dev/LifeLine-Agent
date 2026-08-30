@@ -107,7 +107,9 @@ def run_backend(port: int = 8000, reload: bool = False) -> subprocess.Popen:
 def run_frontend(port: int = 3000) -> subprocess.Popen:
     """Start the Next.js frontend development server."""
     npm = shutil.which("npm.cmd" if sys.platform == "win32" else "npm") or "npm"
-    cmd = [npm, "run", "dev", "--", "-p", str(port)]
+    # Port is already embedded in package.json "dev" script (next dev -p 3000).
+    # Do NOT pass -- -p <port> again or Next.js receives duplicate -p flags.
+    cmd = [npm, "run", "dev"]
 
     print(f"🌐 Starting Next.js frontend on http://localhost:{port}...")
     proc = subprocess.Popen(
@@ -116,6 +118,7 @@ def run_frontend(port: int = 3000) -> subprocess.Popen:
         shell=(sys.platform == "win32"),
     )
     return proc
+
 
 
 def main():

@@ -46,7 +46,8 @@ export function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 
-  if (!currentUser || pathname === '/') return null;
+  const isDashboardRoute = pathname.startsWith('/hospital') || pathname.startsWith('/government') || pathname.startsWith('/donor') || pathname.startsWith('/emergency');
+  if (!currentUser || !isDashboardRoute) return null;
 
   // Real-time badge counts
   const hospitalAlerts = alerts.filter((a) => a.assignedHospitalId === activeHospitalId);
@@ -90,6 +91,7 @@ export function Sidebar() {
               badge: hospitalAlerts.length > 0 ? hospitalAlerts.length : undefined,
               badgeColor: 'bg-sky-100 text-sky-700 border border-sky-200'
             },
+            { label: 'AI Copilot & Alerts', path: '/hospital/copilot', icon: Bot },
           ],
         },
         {
@@ -137,7 +139,7 @@ export function Sidebar() {
             { label: 'Regional Command', path: '/government', icon: LayoutDashboard },
             { label: 'Network Grid Map', path: '/government/network', icon: Network },
             { label: 'AI Intelligence Report', path: '/government/report', icon: FileBarChart2 },
-            { label: 'Ask AI Co-Pilot', path: '/government/ask-ai', icon: Bot },
+            { label: 'AI Copilot & Alerts', path: '/government/copilot', icon: Bot },
             { label: 'Jurisdiction Audit', path: '/government/audit', icon: ScrollText },
           ],
         },
@@ -169,9 +171,7 @@ export function Sidebar() {
       {/* Brand Header */}
       <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200 bg-slate-50">
         <div className="flex items-center gap-3 overflow-hidden">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-red-600 via-rose-600 to-sky-600 flex items-center justify-center text-white shadow-md shadow-red-500/20 shrink-0">
-            <Activity className="w-5 h-5 animate-pulse" />
-          </div>
+          <img src="/logo.png" alt="LifeLine Agent Logo" className="w-9 h-9 rounded-[11px] shadow-md shrink-0 hover:scale-110 transition-transform duration-300" />
           {!collapsed && (
             <div className="flex flex-col min-w-0">
               <span className="font-black text-sm tracking-tight text-slate-900 flex items-center gap-1.5">

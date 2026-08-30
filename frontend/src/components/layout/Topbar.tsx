@@ -65,7 +65,8 @@ export function Topbar() {
     }
   };
 
-  if (!currentUser || pathname === '/') return null;
+  const isDashboardRoute = pathname.startsWith('/hospital') || pathname.startsWith('/government') || pathname.startsWith('/donor') || pathname.startsWith('/emergency');
+  if (!currentUser || !isDashboardRoute) return null;
 
   // Real-time badge calculations
   const hospitalAlerts = alerts.filter((a) => a.assignedHospitalId === activeHospitalId);
@@ -238,7 +239,16 @@ export function Topbar() {
 
           {/* Voice Command Toggle */}
           <button
-            onClick={handleVoiceToggle}
+            onClick={() => {
+              soundEffects.playTelemetryPing();
+              if (currentUser.role === 'hospital_staff') {
+                router.push('/hospital/copilot?listen=true');
+              } else if (currentUser.role === 'government_authority') {
+                router.push('/government/copilot?listen=true');
+              } else {
+                handleVoiceToggle();
+              }
+            }}
             className={`p-2 rounded-xl transition-all ${
               isVoiceActive
                 ? 'bg-red-600 text-white animate-pulse shadow-lg shadow-red-600/50'
@@ -251,15 +261,21 @@ export function Topbar() {
 
           {/* AI Supervisor Co-Pilot Button */}
           <button
-            onClick={() => setIsAiOpen(true)}
+            onClick={() => {
+              soundEffects.playTelemetryPing();
+              if (currentUser.role === 'hospital_staff') {
+                router.push('/hospital/copilot');
+              } else if (currentUser.role === 'government_authority') {
+                router.push('/government/copilot');
+              } else {
+                setIsAiOpen(true);
+              }
+            }}
             className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs font-bold transition-all shadow-sm"
-            title="Open AI Supervisor Co-Pilot (⌘K)"
+            title="Open AI Supervisor Co-Pilot"
           >
             <Bot className="w-4 h-4 text-sky-600 animate-pulse" />
             <span className="hidden sm:inline">Ask AI Co-Pilot</span>
-            <kbd className="hidden md:inline-block px-1.5 py-0.5 text-[9px] font-mono font-normal rounded bg-white text-slate-500 border border-slate-200">
-              ⌘K
-            </kbd>
           </button>
 
           {/* Emergency SOS Button (Hospital Only) */}
@@ -280,7 +296,13 @@ export function Topbar() {
           <button
             onClick={() => {
               soundEffects.playTelemetryPing();
-              setIsNotificationOpen(true);
+              if (currentUser.role === 'hospital_staff') {
+                router.push('/hospital/copilot?tab=notifications');
+              } else if (currentUser.role === 'government_authority') {
+                router.push('/government/copilot?tab=notifications');
+              } else {
+                setIsNotificationOpen(true);
+              }
             }}
             className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl bg-slate-50 border border-slate-200 transition-colors relative"
             title="Emergency Notifications & Inbound Tracking"

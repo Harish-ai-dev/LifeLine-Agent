@@ -281,7 +281,7 @@ export const DonorNavigationMap: React.FC<DonorNavigationMapProps> = ({
                 className="flex-1 py-3.5 px-6 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-2"
               >
                 <Car className="w-4 h-4" />
-                <span>🚗 I'm on My Way (Start Travel)</span>
+                <span>🚗 I&apos;m on My Way (Start Travel)</span>
               </button>
             )}
 
@@ -291,7 +291,7 @@ export const DonorNavigationMap: React.FC<DonorNavigationMapProps> = ({
                 className="flex-1 py-3.5 px-6 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span>📍 I've Arrived at Hospital</span>
+                <span>📍 I&apos;ve Arrived at Hospital</span>
               </button>
             )}
 
@@ -303,7 +303,7 @@ export const DonorNavigationMap: React.FC<DonorNavigationMapProps> = ({
                   </div>
                   <div>
                     <h5 className="text-xs font-black text-emerald-950 uppercase">
-                      Welcome! You're at {loc.hospitalName}
+                      Welcome! You&apos;re at {loc.hospitalName}
                     </h5>
                     <p className="text-xs text-emerald-800">
                       Please show your Digital Fast-Track QR Pass at Blood Bank Reception ({loc.department}).
