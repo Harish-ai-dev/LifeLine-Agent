@@ -285,15 +285,15 @@ Present the brief clearly and concisely.
 
 
 # =============================================================================
-# LEVEL 1 â€” Orchestrator root_agent (what `adk web` discovers)
+# LEVEL 1 — Orchestrator root_agent (what `adk web` discovers)
 # =============================================================================
 
 root_agent = LlmAgent(
-    name="LifeLineOrchestrator",
+    name="Orchestrator",
     model=DEFAULT_MODEL,  # gemini-3.5-flash (coordinator, not clinical)
     description=(
-        "LifeLine Emergency Dispatch Orchestrator â€” autonomously coordinates the full "
-        "5-stage pipeline: NEWS2 â†’ Triage â†’ Bed-Matching â†’ Routing â†’ SBAR Briefing. "
+        "LifeLine Emergency Dispatch Orchestrator — autonomously coordinates the full "
+        "5-stage pipeline: NEWS2 → Triage → Bed-Matching → Routing → SBAR Briefing. "
         "Entry points POST /dispatch and POST /sos both route into this orchestrator."
     ),
     instruction="""\
@@ -301,24 +301,24 @@ You are the LifeLine Emergency Dispatch Orchestrator.
 
 When you receive an emergency case, execute the full pipeline in order:
 
-STAGE 1 â€” TRIAGE
+STAGE 1 — TRIAGE
   Delegate to TriageAgent. It computes NEWS2 and classifies severity + specialty.
 
-STAGE 2 â€” BED MATCHING
+STAGE 2 — BED MATCHING
   Delegate to BedMatchingAgent with the triage output and patient location.
 
-STAGE 3 â€” ROUTING
+STAGE 3 — ROUTING
   Delegate to RoutingAgent with patient location and hospital coordinates.
 
-STAGE 4 â€” BRIEFING
+STAGE 4 — BRIEFING
   Delegate to BriefingAgent with the complete case context.
 
-STAGE 5 â€” DISPATCH SUMMARY
+STAGE 5 — DISPATCH SUMMARY
   Present the structured dispatch record:
 
   LIFELINE DISPATCH RECORD
-  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  Patient:   [age]yo â€” [complaint]
+  ─────────────────────────
+  Patient:   [age]yo — [complaint]
   NEWS2:     [score]/20 ([risk band])
   Severity:  [label]
   Specialty: [required]
@@ -328,13 +328,8 @@ STAGE 5 â€” DISPATCH SUMMARY
 
 Rules:
 - Never skip a stage.
-- Never invent clinical data â€” use tool outputs only.
+- Never invent clinical data — use tool outputs only.
 - If any stage fails, report it and activate deterministic fallback.
 """,
     sub_agents=[triage_agent, bed_matching_agent, routing_agent, briefing_agent],
 )
-
-
-import json
-import os
-import sys

@@ -1,11 +1,15 @@
 @echo off
-chcp 65001 >nul
-title LifeLine Agent — Autonomous Emergency Dispatch & ADK Swarm
 setlocal enabledelayedexpansion
 
+:: Ensure UTF-8 console output
+chcp 65001 >nul
+
+:: Set window title
+title LifeLine Agent - Autonomous Emergency Dispatch and ADK Orchestrator
+
 echo ===================================================================
-echo 🚑 LifeLine Agent — Autonomous Emergency Dispatch System
-echo    Next.js (3000) + FastAPI (8000) + Google ADK Web (8088)
+echo  LifeLine Agent - Autonomous Emergency Dispatch System
+echo  Next.js (3000) + FastAPI (8000) + Google ADK Web (8088)
 echo ===================================================================
 echo.
 
@@ -53,14 +57,16 @@ start "LifeLine-ADK-Web" /B python -c "import sys; from google.adk.cli import ma
 
 echo.
 echo ===================================================================
-echo ✅ LifeLine Agent is now LIVE!
-echo    • Web Showcase:          http://localhost:3000
-echo    • Secret Admin & Demo:   http://localhost:3000/og/admin
-echo    • Google ADK Web UI:     http://localhost:8088
-echo    • Login Portal:          http://localhost:3000/login
-echo    • Backend API:           http://localhost:8000
-echo    • Swagger Docs:          http://localhost:8000/docs
-echo    • Health Check:          http://localhost:8000/health
+echo  LifeLine Agent is now LIVE
+echo  * Web Showcase:     http://localhost:3000
+echo  * Login Portal:     http://localhost:3000/login
+echo  * ADK Web UI:       http://localhost:8088
+echo  * Backend API:      http://localhost:8000
+echo  * Swagger Docs:     http://localhost:8000/docs
+echo  * Health Check:     http://localhost:8000/health
+echo ===================================================================
+echo  Co-Pilot in the UI connects directly to the Orchestrator.
+echo  All 5 emergency scenarios can be triggered from UI, ADK, or CLI.
 echo ===================================================================
 echo.
 
