@@ -1,0 +1,1597 @@
+{
+  "findings": [
+    {
+      "page": "/web",
+      "breakpoint": "1440px",
+      "category": "Visual / Assets",
+      "severity": "P2",
+      "description": "Broken image source: /logo.png, /logo.png",
+      "screenshot": "docs/screenshots/scan/web_landing_1440px.png"
+    },
+    {
+      "page": "/web",
+      "breakpoint": "1920px",
+      "category": "Visual / Assets",
+      "severity": "P2",
+      "description": "Broken image source: /logo.png, /logo.png",
+      "screenshot": "docs/screenshots/scan/web_landing_1920px.png"
+    }
+  ],
+  "log": [
+    {
+      "page": "/web",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "web_landing_375px.png"
+    },
+    {
+      "page": "/",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "root_landing_375px.png"
+    },
+    {
+      "page": "/about",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "about_375px.png"
+    },
+    {
+      "page": "/agents",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "agents_375px.png"
+    },
+    {
+      "page": "/architecture",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "architecture_375px.png"
+    },
+    {
+      "page": "/contribute",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "contribute_375px.png"
+    },
+    {
+      "page": "/docs",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "docs_375px.png"
+    },
+    {
+      "page": "/legal",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "legal_375px.png"
+    },
+    {
+      "page": "/provenance",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "provenance_375px.png"
+    },
+    {
+      "page": "/simulator",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "simulator_375px.png"
+    },
+    {
+      "page": "/emergency",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "emergency_sos_375px.png"
+    },
+    {
+      "page": "/login",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "login_375px.png"
+    },
+    {
+      "page": "/hospital",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_dashboard_375px.png"
+    },
+    {
+      "page": "/hospital/facility/hosp-lilavati",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_facility_lilavati_375px.png"
+    },
+    {
+      "page": "/hospital/facility/hosp-kem",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_facility_kem_375px.png"
+    },
+    {
+      "page": "/hospital/facilities",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_facilities_375px.png"
+    },
+    {
+      "page": "/hospital/beds",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_beds_375px.png"
+    },
+    {
+      "page": "/hospital/blood-bank",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_blood_bank_375px.png"
+    },
+    {
+      "page": "/hospital/requests",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_requests_375px.png"
+    },
+    {
+      "page": "/hospital/issues",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_issues_375px.png"
+    },
+    {
+      "page": "/hospital/inventory",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_inventory_375px.png"
+    },
+    {
+      "page": "/hospital/patients",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_patients_375px.png"
+    },
+    {
+      "page": "/hospital/sos",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_sos_375px.png"
+    },
+    {
+      "page": "/hospital/audit",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_audit_375px.png"
+    },
+    {
+      "page": "/hospital/copilot",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_copilot_375px.png"
+    },
+    {
+      "page": "/donor",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "donor_dashboard_375px.png"
+    },
+    {
+      "page": "/donor/profile",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "donor_profile_375px.png"
+    },
+    {
+      "page": "/donor/requests",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "donor_requests_375px.png"
+    },
+    {
+      "page": "/donor/donations",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "donor_donations_375px.png"
+    },
+    {
+      "page": "/government",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_dashboard_375px.png"
+    },
+    {
+      "page": "/government/network",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_network_375px.png"
+    },
+    {
+      "page": "/government/report",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_report_375px.png"
+    },
+    {
+      "page": "/government/audit",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_audit_375px.png"
+    },
+    {
+      "page": "/government/copilot",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_copilot_375px.png"
+    },
+    {
+      "page": "/government/ask-ai",
+      "breakpoint": "375px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_ask_ai_375px.png"
+    },
+    {
+      "page": "/web",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "web_landing_768px.png"
+    },
+    {
+      "page": "/",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "root_landing_768px.png"
+    },
+    {
+      "page": "/about",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "about_768px.png"
+    },
+    {
+      "page": "/agents",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "agents_768px.png"
+    },
+    {
+      "page": "/architecture",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "architecture_768px.png"
+    },
+    {
+      "page": "/contribute",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "contribute_768px.png"
+    },
+    {
+      "page": "/docs",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "docs_768px.png"
+    },
+    {
+      "page": "/legal",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "legal_768px.png"
+    },
+    {
+      "page": "/provenance",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "provenance_768px.png"
+    },
+    {
+      "page": "/simulator",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "simulator_768px.png"
+    },
+    {
+      "page": "/emergency",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "emergency_sos_768px.png"
+    },
+    {
+      "page": "/login",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "login_768px.png"
+    },
+    {
+      "page": "/hospital",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_dashboard_768px.png"
+    },
+    {
+      "page": "/hospital/facility/hosp-lilavati",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_facility_lilavati_768px.png"
+    },
+    {
+      "page": "/hospital/facility/hosp-kem",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_facility_kem_768px.png"
+    },
+    {
+      "page": "/hospital/facilities",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_facilities_768px.png"
+    },
+    {
+      "page": "/hospital/beds",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_beds_768px.png"
+    },
+    {
+      "page": "/hospital/blood-bank",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_blood_bank_768px.png"
+    },
+    {
+      "page": "/hospital/requests",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_requests_768px.png"
+    },
+    {
+      "page": "/hospital/issues",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_issues_768px.png"
+    },
+    {
+      "page": "/hospital/inventory",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_inventory_768px.png"
+    },
+    {
+      "page": "/hospital/patients",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_patients_768px.png"
+    },
+    {
+      "page": "/hospital/sos",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_sos_768px.png"
+    },
+    {
+      "page": "/hospital/audit",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_audit_768px.png"
+    },
+    {
+      "page": "/hospital/copilot",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_copilot_768px.png"
+    },
+    {
+      "page": "/donor",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "donor_dashboard_768px.png"
+    },
+    {
+      "page": "/donor/profile",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "donor_profile_768px.png"
+    },
+    {
+      "page": "/donor/requests",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "donor_requests_768px.png"
+    },
+    {
+      "page": "/donor/donations",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "donor_donations_768px.png"
+    },
+    {
+      "page": "/government",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_dashboard_768px.png"
+    },
+    {
+      "page": "/government/network",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_network_768px.png"
+    },
+    {
+      "page": "/government/report",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_report_768px.png"
+    },
+    {
+      "page": "/government/audit",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_audit_768px.png"
+    },
+    {
+      "page": "/government/copilot",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_copilot_768px.png"
+    },
+    {
+      "page": "/government/ask-ai",
+      "breakpoint": "768px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_ask_ai_768px.png"
+    },
+    {
+      "page": "/web",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "web_landing_1024px.png"
+    },
+    {
+      "page": "/",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "root_landing_1024px.png"
+    },
+    {
+      "page": "/about",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "about_1024px.png"
+    },
+    {
+      "page": "/agents",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "agents_1024px.png"
+    },
+    {
+      "page": "/architecture",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "architecture_1024px.png"
+    },
+    {
+      "page": "/contribute",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "contribute_1024px.png"
+    },
+    {
+      "page": "/docs",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "docs_1024px.png"
+    },
+    {
+      "page": "/legal",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "legal_1024px.png"
+    },
+    {
+      "page": "/provenance",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "provenance_1024px.png"
+    },
+    {
+      "page": "/simulator",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "simulator_1024px.png"
+    },
+    {
+      "page": "/emergency",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "emergency_sos_1024px.png"
+    },
+    {
+      "page": "/login",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "login_1024px.png"
+    },
+    {
+      "page": "/hospital",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_dashboard_1024px.png"
+    },
+    {
+      "page": "/hospital/facility/hosp-lilavati",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_facility_lilavati_1024px.png"
+    },
+    {
+      "page": "/hospital/facility/hosp-kem",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_facility_kem_1024px.png"
+    },
+    {
+      "page": "/hospital/facilities",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_facilities_1024px.png"
+    },
+    {
+      "page": "/hospital/beds",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_beds_1024px.png"
+    },
+    {
+      "page": "/hospital/blood-bank",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_blood_bank_1024px.png"
+    },
+    {
+      "page": "/hospital/requests",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_requests_1024px.png"
+    },
+    {
+      "page": "/hospital/issues",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_issues_1024px.png"
+    },
+    {
+      "page": "/hospital/inventory",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_inventory_1024px.png"
+    },
+    {
+      "page": "/hospital/patients",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_patients_1024px.png"
+    },
+    {
+      "page": "/hospital/sos",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_sos_1024px.png"
+    },
+    {
+      "page": "/hospital/audit",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_audit_1024px.png"
+    },
+    {
+      "page": "/hospital/copilot",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_copilot_1024px.png"
+    },
+    {
+      "page": "/donor",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "donor_dashboard_1024px.png"
+    },
+    {
+      "page": "/donor/profile",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "donor_profile_1024px.png"
+    },
+    {
+      "page": "/donor/requests",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "donor_requests_1024px.png"
+    },
+    {
+      "page": "/donor/donations",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "donor_donations_1024px.png"
+    },
+    {
+      "page": "/government",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_dashboard_1024px.png"
+    },
+    {
+      "page": "/government/network",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_network_1024px.png"
+    },
+    {
+      "page": "/government/report",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_report_1024px.png"
+    },
+    {
+      "page": "/government/audit",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_audit_1024px.png"
+    },
+    {
+      "page": "/government/copilot",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_copilot_1024px.png"
+    },
+    {
+      "page": "/government/ask-ai",
+      "breakpoint": "1024px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_ask_ai_1024px.png"
+    },
+    {
+      "page": "/web",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "web_landing_1440px.png"
+    },
+    {
+      "page": "/",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "root_landing_1440px.png"
+    },
+    {
+      "page": "/about",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "about_1440px.png"
+    },
+    {
+      "page": "/agents",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "agents_1440px.png"
+    },
+    {
+      "page": "/architecture",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "architecture_1440px.png"
+    },
+    {
+      "page": "/contribute",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "contribute_1440px.png"
+    },
+    {
+      "page": "/docs",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "docs_1440px.png"
+    },
+    {
+      "page": "/legal",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "legal_1440px.png"
+    },
+    {
+      "page": "/provenance",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "provenance_1440px.png"
+    },
+    {
+      "page": "/simulator",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "simulator_1440px.png"
+    },
+    {
+      "page": "/emergency",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "emergency_sos_1440px.png"
+    },
+    {
+      "page": "/login",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "login_1440px.png"
+    },
+    {
+      "page": "/hospital",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_dashboard_1440px.png"
+    },
+    {
+      "page": "/hospital/facility/hosp-lilavati",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_facility_lilavati_1440px.png"
+    },
+    {
+      "page": "/hospital/facility/hosp-kem",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_facility_kem_1440px.png"
+    },
+    {
+      "page": "/hospital/facilities",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_facilities_1440px.png"
+    },
+    {
+      "page": "/hospital/beds",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_beds_1440px.png"
+    },
+    {
+      "page": "/hospital/blood-bank",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_blood_bank_1440px.png"
+    },
+    {
+      "page": "/hospital/requests",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_requests_1440px.png"
+    },
+    {
+      "page": "/hospital/issues",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_issues_1440px.png"
+    },
+    {
+      "page": "/hospital/inventory",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_inventory_1440px.png"
+    },
+    {
+      "page": "/hospital/patients",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_patients_1440px.png"
+    },
+    {
+      "page": "/hospital/sos",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_sos_1440px.png"
+    },
+    {
+      "page": "/hospital/audit",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_audit_1440px.png"
+    },
+    {
+      "page": "/hospital/copilot",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_copilot_1440px.png"
+    },
+    {
+      "page": "/donor",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "donor_dashboard_1440px.png"
+    },
+    {
+      "page": "/donor/profile",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "donor_profile_1440px.png"
+    },
+    {
+      "page": "/donor/requests",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "donor_requests_1440px.png"
+    },
+    {
+      "page": "/donor/donations",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "donor_donations_1440px.png"
+    },
+    {
+      "page": "/government",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_dashboard_1440px.png"
+    },
+    {
+      "page": "/government/network",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_network_1440px.png"
+    },
+    {
+      "page": "/government/report",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_report_1440px.png"
+    },
+    {
+      "page": "/government/audit",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_audit_1440px.png"
+    },
+    {
+      "page": "/government/copilot",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_copilot_1440px.png"
+    },
+    {
+      "page": "/government/ask-ai",
+      "breakpoint": "1440px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_ask_ai_1440px.png"
+    },
+    {
+      "page": "/web",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "web_landing_1920px.png"
+    },
+    {
+      "page": "/",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "root_landing_1920px.png"
+    },
+    {
+      "page": "/about",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "about_1920px.png"
+    },
+    {
+      "page": "/agents",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "agents_1920px.png"
+    },
+    {
+      "page": "/architecture",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "architecture_1920px.png"
+    },
+    {
+      "page": "/contribute",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "contribute_1920px.png"
+    },
+    {
+      "page": "/docs",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "docs_1920px.png"
+    },
+    {
+      "page": "/legal",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "legal_1920px.png"
+    },
+    {
+      "page": "/provenance",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "provenance_1920px.png"
+    },
+    {
+      "page": "/simulator",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "simulator_1920px.png"
+    },
+    {
+      "page": "/emergency",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "emergency_sos_1920px.png"
+    },
+    {
+      "page": "/login",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "login_1920px.png"
+    },
+    {
+      "page": "/hospital",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_dashboard_1920px.png"
+    },
+    {
+      "page": "/hospital/facility/hosp-lilavati",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_facility_lilavati_1920px.png"
+    },
+    {
+      "page": "/hospital/facility/hosp-kem",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_facility_kem_1920px.png"
+    },
+    {
+      "page": "/hospital/facilities",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_facilities_1920px.png"
+    },
+    {
+      "page": "/hospital/beds",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_beds_1920px.png"
+    },
+    {
+      "page": "/hospital/blood-bank",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_blood_bank_1920px.png"
+    },
+    {
+      "page": "/hospital/requests",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_requests_1920px.png"
+    },
+    {
+      "page": "/hospital/issues",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_issues_1920px.png"
+    },
+    {
+      "page": "/hospital/inventory",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_inventory_1920px.png"
+    },
+    {
+      "page": "/hospital/patients",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_patients_1920px.png"
+    },
+    {
+      "page": "/hospital/sos",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_sos_1920px.png"
+    },
+    {
+      "page": "/hospital/audit",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_audit_1920px.png"
+    },
+    {
+      "page": "/hospital/copilot",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "hospital_copilot_1920px.png"
+    },
+    {
+      "page": "/donor",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "donor_dashboard_1920px.png"
+    },
+    {
+      "page": "/donor/profile",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "donor_profile_1920px.png"
+    },
+    {
+      "page": "/donor/requests",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "donor_requests_1920px.png"
+    },
+    {
+      "page": "/donor/donations",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "donor_donations_1920px.png"
+    },
+    {
+      "page": "/government",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_dashboard_1920px.png"
+    },
+    {
+      "page": "/government/network",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_network_1920px.png"
+    },
+    {
+      "page": "/government/report",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_report_1920px.png"
+    },
+    {
+      "page": "/government/audit",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_audit_1920px.png"
+    },
+    {
+      "page": "/government/copilot",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_copilot_1920px.png"
+    },
+    {
+      "page": "/government/ask-ai",
+      "breakpoint": "1920px",
+      "title": "LifeLine Agent · Autonomous Emergency Hospital Command System",
+      "errors": 0,
+      "networkErrors": 0,
+      "horizontalOverflow": false,
+      "screenshot": "government_ask_ai_1920px.png"
+    }
+  ]
+}

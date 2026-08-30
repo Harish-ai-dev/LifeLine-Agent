@@ -105,7 +105,7 @@ async def chat_copilot(payload: ChatRequest):
         def generate():
             try:
                 response = client.models.generate_content_stream(
-                    model="gemini-2.5-flash",
+                    model="gemini-3.6-flash",
                     contents=contents,
                     config=config
                 )

@@ -66,7 +66,7 @@ export default function FacilitiesDirectoryPage() {
       </div>
 
       {/* Hospital Facilities Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-6">
         {filteredHospitals.map((hospital) => {
           const hospitalAlerts = alerts.filter(
             (a) => a.assignedHospitalId === hospital.id && a.status !== 'resolved'
@@ -95,11 +95,23 @@ export default function FacilitiesDirectoryPage() {
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-black text-slate-900">{hospital.name}</h3>
+                  <Link
+                    href={`/hospital/facility/${hospital.id}`}
+                    onClick={() => setActiveHospitalId(hospital.id)}
+                    className="hover:text-sky-600 transition-colors group block"
+                  >
+                    <h3
+                      className="text-lg font-black text-slate-900 group-hover:text-sky-600 leading-snug whitespace-normal break-words flex items-start justify-between gap-2"
+                      title={hospital.name}
+                    >
+                      <span>{hospital.name}</span>
+                      <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-sky-600 shrink-0 mt-1" />
+                    </h3>
+                  </Link>
                   <span className="text-xs font-mono font-bold text-sky-700">{hospital.tier}</span>
-                  <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span className="truncate">{hospital.address}</span>
+                  <p className="text-xs text-slate-500 mt-1 flex items-start gap-1">
+                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+                    <span className="whitespace-normal break-words" title={hospital.address}>{hospital.address}</span>
                   </p>
                 </div>
 
@@ -127,21 +139,15 @@ export default function FacilitiesDirectoryPage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-3 border-t border-slate-100 flex items-center gap-2">
+              <div className="pt-3 border-t border-slate-100">
                 <Link
                   href={`/hospital/facility/${hospital.id}`}
-                  className="flex-1 py-2 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-mono font-bold text-center transition-colors flex items-center justify-center gap-1"
+                  onClick={() => setActiveHospitalId(hospital.id)}
+                  className="w-full py-2.5 px-4 bg-slate-900 hover:bg-sky-600 text-white rounded-xl text-xs font-mono font-bold text-center transition-colors flex items-center justify-center gap-2 shadow-sm"
                 >
-                  <span>Open Facility Dossier</span>
+                  <span>Enter Facility Console</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
-
-                <button
-                  onClick={() => setActiveHospitalId(hospital.id)}
-                  className="py-2 px-3 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-xl text-xs font-mono font-bold transition-colors"
-                >
-                  Set Active
-                </button>
               </div>
             </div>
           );

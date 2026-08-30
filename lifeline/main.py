@@ -165,6 +165,15 @@ async def emergency_sos(payload: dict = Body(...)):
     return dispatch_result
 
 
+@app.post("/capacity/sync", tags=["Hospital Operations & Beds"])
+async def capacity_sync():
+    """
+    On-demand data-integrity tool to reconcile network bed counts and inventory levels.
+    """
+    from lifeline.agents.capacity_sync_tool import run_capacity_sync
+    store = get_data_store()
+    return run_capacity_sync(store)
+
 # ── Register Modular Sub-Agent Routers ────────────────────────────────────────
 
 app.include_router(auth.router, prefix="/auth", tags=["Authentication & Identity"])

@@ -79,7 +79,7 @@ export default function DedicatedFacilityPage() {
       <div className="flex items-center justify-between">
         <Link
           href="/hospital/facilities"
-          className="inline-flex items-center gap-2 text-xs font-mono font-bold text-slate-600 hover:text-slate-900 transition-colors"
+          className="inline-flex items-center gap-2 text-xs font-mono font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to All Accredited Facilities</span>
@@ -97,37 +97,40 @@ export default function DedicatedFacilityPage() {
         </button>
       </div>
 
-      {/* Facility Master Banner */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+      {/* Facility Master Banner - Dark & Light Mode Token Support */}
+      <div className="bg-white dark:bg-[#0d1424] rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 transition-colors">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="flex items-start gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-sky-50 text-sky-600 border border-sky-200 flex items-center justify-center font-black text-2xl shadow-sm shrink-0">
+            <div className="w-16 h-16 rounded-2xl bg-sky-50 dark:bg-sky-600/20 text-sky-600 dark:text-sky-400 border border-sky-200 dark:border-sky-500/30 flex items-center justify-center font-black text-2xl shadow-sm shrink-0">
               <Building2 className="w-8 h-8" />
             </div>
 
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1">
-                <span className="text-[10px] font-mono font-bold bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-md">
+                <span className="text-[10px] font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-0.5 rounded-md border border-slate-200 dark:border-slate-700">
                   CODE: {hospital.code}
                 </span>
-                <span className="text-xs font-mono font-bold bg-sky-50 text-sky-700 border border-sky-200 px-2.5 py-0.5 rounded-md">
+                <span className="text-xs font-mono font-bold bg-sky-50 dark:bg-sky-500/20 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-500/40 px-2.5 py-0.5 rounded-md">
                   {hospital.tier}
                 </span>
-                <span className="text-xs font-mono text-slate-500">
+                <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
                   Sector: {hospital.district}
                 </span>
               </div>
 
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              <h1
+                className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight whitespace-normal break-words"
+                title={hospital.name}
+              >
                 {hospital.name}
               </h1>
 
-              <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 mt-1 font-mono">
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                  {hospital.address}
+              <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 dark:text-slate-400 mt-1 font-mono">
+                <span className="flex items-center gap-1" title={hospital.address}>
+                  <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span className="whitespace-normal break-words">{hospital.address}</span>
                 </span>
-                <span className="flex items-center gap-1 text-slate-700 font-bold">
+                <span className="flex items-center gap-1 text-slate-700 dark:text-slate-300 font-bold shrink-0">
                   <Phone className="w-3.5 h-3.5 text-slate-400" />
                   Emergency: {hospital.emergencyPhone}
                 </span>
@@ -137,17 +140,17 @@ export default function DedicatedFacilityPage() {
 
           {/* Diversion & Quick Status */}
           <div className="flex flex-wrap items-center gap-3">
-            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-center font-mono">
-              <span className="text-[10px] text-slate-500 uppercase block">Active Inbound</span>
-              <span className="text-xl font-black text-slate-900">{hospitalAlerts.length} Cases</span>
+            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-[#080d16] border border-slate-200 dark:border-slate-800 text-center font-mono">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase block">Active Inbound</span>
+              <span className="text-xl font-black text-slate-900 dark:text-white">{hospitalAlerts.length} Cases</span>
             </div>
 
             <button
               onClick={() => toggleDiversion(hospital.id)}
               className={`p-3.5 rounded-2xl border text-left font-mono transition-all ${
                 isDiverting
-                  ? 'bg-red-50 border-red-300 text-red-950 shadow-sm'
-                  : 'bg-emerald-50 border-emerald-300 text-emerald-950 shadow-sm'
+                  ? 'bg-red-50 dark:bg-red-950/40 border-red-300 dark:border-red-600 text-red-950 dark:text-red-200 shadow-sm'
+                  : 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-600 text-emerald-950 dark:text-emerald-200 shadow-sm'
               }`}
             >
               <span className="text-[10px] uppercase font-bold block flex items-center gap-1.5">
@@ -162,7 +165,7 @@ export default function DedicatedFacilityPage() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex flex-wrap gap-2 pt-4 border-t border-slate-100 text-xs font-mono font-bold">
+        <div className="flex flex-wrap gap-2 pt-4 border-t border-slate-100 dark:border-slate-800 text-xs font-mono font-bold">
           {[
             { id: 'triage', label: 'Live Triage Queue', count: hospitalAlerts.length },
             { id: 'capacity', label: 'Bed & Bay Capacity' },
@@ -175,8 +178,8 @@ export default function DedicatedFacilityPage() {
               onClick={() => setActiveTab(tab.id as any)}
               className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 ${
                 activeTab === tab.id
-                  ? 'bg-slate-900 text-white shadow-sm'
-                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                  ? 'bg-slate-900 dark:bg-sky-600 text-white shadow-sm'
+                  : 'bg-slate-50 dark:bg-[#080d16] text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800'
               }`}
             >
               <span>{tab.label}</span>
