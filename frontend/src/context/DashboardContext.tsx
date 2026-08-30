@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   PortalView,
   UserRole,
@@ -222,6 +223,8 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   const watchdogRanRef = useRef(false);
 
+  const router = useRouter();
+
   // ── AUTH ACTIONS ──────────────────────────────────────────────────────────
   const login = useCallback(
     async (username: string, role: UserRole, facilityId?: string, donorId?: string) => {
@@ -232,9 +235,9 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
         setAuthToken(data.token);
         if (data.user.facility_id) setActiveHospitalId(data.user.facility_id);
         if (donorId) setActiveDonorId(donorId);
-        if (data.user.role === 'hospital_staff') window.location.href = '/hospital';
-        else if (data.user.role === 'government_authority') window.location.href = '/government';
-        else if (data.user.role === 'blood_donor') window.location.href = '/donor';
+        if (data.user.role === 'hospital_staff') router.push('/hospital');
+        else if (data.user.role === 'government_authority') router.push('/government');
+        else if (data.user.role === 'blood_donor') router.push('/donor');
         return;
       } catch (e) {
         console.warn('[LifeLine] Backend API unreachable — using offline demo auth mode.');
@@ -270,16 +273,16 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
       }
       if (donorId) setActiveDonorId(donorId);
 
-      if (demoUser.role === 'hospital_staff') window.location.href = '/hospital';
-      else if (demoUser.role === 'government_authority') window.location.href = '/government';
-      else if (demoUser.role === 'blood_donor') window.location.href = '/donor';
+      if (demoUser.role === 'hospital_staff') router.push('/hospital');
+      else if (demoUser.role === 'government_authority') router.push('/government');
+      else if (demoUser.role === 'blood_donor') router.push('/donor');
     },
-    []
+    [router]
   );
 
   const logout = useCallback(() => {
-    window.location.href = '/login';
-  }, []);
+    router.push('/');
+  }, [router]);
 
   const switchUserRole = useCallback(
     (role: UserRole) => {

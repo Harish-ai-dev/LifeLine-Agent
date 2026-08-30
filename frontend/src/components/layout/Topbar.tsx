@@ -65,7 +65,7 @@ export function Topbar() {
     }
   };
 
-  if (!currentUser || pathname === '/login' || pathname === '/') return null;
+  if (!currentUser || pathname === '/') return null;
 
   // Real-time badge calculations
   const hospitalAlerts = alerts.filter((a) => a.assignedHospitalId === activeHospitalId);
@@ -299,7 +299,7 @@ export function Topbar() {
           {/* User Profile / Identity Pill */}
           <div className="flex items-center gap-2 pl-1">
             <Link
-              href="/login"
+              href="/"
               className="text-right hidden md:block group cursor-pointer hover:opacity-80 transition-opacity"
               title="Click to Switch Portal / Change User Profile"
             >
@@ -313,7 +313,7 @@ export function Topbar() {
             </Link>
 
             <Link
-              href="/login"
+              href="/"
               className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-sm font-bold shadow-inner hover:scale-105 transition-transform"
               title="Click to Switch Portal / Change User Profile"
             >

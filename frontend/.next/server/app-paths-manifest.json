@@ -1,3 +1,25 @@
 {
-  "/page": "app/page.js"
+  "/_not-found/page": "app/_not-found/page.js",
+  "/donor/profile/page": "app/donor/profile/page.js",
+  "/donor/requests/page": "app/donor/requests/page.js",
+  "/donor/donations/page": "app/donor/donations/page.js",
+  "/government/network/page": "app/government/network/page.js",
+  "/government/ask-ai/page": "app/government/ask-ai/page.js",
+  "/emergency/page": "app/emergency/page.js",
+  "/donor/page": "app/donor/page.js",
+  "/hospital/beds/page": "app/hospital/beds/page.js",
+  "/government/audit/page": "app/government/audit/page.js",
+  "/government/report/page": "app/government/report/page.js",
+  "/hospital/audit/page": "app/hospital/audit/page.js",
+  "/hospital/blood-bank/page": "app/hospital/blood-bank/page.js",
+  "/hospital/inventory/page": "app/hospital/inventory/page.js",
+  "/hospital/issues/page": "app/hospital/issues/page.js",
+  "/government/page": "app/government/page.js",
+  "/hospital/facility/[id]/page": "app/hospital/facility/[id]/page.js",
+  "/hospital/requests/page": "app/hospital/requests/page.js",
+  "/hospital/page": "app/hospital/page.js",
+  "/hospital/facilities/page": "app/hospital/facilities/page.js",
+  "/page": "app/page.js",
+  "/hospital/patients/page": "app/hospital/patients/page.js",
+  "/hospital/sos/page": "app/hospital/sos/page.js"
 }

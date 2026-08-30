@@ -46,7 +46,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 
-  if (!currentUser || pathname === '/login' || pathname === '/') return null;
+  if (!currentUser || pathname === '/') return null;
 
   // Real-time badge counts
   const hospitalAlerts = alerts.filter((a) => a.assignedHospitalId === activeHospitalId);
