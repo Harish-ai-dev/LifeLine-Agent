@@ -42,7 +42,7 @@ interface NavSection {
 }
 
 export function Sidebar() {
-  const { currentUser, alerts, activeHospitalId, issues, inventory, donorRequests } = useDashboard();
+  const { currentUser, alerts, activeHospitalId, issues, inventory, donorRequests, openCopilot } = useDashboard();
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -203,6 +203,7 @@ export function Sidebar() {
             )}
             {section.items.map((item) => {
               const Icon = item.icon;
+              const isCopilot = item.path.endsWith('/copilot');
               const isActive =
                 pathname === item.path ||
                 (pathname.startsWith(item.path) && item.path !== `/${currentUser.role}`);
@@ -211,6 +212,12 @@ export function Sidebar() {
                 <Link
                   key={item.path}
                   href={item.path}
+                  onClick={(e) => {
+                    if (isCopilot) {
+                      e.preventDefault();
+                      openCopilot();
+                    }
+                  }}
                   className={`group flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
                     isActive
                       ? 'bg-sky-50 text-sky-900 border border-sky-200 shadow-sm'

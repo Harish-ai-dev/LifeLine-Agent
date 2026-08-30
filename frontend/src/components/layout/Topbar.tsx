@@ -43,6 +43,7 @@ export function Topbar() {
     logout,
     alerts,
     issues,
+    openCopilot,
   } = useDashboard();
   const pathname = usePathname();
   const router = useRouter();
@@ -161,8 +162,9 @@ export function Topbar() {
                     </Link>
                   </div>
                   {hospitals.map((h) => (
-                    <button
+                    <Link
                       key={h.id}
+                      href={`/hospital/facility/${h.id}`}
                       onClick={() => {
                         setActiveHospitalId(h.id);
                         setIsFacilityMenuOpen(false);
@@ -180,7 +182,7 @@ export function Topbar() {
                       <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
                         {h.tier}
                       </span>
-                    </button>
+                    </Link>
                   ))}
                 </div>
               )}
@@ -241,35 +243,23 @@ export function Topbar() {
           <button
             onClick={() => {
               soundEffects.playTelemetryPing();
-              if (currentUser.role === 'hospital_staff') {
-                router.push('/hospital/copilot?listen=true');
-              } else if (currentUser.role === 'government_authority') {
-                router.push('/government/copilot?listen=true');
-              } else {
-                handleVoiceToggle();
-              }
+              openCopilot('copilot', true);
             }}
             className={`p-2 rounded-xl transition-all ${
               isVoiceActive
                 ? 'bg-red-600 text-white animate-pulse shadow-lg shadow-red-600/50'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 bg-slate-50 border border-slate-200'
             }`}
-            title="Voice Commands / Hands-free dictation"
+            title="Voice Commands / Ask Copilot"
           >
-            {isVoiceActive ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
+            <Mic className="w-4 h-4" />
           </button>
 
           {/* AI Supervisor Co-Pilot Button */}
           <button
             onClick={() => {
               soundEffects.playTelemetryPing();
-              if (currentUser.role === 'hospital_staff') {
-                router.push('/hospital/copilot');
-              } else if (currentUser.role === 'government_authority') {
-                router.push('/government/copilot');
-              } else {
-                setIsAiOpen(true);
-              }
+              openCopilot('copilot');
             }}
             className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs font-bold transition-all shadow-sm"
             title="Open AI Supervisor Co-Pilot"
@@ -296,16 +286,10 @@ export function Topbar() {
           <button
             onClick={() => {
               soundEffects.playTelemetryPing();
-              if (currentUser.role === 'hospital_staff') {
-                router.push('/hospital/copilot?tab=notifications');
-              } else if (currentUser.role === 'government_authority') {
-                router.push('/government/copilot?tab=notifications');
-              } else {
-                setIsNotificationOpen(true);
-              }
+              openCopilot('notifications');
             }}
             className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl bg-slate-50 border border-slate-200 transition-colors relative"
-            title="Emergency Notifications & Inbound Tracking"
+            title="Emergency Notifications & Alerts"
           >
             <Bell className="w-4 h-4" />
             {pendingCount > 0 && (

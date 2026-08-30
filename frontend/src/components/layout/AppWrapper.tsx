@@ -7,6 +7,7 @@ import { useDashboard } from '../../context/DashboardContext';
 import { RoleGuard } from '../RoleGuard';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
+import { UnifiedCopilotModal } from './UnifiedCopilotModal';
 
 export function AppWrapper({ children }: { children: React.ReactNode }) {
   const [initializing, setInitializing] = useState(true);
@@ -53,6 +54,7 @@ export function AppWrapper({ children }: { children: React.ReactNode }) {
           >
             {content}
           </main>
+          <UnifiedCopilotModal />
         </div>
       </>
     );

@@ -153,6 +153,13 @@ interface DashboardContextType {
   registerNewDonor: (profile: Omit<DonorProfile, 'id' | 'totalDonations' | 'badgeTitle'>) => void;
   updateHospitalBloodBank: (hospitalId: string, bloodGroup: BloodGroup, deltaUnits: number) => void;
   checkAndAutoTriggerBloodDeficit: (hospitalId: string, bloodGroup: BloodGroup, currentUnits: number) => void;
+
+  // Unified Copilot Overlay Modal
+  isCopilotOpen: boolean;
+  copilotTab: 'all' | 'notifications' | 'copilot';
+  copilotListen: boolean;
+  openCopilot: (tab?: 'all' | 'notifications' | 'copilot', autoListen?: boolean) => void;
+  closeCopilot: () => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -222,6 +229,22 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
   const currentDonor = donors.find((d) => d.id === activeDonorId) || donors[0];
 
   const watchdogRanRef = useRef(false);
+
+  // ── UNIFIED COPILOT OVERLAY MODAL STATE ──────────────────────────────
+  const [isCopilotOpen, setIsCopilotOpen] = useState(false);
+  const [copilotTab, setCopilotTab] = useState<'all' | 'notifications' | 'copilot'>('all');
+  const [copilotListen, setCopilotListen] = useState(false);
+
+  const openCopilot = useCallback((tab: 'all' | 'notifications' | 'copilot' = 'all', autoListen = false) => {
+    setCopilotTab(tab);
+    setCopilotListen(autoListen);
+    setIsCopilotOpen(true);
+  }, []);
+
+  const closeCopilot = useCallback(() => {
+    setIsCopilotOpen(false);
+    setCopilotListen(false);
+  }, []);
 
   const router = useRouter();
 
@@ -1727,6 +1750,11 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
         registerNewDonor,
         updateHospitalBloodBank,
         checkAndAutoTriggerBloodDeficit,
+        isCopilotOpen,
+        copilotTab,
+        copilotListen,
+        openCopilot,
+        closeCopilot,
       }}
     >
       {children}
