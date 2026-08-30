@@ -19,7 +19,7 @@ const PrivacyTermsPage: React.FC = () => {
         </div>
 
         {/* Section 1: Apache 2.0 License */}
-        <section className="p-6 rounded-2xl bg-[#0F172A] border border-slate-200 dark:border-slate-800 space-y-3">
+        <section className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
           <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center space-x-2">
             <FileCode className="w-4 h-4 text-cyan-400" />
             <span>1. Apache License Version 2.0</span>
@@ -41,7 +41,7 @@ const PrivacyTermsPage: React.FC = () => {
         </section>
 
         {/* Section 2: Clinical Safety Disclaimer */}
-        <section className="p-6 rounded-2xl bg-[#0F172A] border border-slate-200 dark:border-slate-800 space-y-3">
+        <section className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
           <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center space-x-2">
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
             <span>2. Clinical Safety & Simulation Disclaimer</span>
@@ -52,7 +52,7 @@ const PrivacyTermsPage: React.FC = () => {
         </section>
 
         {/* Section 3: HIPAA & Synthetic Data */}
-        <section className="p-6 rounded-2xl bg-[#0F172A] border border-slate-200 dark:border-slate-800 space-y-3">
+        <section className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
           <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center space-x-2">
             <Lock className="w-4 h-4 text-purple-400" />
             <span>3. HIPAA Compliance & Zero-PHI Architecture</span>

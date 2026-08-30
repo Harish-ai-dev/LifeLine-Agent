@@ -34,15 +34,15 @@ const AboutPage: React.FC = () => {
         </div>
 
         {/* Mission Narrative */}
-        <div className="mt-12 p-6 sm:p-8 rounded-3xl bg-[#0F172A] border border-cyan-950/80 shadow-2xl max-w-4xl space-y-4 font-mono text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white font-sans">Why We Built LifeLine Agent</h2>
-          <p className="font-sans text-sm text-slate-600 dark:text-slate-300">
+        <div className="mt-12 p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-sm max-w-4xl space-y-4 font-sans text-xs text-slate-700 leading-relaxed">
+          <h2 className="text-xl font-bold text-slate-900 font-sans">Why We Built LifeLine Agent</h2>
+          <p className="font-sans text-sm text-slate-700">
             In emergency medicine, the first 60 minutes after a traumatic injury or myocardial infarction is known as the <strong>&quot;Golden Hour.&quot;</strong> Every minute of delay increases the mortality rate by 7-10%.
           </p>
-          <p className="font-sans text-sm text-slate-600 dark:text-slate-300">
+          <p className="font-sans text-sm text-slate-700">
             Yet today, 911 dispatchers and paramedics still manually call receiving hospitals on landlines, waiting on hold while charge nurses check ICU bed boards or verify if an interventional catheterization lab is staffed.
           </p>
-          <p className="font-sans text-sm text-slate-600 dark:text-slate-300">
+          <p className="font-sans text-sm text-slate-700">
             LifeLine Agent solves this by orchestrating 6 autonomous Gemini agents in an event-driven mesh. In 1.8 seconds, vitals are triaged with NEWS2, the optimal accredited hospital is matched via live OSRM routing, and a structured SBAR trauma briefing is delivered to the receiving surgical team before the ambulance even begins rolling.
           </p>
           <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center space-x-4">

@@ -93,55 +93,55 @@ const AgentsPage: React.FC = () => {
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
           
           {/* Left Col: Agent Specifications & Description */}
-          <div className="lg:col-span-5 p-6 sm:p-8 rounded-3xl bg-[#0F172A] border border-cyan-950/80 shadow-2xl space-y-6">
+          <div className="lg:col-span-5 p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-6">
             <div>
               <div className="flex items-center space-x-2 text-xs font-mono mb-2">
-                <span className="px-2.5 py-1 rounded-md bg-cyan-950 border border-cyan-800 text-cyan-300 font-bold">
+                <span className="px-2.5 py-1 rounded-md bg-cyan-100 border border-cyan-200 text-cyan-800 font-bold">
                   Model: {selectedAgent.model}
                 </span>
-                <span className="text-slate-400 dark:text-slate-400">
-                  Latency SLA: <strong className="text-emerald-400">{selectedAgent.latencyMs}ms</strong>
+                <span className="text-slate-600">
+                  Latency SLA: <strong className="text-emerald-600">{selectedAgent.latencyMs}ms</strong>
                 </span>
               </div>
 
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-mono">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-mono">
                 {selectedAgent.name}
               </h2>
-              <p className="text-xs font-mono text-cyan-400 mt-1">{selectedAgent.role}</p>
+              <p className="text-xs font-mono text-cyan-700 font-bold mt-1">{selectedAgent.role}</p>
             </div>
 
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-sans">
+            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-sans">
               {selectedAgent.description}
             </p>
 
             {/* Clinical Purpose Box */}
-            <div className="p-4 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 font-mono text-xs space-y-1.5">
-              <div className="text-cyan-400 font-bold uppercase tracking-wider text-[10px]">Clinical Purpose:</div>
-              <p className="text-slate-600 dark:text-slate-300 leading-relaxed font-sans">{selectedAgent.clinicalPurpose}</p>
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 font-mono text-xs space-y-1.5">
+              <div className="text-cyan-700 font-bold uppercase tracking-wider text-[10px]">Clinical Purpose:</div>
+              <p className="text-slate-700 leading-relaxed font-sans">{selectedAgent.clinicalPurpose}</p>
             </div>
 
             {/* Input & Output Plain Language Descriptions */}
             <div className="space-y-3 font-mono text-xs">
-              <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <span className="text-slate-400 dark:text-slate-400 font-bold block mb-1">RAW INPUT PAYLOAD:</span>
-                <span className="text-slate-700 dark:text-slate-200 font-sans">{selectedAgent.inputDescription}</span>
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <span className="text-slate-500 font-bold block mb-1">RAW INPUT PAYLOAD:</span>
+                <span className="text-slate-800 font-sans">{selectedAgent.inputDescription}</span>
               </div>
 
-              <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <span className="text-cyan-400 font-bold block mb-1">DETERMINISTIC OUTPUT:</span>
-                <span className="text-slate-700 dark:text-slate-200 font-sans">{selectedAgent.outputDescription}</span>
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <span className="text-cyan-700 font-bold block mb-1">DETERMINISTIC OUTPUT:</span>
+                <span className="text-slate-800 font-sans">{selectedAgent.outputDescription}</span>
               </div>
             </div>
 
             {/* Guardrails */}
             <div>
-              <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 dark:text-slate-400 mb-2">
+              <div className="text-[10px] font-mono uppercase tracking-wider text-slate-500 mb-2 font-bold">
                 Clinical Guardrails & Verification:
               </div>
               <div className="space-y-1.5">
                 {selectedAgent.keyCapabilities.map((cap, i) => (
-                  <div key={i} className="flex items-center space-x-2 text-xs font-mono text-slate-600 dark:text-slate-300">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  <div key={i} className="flex items-center space-x-2 text-xs font-mono text-slate-700">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                     <span>{cap}</span>
                   </div>
                 ))}
@@ -150,7 +150,7 @@ const AgentsPage: React.FC = () => {
           </div>
 
           {/* Right Col: Schema & Prompt Inspector */}
-          <div className="lg:col-span-7 p-6 sm:p-8 rounded-3xl bg-[#090D16] border border-cyan-900/60 shadow-2xl flex flex-col justify-between">
+          <div className="lg:col-span-7 p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-sm flex flex-col justify-between">
             <div>
               {/* Tab Selector */}
               <div className="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-slate-200 dark:border-slate-800">

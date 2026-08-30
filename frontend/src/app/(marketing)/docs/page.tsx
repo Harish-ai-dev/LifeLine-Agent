@@ -51,7 +51,7 @@ const DocsPage: React.FC = () => {
           <div className="lg:col-span-8 space-y-10 font-mono text-xs">
             
             {/* Quickstart */}
-            <section className="p-6 rounded-3xl bg-[#0F172A] border border-slate-200 dark:border-slate-800 space-y-4">
+            <section className="p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4">
               <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center space-x-2">
                 <Terminal className="w-5 h-5 text-cyan-400" />
                 <span>1. Local Quickstart & Setup</span>
@@ -89,7 +89,7 @@ python -m lifeline.server --port 8000`}
             </section>
 
             {/* Docker Deployment */}
-            <section className="p-6 rounded-3xl bg-[#0F172A] border border-slate-200 dark:border-slate-800 space-y-4">
+            <section className="p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4">
               <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center space-x-2">
                 <Server className="w-5 h-5 text-emerald-400" />
                 <span>2. Docker Compose Infrastructure</span>
@@ -123,7 +123,7 @@ services:
             </section>
 
             {/* Clinical Test Suite */}
-            <section className="p-6 rounded-3xl bg-[#0F172A] border border-slate-200 dark:border-slate-800 space-y-4">
+            <section className="p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4">
               <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center space-x-2">
                 <Zap className="w-5 h-5 text-amber-400" />
                 <span>3. Running the Clinical NEWS2 Test Suite</span>
@@ -146,7 +146,7 @@ pytest tests/agents/test_gemini_schemas.py --benchmark`}
 
           {/* Sidebar */}
           <div className="lg:col-span-4 space-y-6 font-mono text-xs">
-            <div className="p-6 rounded-2xl bg-[#0F172A] border border-slate-200 dark:border-slate-800 space-y-3">
+            <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-3">
               <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">Repository Specs</h3>
               <div className="space-y-2 text-slate-600 dark:text-slate-300">
                 <div className="flex justify-between pb-1 border-b border-slate-200 dark:border-slate-800">
