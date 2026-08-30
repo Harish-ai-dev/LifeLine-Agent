@@ -1,0 +1,46 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start LifeLine Full Stack (Next.js + FastAPI + ADK Web)",
+      "type": "shell",
+      "command": "cmd.exe /c start.bat",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "focus": true
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Run ADK Web UI Only",
+      "type": "shell",
+      "command": "python -c \"import sys; from google.adk.cli import main; sys.argv=['adk', 'web', '--port', '8088', 'lifeline_adk']; main()\"",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "focus": true
+      }
+    },
+    {
+      "label": "Run Next.js Frontend Only",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run FastAPI Backend Only",
+      "type": "shell",
+      "command": "python -m lifeline.main",
+      "problemMatcher": []
+    }
+  ]
+}
