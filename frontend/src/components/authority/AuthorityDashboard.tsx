@@ -19,11 +19,13 @@ import { RegionalBloodNetwork } from './RegionalBloodNetwork';
 import { ComplianceReports } from './ComplianceReports';
 import { HospitalRegistry } from './HospitalRegistry';
 import { JurisdictionAuditLog } from './JurisdictionAuditLog';
+import { DailyIntelligenceReportView } from './DailyIntelligenceReportView';
+import { NetworkQueryConsole } from './NetworkQueryConsole';
 
 export const AuthorityDashboard: React.FC = () => {
   const { analytics, alerts, hospitals, donorRequests } = useDashboard();
   const [activeTab, setActiveTab] = useState<
-    'radar' | 'escalations' | 'compliance' | 'blood_network' | 'registry' | 'audit'
+    'radar' | 'daily_report' | 'nl_query' | 'escalations' | 'compliance' | 'blood_network' | 'registry' | 'audit'
   >('radar');
 
   const escalatedCount = alerts.filter(
@@ -121,6 +123,30 @@ export const AuthorityDashboard: React.FC = () => {
         </button>
 
         <button
+          onClick={() => setActiveTab('daily_report')}
+          className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition ${
+            activeTab === 'daily_report'
+              ? 'bg-indigo-600 text-white shadow-sm font-black'
+              : 'text-slate-600 hover:bg-slate-100'
+          }`}
+        >
+          <span className="text-amber-300">✨</span>
+          <span>AI Daily Report</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('nl_query')}
+          className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition ${
+            activeTab === 'nl_query'
+              ? 'bg-indigo-600 text-white shadow-sm font-black'
+              : 'text-slate-600 hover:bg-slate-100'
+          }`}
+        >
+          <span className="text-sky-300">💬</span>
+          <span>NL Query Console</span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('escalations')}
           className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition ${
             activeTab === 'escalations'
@@ -193,6 +219,8 @@ export const AuthorityDashboard: React.FC = () => {
 
       {/* ── Active Tab View ──────────────────────────────────────────────── */}
       {activeTab === 'radar' && <JurisdictionMap />}
+      {activeTab === 'daily_report' && <DailyIntelligenceReportView />}
+      {activeTab === 'nl_query' && <NetworkQueryConsole />}
       {activeTab === 'escalations' && <Tier2EscalationCenter />}
       {activeTab === 'blood_network' && <RegionalBloodNetwork />}
       {activeTab === 'compliance' && <ComplianceReports />}

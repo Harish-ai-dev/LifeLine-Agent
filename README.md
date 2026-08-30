@@ -1,310 +1,254 @@
 # 🚑 LifeLine Agent
 
-> **Autonomous Emergency & Hospital Bed Matchmaker** — an AI multi-agent pipeline that matches incoming emergency cases to the right hospital in seconds, not minutes.
+> **Autonomous Emergency Healthcare Coordination Platform & Hospital Bed Matchmaker**  
+> An autonomous multi-agent pipeline powered by **Gemini 3.1 Pro**, **Gemini 3.5 Flash**, **Google ADK**, **Genkit**, and **Google Cloud Run + Firestore**.
 
 [![Hackathon](https://img.shields.io/badge/Hackathon-All%20Things%20Agentic-blue)](https://allthingsagentichackathon.devpost.com/)
 [![Track](https://img.shields.io/badge/Track-The%20Taskmaster-red)](https://allthingsagentichackathon.devpost.com/)
-[![Model](https://img.shields.io/badge/Model-Gemini%203.5%20Flash%20%2F%203.1%20Pro-orange)](https://ai.google.dev/models)
+[![Clinical%20Reasoning](https://img.shields.io/badge/Triage%20Model-Gemini%203.1%20Pro-purple)](https://ai.google.dev/models)
+[![Agent%20Operations](https://img.shields.io/badge/Agents%20Model-Gemini%203.5%20Flash-orange)](https://ai.google.dev/models)
 [![Framework](https://img.shields.io/badge/Framework-Google%20ADK%20%2B%20Genkit-green)](https://github.com/google/adk-python)
-[![Cloud](https://img.shields.io/badge/Cloud-Cloud%20Run%20%2B%20Firestore-blue)](https://cloud.google.com/)
+[![Cloud](https://img.shields.io/badge/Cloud-Google%20Cloud%20Run%20%2B%20Firestore-blue)](https://cloud.google.com/)
 
 ---
 
 ## 🎯 Problem & Value Proposition
 
-Every minute a paramedic spends on hold with hospitals is a minute a critical patient is not receiving treatment. Manual emergency dispatch — phone calls, spreadsheets, radio coordination — introduces deadly latency at exactly the wrong moment.
+In acute medical crises — cardiac arrest, severe trauma, hemorrhagic shock — **seconds save lives**. Yet traditional emergency dispatch systems remain heavily fragmented and manual:
+- Paramedics wait on hold with hospitals trying to find open ICU beds or cath labs.
+- Hospital ER teams receive little to no advance clinical briefing prior to arrival.
+- Emergency blood bank shortages require frantic manual phone coordination.
+- Health authorities lack real-time visibility into regional hospital strain and diversions.
 
-**LifeLine Agent eliminates that latency.** It autonomously:
-- Computes a real clinical triage score (NEWS2) from patient vitals
-- Reasons over that score to determine severity and required specialty
-- Matches the patient to the optimal available hospital using real location data and real driving ETAs
-- Writes a pre-arrival brief for the receiving team
-- Logs every decision to an immutable, timestamped audit trail
-
-Zero phone calls. Zero hold music. Seconds, not minutes.
-
----
-
-## 🏆 Category: The Taskmaster
-
-LifeLine Agent is built for **The Taskmaster** track because it is a fully autonomous multi-step agent pipeline — not a chatbot, not a single LLM call. It orchestrates four sequential specialist agents, each with a defined input schema, output schema, and tool access, completing a complex real-world workflow without any human intervention in the decision loop.
+**LifeLine Agent replaces manual delays with autonomous multi-agent intelligence:**
+1. **Clinically Grounded Triage**: Computes validated NEWS2 scores before invoking **Gemini 3.1 Pro** for clinical reasoning.
+2. **Dynamic Hospital Bed Matching**: Evaluates real OpenStreetMap facilities, real road network ETAs, and bed specialties with **Gemini 3.5 Flash**.
+3. **Automated ER Pre-Arrival Briefing**: Generates structured SBAR dossiers for receiving trauma teams.
+4. **Community Donor Mobilization**: Broadcasts hyper-targeted STAT blood and organ requests to nearby donors.
+5. **Regional Health Intelligence**: Synthesizes district-wide hospital telemetry into daily executive briefings.
+6. **HIPAA-Defensible Audit Trail**: Logs every autonomous decision to Google Cloud Firestore with immutable timestamps.
 
 ---
 
-## 🏗️ Architecture Diagram
+## 🏆 Hackathon Track: The Taskmaster
 
-![LifeLine Agent Architecture](docs/architecture.jpg)
+LifeLine Agent is built strictly for **The Taskmaster** track:
+- **Autonomous Multi-Step Execution**: Executes end-to-end clinical triage, facility selection, routing, ER briefing, and audit logging with **zero human intervention** in the decision loop.
+- **Deterministic Grounding + Generative Reasoning**: All LLM reasoning is grounded in deterministic mathematical models (NEWS2 vital score calculation, Haversine/OSRM geo-routing).
+- **Structured Pydantic Schemas**: Every agent step consumes and produces typed Pydantic schemas, eliminating string parsing failure modes.
 
-### How it flows
+---
+
+## 🏗️ System Architecture & Workflow
 
 ```
-[Preset Scenario / React + Vite (TypeScript) UI]
-         │
-         ▼
-┌─────────────────────┐   NEWS2 score (real formula) + Gemini 3.1 Pro reasoning
-│    Triage Agent      │──────────────────────────────────────────────────────▶
-│  (ADK LlmAgent)      │   → { severity_label, required_specialty, notes }
-└─────────────────────┘
-         │
-         ▼
-┌─────────────────────┐   Real hospitals: OpenStreetMap Overpass API
-│  Bed-Matching Agent  │   Real ETAs: OSRM public server
-│  (ADK LlmAgent)      │   Simulated: bed counts & specialties
-└─────────────────────┘   → { chosen_hospital, reasoning, alternatives[] }
-         │
-    ┌────┴────┐
-    ▼         ▼
-[Routing]  [Briefing]   ← STRETCH (gemini-3.5-flash)
-    │         │
-    └────┬────┘
-         ▼
-[Cloud Run FastAPI] ──── POST /dispatch
-         │
-    [Firestore] ──────── dispatch_cases (audit trail)
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        LIFELINE AGENT ECOSYSTEM                         │
+├──────────────────┬─────────────────────────────┬────────────────────────┤
+│   BLOOD DONOR    │       HOSPITAL STAFF        │  GOVERNMENT AUTHORITY  │
+│  `blood_donor`   │      `hospital_staff`       │ `government_authority` │
+│ (Mobile/Portal)  │   (ER Ops Console & Bays)   │ (Regional Exec Brief)  │
+└─────────┬────────┴──────────────┬──────────────┴───────────┬────────────┘
+          │                       │                          │
+          ▼                       ▼                          ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                   FASTAPI UNIFIED REST API GATEWAY                      │
+│   • Demo/Mock Auth (`POST /auth/login`, `GET /auth/me`)                 │
+│   • Donor Coordination (`/donors`, `/requests`, `/requests/:id/respond`)│
+│   • Hospital ER Operations (`/patients`, `/sos`, `/beds`, `/inventory`) │
+│   • Regional Intelligence (`/network/overview`, `/reports/daily`)       │
+│   • Core Multi-Agent Dispatch (`POST /dispatch`, `GET /health`)         │
+└─────────────────────────────────┬───────────────────────────────────────┘
+                                  │
+          ┌───────────────────────┴───────────────────────┐
+          ▼                                               ▼
+┌──────────────────────────────────┐    ┌─────────────────────────────────┐
+│  CORE MULTI-AGENT PIPELINE       │    │  GOOGLE CLOUD FIRESTORE         │
+│  1. Deterministic NEWS2 Engine   │    │  • `dispatch_cases` (Audit Log) │
+│  2. Triage (`gemini-3.1-pro`)    │    │  • `donors`, `requests`         │
+│  3. Bed-Match (`gemini-3.5-flash`)    │  • `patients`, `issues`         │
+│  4. Routing & SBAR Briefing      │    │  • `inventory`, `reports`       │
+└──────────────────────────────────┘    └─────────────────────────────────┘
 ```
 
 ---
 
-## 🧰 Tech Stack
+## 👥 Multi-Role Portal Walkthroughs
 
-| Layer | Technology |
-|---|---|
-| **LLM — Triage** | `gemini-3.1-pro` via Gemini API |
-| **LLM — All other agents** | `gemini-3.5-flash` via Gemini API |
-| **Agent Framework** | Google ADK (`LlmAgent`, `SequentialAgent`) |
-| **Prompt / Flow Management** | Google Genkit |
-| **Auth** | Firebase Authentication |
-| **Database / Audit Log** | Cloud Firestore (Firebase Admin SDK) |
-| **API Server** | FastAPI on Google Cloud Run |
-| **Hospital Locations** | OpenStreetMap Overpass API (free, no key) |
-| **Routing / ETA** | OSRM public demo server (free, no key) |
-| **Triage Formula** | NEWS2 — Royal College of Physicians (public standard) |
-| **Frontend** | React + Vite (TypeScript) |
-| **CLI** | Typer + Rich |
-| **Packaging** | `pyproject.toml` (hatchling), `pip install -e .` |
+The unified Next.js portal provides three dedicated role personas accessible via instant demo authentication:
+
+### 1. 🩸 Blood & Organ Donor (`blood_donor`)
+- **Donor Profile & Pledge**: Manage contact info, blood type (e.g. `O-`, `AB+`), organ donor pledge, and donation streak badges.
+- **STAT Emergency Callouts**: Real-time feed of urgent blood/organ requests raised by hospitals.
+- **One-Tap Transit Response**: Accept requests with estimated transit ETA (`POST /requests/:id/respond`), receiving hospital blood bank directions.
+- **Donation History Log**: Track total units contributed and verified impact records.
+
+### 2. 🏥 Hospital ER Operations Console (`hospital_staff`)
+- **Real-Time Intake Inbox**: Track inbound ambulance cases, vital telemetry, and live countdown ETAs.
+- **Clinical Admission Dossiers**: Full patient summaries with computed NEWS2 risk scores, specialty requirements, and SBAR briefs.
+- **Advance Bay Reservation**: Reserve Cardiac ICU, Trauma, or General bays before patient arrival (`POST /beds/:id/reserve`).
+- **Emergency Transfer Rerouting**: One-click autonomous rerouting to nearby facilities if capacity surges (`POST /cases/:id/transfer`).
+- **Resource Requests & Inventory**: Raise STAT blood requests and monitor blood bank / medication stock thresholds (`/inventory`, `/issues`).
+
+### 3. 🏛️ Regional Health Authority (`government_authority`)
+- **District Telemetry Overview**: Real-time metrics across 14+ hospitals — active critical alerts, mean response time, and SLA compliance (`GET /network/overview`).
+- **Hospital Strain & Diversion Monitoring**: Live occupancy heatmap identifying facilities nearing 100% capacity.
+- **AI Executive Briefing**: Daily plain-language regional intelligence reports generated by **Gemini 3.5 Flash** (`GET /reports/daily`).
+- **Natural Language Query Assistant**: Interactive query tool to ask questions over regional healthcare telemetry (`POST /reports/query`).
 
 ---
 
-## ✨ Features & Functionality
+## 📡 Canonical REST API Reference
 
-- **Real NEWS2 Scoring** — patient vitals run through the clinically validated National Early Warning Score 2 formula before any LLM sees them. The agent reasons over a real number, not a guess.
-- **Autonomous 2-Agent Pipeline** — Triage → Bed-Matching chain orchestrated by Google ADK `SequentialAgent`. Agents hand off structured Pydantic schemas, not plain text.
-- **Real Hospital Data** — hospital names and GPS coordinates fetched from OpenStreetMap via the free Overpass API for any city.
-- **Real Driving ETAs** — OSRM public server provides actual road-network distance and drive time for hospital ranking.
-- **Immutable Audit Trail** — every dispatch run (inputs + all agent outputs) is written to Firestore with a UTC timestamp. HIPAA-defensible audit log design.
-- **Super Admin Panel** — React + Vite (TypeScript) UI for securely setting API keys (AES-256 encrypted at rest, Firebase Auth login, never hardcoded).
-- **One-command Install** — `pip install -e .` registers the `lifeline` CLI globally.
+All API routes return standard JSON envelopes and adhere to `docs/09-parallel-build-contract.md`.
+
+| Method | Endpoint | Role / Access | Description |
+|---|---|---|---|
+| `POST` | `/auth/login` | Public / Demo | Authenticate persona (`hospital_staff`, `blood_donor`, `government_authority`). |
+| `GET` | `/auth/me` | Authenticated | Retrieve current user profile and facility binding from Bearer token. |
+| `POST` | `/dispatch` | System / Core | End-to-end autonomous dispatch workflow (NEWS2 → Triage → Bed-Match → Routing → Briefing). |
+| `GET` | `/health` | Public | Service health probe and version check (`{"status": "ok"}`). |
+| `POST` | `/donors` | Donor / Admin | Register new donor or update eligibility profile. |
+| `GET` | `/donors/:id` | Donor / Hospital | Retrieve complete donor dossier and donation history. |
+| `GET` | `/requests` | All Roles | Query open emergency blood, organ, or equipment requests. |
+| `POST` | `/requests` | Hospital Staff | Hospital raises urgent STAT blood or resource callout. |
+| `POST` | `/requests/:id/respond`| Blood Donor | Donor accepts/declines emergency blood transit request with ETA. |
+| `GET` | `/patients` | Hospital Staff | Query active inbound, admitted, or transferred emergency patients. |
+| `PATCH`| `/patients/:id` | Hospital Staff | Update patient clinical notes and admission status. |
+| `POST` | `/sos` | Field / Hospital | Emergency field SOS trigger executing full dispatch pipeline. |
+| `POST` | `/beds/:id/reserve` | Hospital Staff | Advance trauma bay or ICU bed reservation for incoming patient. |
+| `POST` | `/cases/:id/transfer`| Hospital Staff | Autonomous reroute/transfer when assigned hospital reaches capacity. |
+| `GET` | `/issues` | Hospital / Gov | List equipment breakdowns and operational facility issues. |
+| `POST` | `/issues` | Hospital Staff | Log facility issue (e.g. CT Scanner Offline). |
+| `GET` | `/inventory` | Hospital Staff | View hospital blood bank and medication supply levels. |
+| `PATCH`| `/inventory/:id` | Hospital Staff | Update stock counts and trigger low-stock alerts. |
+| `GET` | `/network/overview` | Gov Authority | Aggregate regional metrics, SLA compliance, and hospital summaries. |
+| `GET` | `/reports/daily` | Gov Authority | Plain-language AI executive daily intelligence report (**Gemini 3.5 Flash**). |
+| `POST` | `/reports/query` | Gov Authority | Natural language query assistant over regional hospital telemetry. |
+
+---
+
+## 💻 Typer CLI Reference
+
+LifeLine Agent provides a command-line interface supporting all standard operational verbs:
+
+```bash
+# Global CLI command after installation
+lifeline --help
+```
+
+| Command | Usage | Description |
+|---|---|---|
+| `version` | `lifeline version` | Displays version (`v0.1.0`), author, Python runtime, and OS platform. |
+| `init` | `lifeline init` | Interactive setup wizard (dependencies, API keys, city selection, data seeding). |
+| `status` | `lifeline status` | Live system health dashboard checking environment variables, datasets, and Gemini model registry. |
+| `run` | `lifeline run [--port 8000] [--reload] [--backend-only]` | Starts FastAPI backend server and Next.js frontend concurrently. |
+| `ui` | `lifeline ui [--port 3000] [--no-browser]` | Launches the Next.js multi-role portal at `http://localhost:3000`. |
+| `dispatch` | `lifeline dispatch [scenario] [--lat LAT] [--lng LNG]` | Executes the autonomous multi-agent dispatch pipeline directly in terminal. |
+| `logs` | `lifeline logs [--limit 10]` | Streams recent Firestore audit records in a formatted terminal table. |
+| `seed` | `lifeline seed [--icu-max 12]` | Enriches raw OSM data with simulated bed counts & specialties into `data/hospitals.json`. |
+| `fetch-hospitals` | `lifeline fetch-hospitals [city]` | Queries OpenStreetMap Overpass API to pull real hospital GPS locations. |
+| `test` | `lifeline test [-v] [--cov]` | Runs the full pytest test suite with code coverage. |
+
+---
+
+## 🚀 Quickstart & Local Setup
+
+### Prerequisites
+- **Python**: `≥ 3.11`
+- **Node.js**: `≥ 18` (for Next.js frontend)
+- **Gemini API Key**: [Google AI Studio](https://aistudio.google.com/apikey)
+
+### Quick Setup in 4 Steps
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/your-org/lifeline-agent.git
+cd lifeline-agent
+
+# 2. Install package and dependencies
+make install
+# or: pip install -e ".[dev]"
+
+# 3. Configure environment
+cp .env.example .env
+# Edit .env and set GOOGLE_API_KEY=your_key_here
+
+# 4. Ingest real hospital data and seed bed availability
+make data CITY=mumbai
+
+# 5. Start full stack (FastAPI Backend :8000 + Next.js Frontend :3000)
+make dev
+```
+
+### Windows One-Click Launch
+On Windows systems, simply run `start.bat`:
+```cmd
+start.bat
+```
+*(Runs backend and frontend concurrently in a single terminal window using `start /B` per AGENTS.md invariant).*
+
+---
+
+## ☁️ Google Cloud Run Deployment
+
+LifeLine Agent is packaged with a multi-stage Dockerfile and deployment manifests ready for Google Cloud Run:
+
+```bash
+# 1. Authenticate with Google Cloud
+gcloud auth login
+gcloud config set project YOUR_GCP_PROJECT_ID
+
+# 2. Build multi-stage production container
+make build-docker
+
+# 3. Deploy to Google Cloud Run
+make deploy-cloudrun
+```
+
+Or deploy directly via gcloud:
+```bash
+gcloud run deploy lifeline-agent \
+  --source . \
+  --region us-central1 \
+  --allow-unauthenticated \
+  --port 8080 \
+  --set-env-vars GOOGLE_API_KEY=your-key,DEMO_AUTH_MODE=true,FIRESTORE_PROJECT_ID=your-gcp-project-id
+```
+
+See [`deploy/README.md`](deploy/README.md) and [`deploy/cloud_run.yaml`](deploy/cloud_run.yaml) for complete Knative configuration and Secret Manager integration.
+
+---
+
+## 🧪 Testing & Quality Assurance
+
+Run the comprehensive unit test suite:
+```bash
+make test
+# or: python -m pytest tests/ -v --cov=lifeline
+```
+
+The test suite validates:
+- Clinical NEWS2 score computation for mild, cardiac, and trauma presentations.
+- Gemini 3.1 Pro Triage schema validation and clinical prompting.
+- Bed-Matching Haversine geo-distance calculation and facility ranking.
+- Routing and pre-arrival SBAR briefing generation.
+- CLI operational commands, options, and error handling.
 
 ---
 
 ## 📊 Data Sources — Real vs. Simulated
 
-| Component | Source | Status |
+| Component | Source | Verification |
 |---|---|---|
-| Hospital names & GPS coordinates | OpenStreetMap Overpass API | ✅ **Real** |
-| Triage scoring formula (NEWS2) | Royal College of Physicians public standard | ✅ **Real** |
-| Driving distance & ETA | OSRM public demo server | ✅ **Real** |
-| Agent reasoning & orchestration | Gemini 3.5-flash / 3.1-pro via ADK | ✅ **Real** |
-| Bed counts (ICU / general / surgical) | `lifeline seed` script (randomized, plausible) | ⚠️ **Simulated** |
-| Hospital specialties | `lifeline seed` script | ⚠️ **Simulated** |
-
-> **Why simulated beds?** Real-time bed availability requires direct EHR integration (HL7/FHIR) with private hospital systems. This is explicitly out of scope for a hackathon and documented as future work.
-
----
-
-## 🚀 Spin-up Instructions
-
-### Prerequisites
-
-| Tool | Version | Link |
-|---|---|---|
-| Python | ≥ 3.11 | [python.org](https://python.org) |
-| Git | any | [git-scm.com](https://git-scm.com) |
-| Docker (optional, for Cloud Run) | ≥ 24 | [docker.com](https://docker.com) |
-| gcloud CLI (optional, for deploy) | latest | [cloud.google.com/sdk](https://cloud.google.com/sdk) |
-
----
-
-### Local Setup (5 steps)
-
-**Step 1 — Clone & install**
-```bash
-git clone https://github.com/your-org/lifeline-agent.git
-cd lifeline-agent
-pip install -e ".[dev]"
-# The 'lifeline' CLI is now available globally
-lifeline --help
-```
-
-**Step 2 — Configure API keys via the Admin Panel**
-```bash
-lifeline admin
-# Opens http://localhost:5173 in your browser
-```
-On first launch, the setup wizard appears:
-1. Create your **admin email + password** (stored in Firebase Auth — never on disk in plain text)
-2. Log in
-3. Go to **🔑 API Keys** tab and fill in:
-
-| Key | Where to get it |
-|---|---|
-| `Gemini API Key` | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) |
-| `GCP Project ID` | [console.cloud.google.com](https://console.cloud.google.com) |
-| `Firebase Web API Key` | Firebase Console → Project Settings → General |
-| `Firebase Service Account JSON` | Firebase Console → Project Settings → Service Accounts → Generate New Key → paste full JSON |
-| `Firestore Collection` | `dispatch_cases` (or any name you choose) |
-| `Demo City` | `mumbai` (or `london`, `seattle`, `delhi`, `bangalore`) |
-
-**Step 3 — Pull real hospital data**
-```bash
-lifeline fetch-hospitals --city mumbai
-# Saves: data/hospitals_raw.json  (real OSM hospital locations)
-
-lifeline seed
-# Saves: data/hospitals.json  (enriched with simulated bed data)
-
-# Or run both with:
-make data CITY=mumbai
-```
-
-**Step 4 — Start the API server**
-```bash
-lifeline run
-# API running at http://localhost:8000
-# Interactive docs at http://localhost:8000/docs
-# Health check: curl http://localhost:8000/health
-```
-
-**Step 5 — Launch the demo UI**
-```bash
-lifeline ui
-# Opens React + Vite (TypeScript) at http://localhost:5173
-# Pick a scenario from the dropdown → click Dispatch → watch agents run
-```
-
----
-
-### Cloud Run Deployment
-
-**Step 1 — Authenticate**
-```bash
-gcloud auth login
-gcloud config set project YOUR_PROJECT_ID
-```
-
-**Step 2 — Build & deploy**
-```bash
-make docker-build
-make deploy
-# Or manually:
-gcloud run deploy lifeline-agent \
-  --source . \
-  --region us-central1 \
-  --allow-unauthenticated
-```
-
-**Step 3 — Set environment variables on Cloud Run**
-
-In GCP Console → Cloud Run → lifeline-agent → Edit & Deploy → Variables:
-- `GEMINI_API_KEY`
-- `FIREBASE_WEB_API_KEY`
-- `GCP_PROJECT_ID`
-- `FIRESTORE_COLLECTION=dispatch_cases`
-- `DEMO_CITY=mumbai`
-- `GOOGLE_APPLICATION_CREDENTIALS` (or attach a service account to the Cloud Run service)
-
----
-
-### Run Tests
-```bash
-make test
-# or: pytest tests/ -v --cov=lifeline
-```
-
----
-
-## 🎬 Demo Video
-
-> 📺 **[Watch the demo on YouTube](https://youtube.com/your-link-here)** *(link added post-recording)*
-
-The demo shows 3 live scenarios run end-to-end:
-1. **Mild** — ankle sprain, NEWS2 low → general hospital nearby
-2. **Critical Cardiac** — chest pain, low BP, high NEWS2 → cardiac-capable hospital
-3. **Critical Trauma** — motorcycle collision, confused patient → trauma center despite longer ETA
-
----
-
-## 💡 Findings & Learnings
-
-- **NEWS2 as a grounding anchor works.** Giving the Triage Agent a real clinical number prevents hallucinated severity labels. The model respects the score — a NEWS2 of 12 always maps to critical.
-- **ADK's output schemas are powerful.** Pydantic schemas as `output_schema` force the model to produce machine-parseable JSON, making agent handoffs reliable without string parsing hacks.
-- **Free APIs are demo-day fragile.** Overpass and OSRM are unmetered public instances. We cache their results to `data/` immediately after the first successful pull. Demo-day availability is not guaranteed, but cached data always is.
-- **Simulated data needs tuning.** Uniform random bed counts look fake. A small asymmetric randomization (`randint(1,12) - randint(0,3)`) produces plausible variation including 0-bed scenarios that stress-test the matching logic.
-- **Firebase Auth is the right choice for admin credential management.** Eliminates local password storage entirely — no bcrypt files, no plain-text passwords, no credential leakage risk.
-
----
-
-## 🔭 Future Work (Explicitly Out of Scope for This Submission)
-
-- **Real HL7/FHIR Integration** — connect to actual hospital EHR systems for live bed availability
-- **Human-in-the-Loop Destination Lock** — paramedic confirms or overrides the agent's hospital choice before dispatch is finalised
-- **Real-Time Ambulance Telemetry** — ingest live GPS + vitals from ambulance hardware
-- **Multi-Region Surge Management** — coordinate across regional hospital networks during mass-casualty events
-- **Liability & Audit Framework** — legal wrapper for automated medical routing decisions
-- **Native Mobile App** — paramedic-facing iOS/Android app for hands-free vitals reporting
-
----
-
-## 📁 Repository Structure
-
-```
-lifeline-agent/
-├── lifeline/               ← Installable Python package
-│   ├── __init__.py         ← version = "0.1.0"
-│   ├── cli.py              ← 'lifeline' CLI (Typer)
-│   ├── models.py           ← Gemini model registry
-│   ├── firebase.py         ← Firebase Admin SDK bootstrap
-│   ├── schemas.py          ← Pydantic I/O schemas
-│   ├── orchestrator.py     ← Pipeline runner
-│   ├── main.py             ← FastAPI app (POST /dispatch)
-│   ├── agents/
-│   │   ├── triage_agent.py
-│   │   ├── bed_matching_agent.py
-│   │   ├── routing_agent.py    ← STRETCH
-│   │   └── briefing_agent.py   ← STRETCH
-│   └── tools/
-│       ├── news2.py            ← NEWS2 scoring (pure Python)
-│       ├── places_api.py       ← OpenStreetMap Overpass API
-│       ├── routes_api.py       ← OSRM routing
-│       └── firestore_client.py ← Firestore audit log
-├── admin/                  ← Super Admin Panel
-│   ├── superadmin.py       ← React + Vite (TypeScript) admin UI
-│   ├── auth.py             ← Firebase Auth
-│   └── config_manager.py   ← AES-256 encrypted config
-├── ui/
-│   └── React + Vite (TypeScript)_app.py    ← Demo UI (preset scenarios)
-├── data/
-│   └── demo_cases.json     ← 5 preset scenarios
-├── scripts/
-│   ├── fetch_hospitals.py
-│   └── seed_mock_data.py
-├── tests/
-├── deploy/
-│   └── Dockerfile
-├── docs/
-│   └── architecture.jpg    ← Architecture diagram
-├── my-agent/               ← 📚 Documentation ONLY (.md files)
-│   ├── README.md
-│   ├── ROADMAP.md
-│   └── docs/
-├── pyproject.toml          ← Package config (pip install -e .)
-├── Makefile                ← All dev commands
-└── .env.example            ← Environment variable template
-```
+| **Hospital Names & GPS** | OpenStreetMap (Overpass API) | ✅ **Real** |
+| **Clinical Triage Formula** | Royal College of Physicians NEWS2 Standard | ✅ **Real** |
+| **Driving ETAs & Routes** | OSRM Road Network Demo Server | ✅ **Real** |
+| **Agent Reasoning** | Gemini 3.1 Pro (Triage) & Gemini 3.5 Flash (Operations) | ✅ **Real** |
+| **Bed Counts & Specialties** | Randomized plausible simulation (`lifeline seed`) | ⚠️ **Simulated** (EHR integration is future work) |
 
 ---
 
 ## 📄 License
 
 Apache 2.0 — see [LICENSE](LICENSE)
-

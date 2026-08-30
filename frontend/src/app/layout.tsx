@@ -1,22 +1,43 @@
-import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import './globals.css';
+import { DashboardProvider } from '@/context/DashboardContext';
+import { ThemeProvider } from '@/context/ThemeContext';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+
+
+import { AppWrapper } from '@/components/layout/AppWrapper';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'LifeLine Agent',
-  description: 'Emergency dispatch system',
+  title: 'LifeLine Agent · Autonomous Emergency Hospital Command System',
+  description: 'Autonomous Emergency Dispatch, Multi-Level Agent Supervision & Hospital Operations Platform',
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
 };
 
 export default function RootLayout({
-  children,
-}: {
+  children
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <html lang="en" className={inter.className}>
-      <body>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.className} h-screen overflow-hidden flex select-none bg-slate-50 text-slate-900 dark:bg-[#080c14] dark:text-slate-100`}>
+        <ErrorBoundary isRoot={true}>
+          <ThemeProvider>
+            <DashboardProvider>
+              <AppWrapper>
+                {children}
+              </AppWrapper>
+            </DashboardProvider>
+          </ThemeProvider>
+        </ErrorBoundary>
+      </body>
     </html>
   );
 }

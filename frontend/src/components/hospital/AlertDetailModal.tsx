@@ -21,6 +21,7 @@ import { useDashboard } from '../../context/DashboardContext';
 import { EmergencyIncidentAlert, HospitalFacility } from '../../types/dashboard';
 
 import { DonorRequestModal } from './DonorRequestModal';
+import { BedReservationModal } from './BedReservationModal';
 import { BloodGroup } from '../../types/dashboard';
 
 interface AlertDetailModalProps {
@@ -42,6 +43,7 @@ export const AlertDetailModal: React.FC<AlertDetailModalProps> = ({ alert, onClo
 
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [showDonorModal, setShowDonorModal] = useState(false);
+  const [showBedReservationModal, setShowBedReservationModal] = useState(false);
   const [targetHospitalId, setTargetHospitalId] = useState(
     hospitals.find((h) => h.id !== alert.assignedHospitalId)?.id || hospitals[0].id
   );
@@ -58,24 +60,24 @@ export const AlertDetailModal: React.FC<AlertDetailModalProps> = ({ alert, onClo
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-4xl w-full border border-slate-200 shadow-2xl overflow-hidden my-auto">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+      <div className="bg-white dark:bg-[#0e1424] text-slate-900 dark:text-slate-100 rounded-3xl max-w-4xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden my-auto">
         {/* ── Modal Header Banner ──────────────────────────────────────────── */}
-        <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-sky-950 text-white p-5 sm:p-6 flex flex-wrap items-center justify-between gap-4 border-b border-slate-700">
+        <div className="bg-slate-50 dark:bg-gradient-to-r dark:from-[#080d16] dark:via-[#111728] dark:to-[#080d16] p-5 sm:p-6 flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-alert-600/20 text-alert-400 border border-alert-500/40 flex items-center justify-center font-black text-xl shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-red-100 dark:bg-red-600/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/40 flex items-center justify-center font-black text-xl shrink-0">
               <ShieldAlert className="w-6 h-6 animate-pulse" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black uppercase tracking-wider bg-alert-600 text-white px-2 py-0.5 rounded">
+                <span className="text-[10px] font-black uppercase tracking-wider bg-red-600 text-white px-2 py-0.5 rounded">
                   {alert.crisisType.toUpperCase()} EMERGENCY
                 </span>
-                <span className="text-xs font-mono text-slate-300">
+                <span className="text-xs font-mono text-slate-500 dark:text-slate-300">
                   {alert.trackingNumber}
                 </span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight mt-1">
+              <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight mt-1 text-slate-900 dark:text-white">
                 {alert.patient.fullName}, {alert.patient.age}yo {alert.patient.gender}
               </h2>
             </div>
@@ -83,16 +85,16 @@ export const AlertDetailModal: React.FC<AlertDetailModalProps> = ({ alert, onClo
 
           <div className="flex items-center gap-3">
             {/* Driving ETA badge */}
-            <div className="bg-sky-500/20 border border-sky-400/40 rounded-2xl px-4 py-2 text-right">
-              <span className="text-[10px] uppercase font-bold text-sky-300 block">Ambulance ETA</span>
-              <span className="text-xl font-black text-white font-mono">
+            <div className="bg-sky-50 dark:bg-sky-500/20 border border-sky-200 dark:border-sky-400/40 rounded-2xl px-4 py-2 text-right">
+              <span className="text-[10px] uppercase font-bold text-sky-700 dark:text-sky-300 block">Ambulance ETA</span>
+              <span className="text-xl font-black text-slate-900 dark:text-white font-mono">
                 {alert.drivingEtaMinutes} mins
               </span>
             </div>
 
             <button
               onClick={onClose}
-              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition"
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition"
               aria-label="Close"
             >
               <X className="w-6 h-6" />
@@ -103,19 +105,19 @@ export const AlertDetailModal: React.FC<AlertDetailModalProps> = ({ alert, onClo
         {/* ── Modal Body Content ───────────────────────────────────────────── */}
         <div className="p-5 sm:p-6 space-y-6 max-h-[75vh] overflow-y-auto">
           {/* 1. NEWS2 Scoring & Clinical Vitals Bar */}
-          <div className="bg-slate-900 text-white rounded-2xl p-4 sm:p-5 border border-slate-800">
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-3 mb-4">
+          <div className="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800">
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-3 mb-4">
               <div className="flex items-center gap-2">
-                <HeartPulse className="w-5 h-5 text-alert-400" />
-                <span className="text-xs font-black uppercase tracking-wider text-slate-300">
+                <HeartPulse className="w-5 h-5 text-red-600 dark:text-red-400" />
+                <span className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
                   NEWS2 Clinical Triage Rating
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="bg-alert-500/20 text-alert-300 border border-alert-500/40 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider">
+                <span className="bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-500/40 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider">
                   Score: {alert.news2Score}/20 · {alert.news2RiskBand.toUpperCase()} RISK
                 </span>
-                <span className="bg-sky-500/20 text-sky-300 border border-sky-400/40 px-3 py-1 rounded-full text-xs font-bold font-mono">
+                <span className="bg-sky-100 dark:bg-sky-500/20 text-sky-800 dark:text-sky-300 border border-sky-200 dark:border-sky-400/40 px-3 py-1 rounded-full text-xs font-bold font-mono">
                   Blood: {alert.patient.bloodType}
                 </span>
               </div>
@@ -123,37 +125,37 @@ export const AlertDetailModal: React.FC<AlertDetailModalProps> = ({ alert, onClo
 
             {/* Vitals Matrix */}
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center text-xs">
-              <div className="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700">
-                <span className="text-slate-400 text-[10px] uppercase font-bold block">Heart Rate</span>
-                <span className="text-base font-black text-alert-400 font-mono">{alert.vitals.heartRate}</span>
-                <span className="text-[10px] text-slate-400 block">bpm</span>
+              <div className="bg-white dark:bg-slate-800/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block">Heart Rate</span>
+                <span className="text-base font-black text-red-600 dark:text-red-400 font-mono">{alert.vitals.heartRate}</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block">bpm</span>
               </div>
-              <div className="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700">
-                <span className="text-slate-400 text-[10px] uppercase font-bold block">BP (Sys)</span>
-                <span className="text-base font-black text-sky-300 font-mono">{alert.vitals.systolicBp}</span>
-                <span className="text-[10px] text-slate-400 block">mmHg</span>
+              <div className="bg-white dark:bg-slate-800/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block">BP (Sys)</span>
+                <span className="text-base font-black text-sky-700 dark:text-sky-300 font-mono">{alert.vitals.systolicBp}</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block">mmHg</span>
               </div>
-              <div className="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700">
-                <span className="text-slate-400 text-[10px] uppercase font-bold block">SpO2 Sat</span>
-                <span className="text-base font-black text-emerald-400 font-mono">{alert.vitals.spo2}%</span>
-                <span className="text-[10px] text-slate-400 block">Room Air</span>
+              <div className="bg-white dark:bg-slate-800/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block">SpO2 Sat</span>
+                <span className="text-base font-black text-emerald-700 dark:text-emerald-400 font-mono">{alert.vitals.spo2}%</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Room Air</span>
               </div>
-              <div className="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700">
-                <span className="text-slate-400 text-[10px] uppercase font-bold block">Resp Rate</span>
-                <span className="text-base font-black text-amber-300 font-mono">{alert.vitals.respiratoryRate}</span>
-                <span className="text-[10px] text-slate-400 block">/min</span>
+              <div className="bg-white dark:bg-slate-800/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block">Resp Rate</span>
+                <span className="text-base font-black text-amber-700 dark:text-amber-300 font-mono">{alert.vitals.respiratoryRate}</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block">/min</span>
               </div>
-              <div className="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700">
-                <span className="text-slate-400 text-[10px] uppercase font-bold block">Temp</span>
-                <span className="text-base font-black text-purple-300 font-mono">{alert.vitals.temperatureC}°C</span>
-                <span className="text-[10px] text-slate-400 block">Core</span>
+              <div className="bg-white dark:bg-slate-800/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block">Temp</span>
+                <span className="text-base font-black text-purple-700 dark:text-purple-300 font-mono">{alert.vitals.temperatureC}°C</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Core</span>
               </div>
-              <div className="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700">
-                <span className="text-slate-400 text-[10px] uppercase font-bold block">Consciousness</span>
-                <span className="text-xs font-black text-white uppercase mt-1 block">
+              <div className="bg-white dark:bg-slate-800/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block">Consciousness</span>
+                <span className="text-xs font-black text-slate-900 dark:text-white uppercase mt-1 block">
                   {alert.vitals.consciousness}
                 </span>
-                <span className="text-[10px] text-slate-400 block">AVPU</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block">AVPU</span>
               </div>
             </div>
           </div>
@@ -161,16 +163,16 @@ export const AlertDetailModal: React.FC<AlertDetailModalProps> = ({ alert, onClo
           {/* 2. Critical Allergies & Chronic Conditions */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Allergies */}
-            <div className="bg-alert-50 border border-alert-200 rounded-2xl p-4 text-xs">
-              <div className="flex items-center gap-1.5 font-bold text-alert-900 uppercase tracking-wider mb-2">
-                <AlertTriangle className="w-4 h-4 text-alert-600" />
+            <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-500/40 rounded-2xl p-4 text-xs">
+              <div className="flex items-center gap-1.5 font-bold text-red-900 dark:text-red-300 uppercase tracking-wider mb-2">
+                <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
                 <span>Anaphylactic Allergies</span>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {alert.patient.allergies.map((allg, i) => (
                   <span
                     key={i}
-                    className="bg-alert-100 text-alert-800 border border-alert-300 px-2.5 py-1 rounded-lg font-bold"
+                    className="bg-red-100 dark:bg-red-500/30 text-red-800 dark:text-red-200 border border-red-300 dark:border-red-400/40 px-2.5 py-1 rounded-lg font-bold"
                   >
                     {allg}
                   </span>
@@ -179,16 +181,16 @@ export const AlertDetailModal: React.FC<AlertDetailModalProps> = ({ alert, onClo
             </div>
 
             {/* Chronic Conditions & Meds */}
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs">
-              <div className="flex items-center gap-1.5 font-bold text-slate-900 uppercase tracking-wider mb-2">
-                <Pill className="w-4 h-4 text-sky-600" />
+            <div className="bg-slate-50 dark:bg-[#111728] border border-slate-200 dark:border-slate-800 rounded-2xl p-4 text-xs">
+              <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">
+                <Pill className="w-4 h-4 text-sky-600 dark:text-sky-400" />
                 <span>Known Conditions & Daily Meds</span>
               </div>
-              <div className="text-slate-700 space-y-1">
+              <div className="text-slate-700 dark:text-slate-300 space-y-1">
                 <p>
                   <strong>Conditions:</strong> {alert.patient.conditions.join(', ') || 'None recorded'}
                 </p>
-                <p className="text-slate-500">
+                <p className="text-slate-500 dark:text-slate-400">
                   <strong>Medications:</strong>{' '}
                   {alert.patient.medications.map((m) => `${m.name} (${m.dosage})`).join(', ') || 'None'}
                 </p>
@@ -197,9 +199,9 @@ export const AlertDetailModal: React.FC<AlertDetailModalProps> = ({ alert, onClo
           </div>
 
           {/* 3. Pre-Arrival SBAR Radio Protocol */}
-          <div className="bg-sky-50/70 border-l-4 border-sky-600 rounded-r-2xl p-4 text-xs sm:text-sm text-slate-800 leading-relaxed font-mono">
-            <div className="flex items-center gap-2 font-bold text-sky-900 uppercase tracking-wider mb-1 font-sans">
-              <FileText className="w-4 h-4 text-sky-700" />
+          <div className="bg-sky-50 dark:bg-sky-950/30 border-l-4 border-sky-600 rounded-r-2xl p-4 text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed font-mono">
+            <div className="flex items-center gap-2 font-bold text-sky-900 dark:text-sky-300 uppercase tracking-wider mb-1 font-sans">
+              <FileText className="w-4 h-4 text-sky-700 dark:text-sky-400" />
               <span>Transmitted Pre-Arrival SBAR Radio Protocol</span>
             </div>
             {alert.sbarBrief}
@@ -207,29 +209,29 @@ export const AlertDetailModal: React.FC<AlertDetailModalProps> = ({ alert, onClo
 
           {/* 4. Incident Location & Emergency Contacts */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
-              <div className="flex items-center gap-1.5 font-bold text-slate-900 uppercase tracking-wider mb-2">
-                <MapPin className="w-4 h-4 text-sky-600" />
+            <div className="bg-slate-50 dark:bg-[#111728] border border-slate-200 dark:border-slate-800 rounded-2xl p-4">
+              <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">
+                <MapPin className="w-4 h-4 text-sky-600 dark:text-sky-400" />
                 <span>Incident Geolocation</span>
               </div>
-              <p className="font-bold text-slate-800">{alert.location.address}</p>
-              <p className="text-slate-500 mt-1 font-mono">
+              <p className="font-bold text-slate-800 dark:text-slate-200">{alert.location.address}</p>
+              <p className="text-slate-500 dark:text-slate-400 mt-1 font-mono">
                 GPS: {alert.location.lat.toFixed(4)}°N, {alert.location.lng.toFixed(4)}°E (±4m)
               </p>
             </div>
 
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
-              <div className="flex items-center gap-1.5 font-bold text-slate-900 uppercase tracking-wider mb-2">
-                <UserCheck className="w-4 h-4 text-sky-600" />
+            <div className="bg-slate-50 dark:bg-[#111728] border border-slate-200 dark:border-slate-800 rounded-2xl p-4">
+              <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">
+                <UserCheck className="w-4 h-4 text-sky-600 dark:text-sky-400" />
                 <span>Emergency Contacts Broadcasted</span>
               </div>
               <div className="space-y-1.5">
                 {alert.patient.emergencyContacts.map((c, i) => (
-                  <div key={i} className="flex items-center justify-between text-slate-700">
+                  <div key={i} className="flex items-center justify-between text-slate-700 dark:text-slate-300">
                     <span>
                       <strong>{c.name}</strong> ({c.relationship})
                     </span>
-                    <span className="font-mono text-slate-500">{c.phone}</span>
+                    <span className="font-mono text-slate-500 dark:text-slate-400">{c.phone}</span>
                   </div>
                 ))}
               </div>
@@ -238,21 +240,29 @@ export const AlertDetailModal: React.FC<AlertDetailModalProps> = ({ alert, onClo
         </div>
 
         {/* ── Modal Footer Action Controls ─────────────────────────────────── */}
-        <div className="bg-slate-50 border-t border-slate-200 p-4 sm:p-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="bg-slate-50 dark:bg-[#080d16] border-t border-slate-200 dark:border-slate-800 p-4 sm:p-6 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             {/* Transfer / Reassign Button */}
             <button
               onClick={() => setShowTransferModal(true)}
-              className="flex items-center gap-1.5 py-2.5 px-3.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl text-xs font-bold transition shadow-sm"
+              className="flex items-center gap-1.5 py-2.5 px-3.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-bold transition shadow-sm"
             >
               <ArrowRightLeft className="w-4 h-4 text-amber-600" />
               <span>Transfer / Reassign</span>
             </button>
 
+            {/* Advance Bed / Bay Reservation */}
+            <button
+              onClick={() => setShowBedReservationModal(true)}
+              className="flex items-center gap-1.5 py-2.5 px-3.5 bg-sky-50 dark:bg-sky-600/20 hover:bg-sky-100 dark:hover:bg-sky-600/30 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-500/40 rounded-xl text-xs font-bold transition shadow-sm"
+            >
+              <span>🛏️ Reserve Bay &amp; ICU</span>
+            </button>
+
             {/* Raise STAT Blood Request Button */}
             <button
               onClick={() => setShowDonorModal(true)}
-              className="flex items-center gap-1.5 py-2.5 px-3.5 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 rounded-xl text-xs font-bold transition shadow-sm"
+              className="flex items-center gap-1.5 py-2.5 px-3.5 bg-rose-50 dark:bg-rose-600/20 hover:bg-rose-100 dark:hover:bg-rose-600/30 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-500/40 rounded-xl text-xs font-bold transition shadow-sm"
             >
               <span>🩸 Request Blood / Organ (STAT)</span>
             </button>
@@ -302,7 +312,7 @@ export const AlertDetailModal: React.FC<AlertDetailModalProps> = ({ alert, onClo
 
             <button
               onClick={onClose}
-              className="py-2.5 px-4 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition"
+              className="py-2.5 px-4 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition"
             >
               Close
             </button>
@@ -311,25 +321,25 @@ export const AlertDetailModal: React.FC<AlertDetailModalProps> = ({ alert, onClo
 
         {/* ── Transfer / Reassignment Sub-Modal ────────────────────────────── */}
         {showTransferModal && (
-          <div className="fixed inset-0 z-60 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl p-6 max-w-md w-full border border-slate-200 shadow-2xl">
-              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-1">
+          <div className="fixed inset-0 z-60 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-[#0e1424] rounded-3xl p-6 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-1">
                 <ArrowRightLeft className="w-5 h-5 text-amber-600" />
                 <span>Manual Emergency Reassignment</span>
               </h3>
-              <p className="text-xs text-slate-500 mb-4">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
                 Override auto-routing and divert this patient to another specialized regional facility.
               </p>
 
               <form onSubmit={handleExecuteTransfer} className="space-y-3.5">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                     Destination Facility
                   </label>
                   <select
                     value={targetHospitalId}
                     onChange={(e) => setTargetHospitalId(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold bg-white"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-semibold bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
                   >
                     {hospitals
                       .filter((h) => h.id !== alert.assignedHospitalId)
@@ -342,7 +352,7 @@ export const AlertDetailModal: React.FC<AlertDetailModalProps> = ({ alert, onClo
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                     Clinical Reassignment Reason
                   </label>
                   <textarea
@@ -350,7 +360,7 @@ export const AlertDetailModal: React.FC<AlertDetailModalProps> = ({ alert, onClo
                     required
                     value={transferReason}
                     onChange={(e) => setTransferReason(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-amber-500"
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500"
                     placeholder="e.g. Cath Lab at surge capacity, patient requires urgent Level 1 ECMO support."
                   />
                 </div>
@@ -359,7 +369,7 @@ export const AlertDetailModal: React.FC<AlertDetailModalProps> = ({ alert, onClo
                   <button
                     type="button"
                     onClick={() => setShowTransferModal(false)}
-                    className="flex-1 py-2.5 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold"
+                    className="flex-1 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold"
                   >
                     Cancel
                   </button>
@@ -382,6 +392,14 @@ export const AlertDetailModal: React.FC<AlertDetailModalProps> = ({ alert, onClo
             defaultPatientName={`${alert.patient.fullName} (${alert.patient.age}yo ${alert.patient.gender})`}
             defaultBloodGroup={(alert.patient.bloodType as BloodGroup) || 'O-'}
             onClose={() => setShowDonorModal(false)}
+          />
+        )}
+
+        {/* ── Advance Bed / Bay Reservation Modal ───────────────────────────── */}
+        {showBedReservationModal && (
+          <BedReservationModal
+            alert={alert}
+            onClose={() => setShowBedReservationModal(false)}
           />
         )}
       </div>

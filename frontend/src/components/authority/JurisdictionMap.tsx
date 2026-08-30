@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import {
   MapPin,
@@ -9,6 +11,7 @@ import {
   Navigation,
   CheckCircle2,
   AlertTriangle,
+  Radio,
 } from 'lucide-react';
 import { useDashboard } from '../../context/DashboardContext';
 import { HospitalFacility, EmergencyIncidentAlert } from '../../types/dashboard';
@@ -22,28 +25,30 @@ export const JurisdictionMap: React.FC = () => {
   const activeIncidents = alerts.filter((a) => a.status !== 'resolved');
 
   return (
-    <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
+    <div className="bg-white dark:bg-[#0e1424] rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800/80 pb-5">
         <div>
-          <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
-            <Navigation className="w-5 h-5 text-indigo-600" />
-            <span>Jurisdiction-Wide Emergency Proximity & Hospital Radar</span>
-          </h3>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Live telemetry of all accredited emergency centers, active ambulances, and citizen SOS clusters in Region IV.
+          <div className="flex items-center gap-2">
+            <Navigation className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            <h3 className="text-lg font-black text-slate-900 dark:text-white">
+              Jurisdiction-Wide Emergency Proximity &amp; Hospital Radar
+            </h3>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-mono">
+            Live telemetry of all accredited emergency centers, active ambulances, and citizen SOS clusters in Mumbai Metropolitan Zone.
           </p>
         </div>
 
         {/* Legend */}
-        <div className="flex items-center gap-3 text-xs font-semibold">
-          <span className="flex items-center gap-1.5 text-slate-700">
+        <div className="flex items-center gap-4 text-xs font-mono">
+          <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Normal Intake
           </span>
-          <span className="flex items-center gap-1.5 text-slate-700">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> Surge / Busy
+          <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> High Load
           </span>
-          <span className="flex items-center gap-1.5 text-slate-700">
-            <span className="w-2.5 h-2.5 rounded-full bg-alert-600 animate-ping" /> Active SOS Pin
+          <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" /> Active SOS
           </span>
         </div>
       </div>
@@ -51,144 +56,110 @@ export const JurisdictionMap: React.FC = () => {
       {/* ── Interactive Proximity Radar Board ─────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Interactive Visual Radar / Map Canvas */}
-        <div className="lg:col-span-2 bg-slate-950 rounded-3xl p-6 border border-slate-800 relative min-h-[420px] overflow-hidden flex flex-col justify-between text-white">
+        <div className="lg:col-span-2 bg-slate-50 dark:bg-[#080d16] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 relative min-h-[440px] overflow-hidden flex flex-col justify-between shadow-inner">
           {/* Subtle Map Grid lines */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-30 pointer-events-none" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#cbd5e1_1px,transparent_1px),linear-gradient(to_bottom,#cbd5e1_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] opacity-30 pointer-events-none" />
 
           {/* District Header */}
           <div className="relative z-10 flex items-center justify-between">
-            <div className="bg-slate-900/80 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-slate-700 text-xs font-bold flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>MUMBAI HEALTH REGION IV RADAR</span>
+            <div className="bg-white dark:bg-[#111728]/90 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold font-mono flex items-center gap-2 shadow-sm text-slate-800 dark:text-white">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>RADAR SECTOR: MUMBAI-WEST / SOUTH METRO</span>
             </div>
-            <span className="text-xs text-slate-400 font-mono">Center: 19.0760° N, 72.8777° E</span>
+            <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900/80 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm">
+              OSRM Geodesic Mesh: Active
+            </div>
           </div>
 
-          {/* Visual Interactive Hospital & Incident Pins Grid */}
-          <div className="relative z-10 my-8 grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {hospitals.map((hosp) => {
-              const isSelected = selectedHospital?.id === hosp.id;
-              const hasAlert = activeIncidents.some((a) => a.assignedHospitalId === hosp.id);
+          {/* Radar Nodes Simulation Display */}
+          <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 gap-3 my-6">
+            {hospitals.map((h) => {
+              const isSelected = selectedHospital?.id === h.id;
+              const isDiverting = h.isDiverting;
 
               return (
                 <button
-                  key={hosp.id}
-                  onClick={() => {
-                    setSelectedHospital(hosp);
-                    setSelectedAlert(null);
-                  }}
-                  className={`p-4 rounded-2xl border text-left transition-all relative ${
+                  key={h.id}
+                  onClick={() => setSelectedHospital(h)}
+                  className={`p-3.5 rounded-2xl border text-left transition-all ${
                     isSelected
-                      ? 'bg-sky-950/90 border-sky-400 ring-2 ring-sky-500/40 shadow-xl'
-                      : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'
+                      ? 'bg-indigo-50 dark:bg-indigo-600/30 border-indigo-500 dark:border-indigo-400 text-slate-900 dark:text-white shadow-md'
+                      : isDiverting
+                      ? 'bg-red-50 dark:bg-red-950/20 border-red-300 dark:border-red-500/40 text-slate-700 dark:text-slate-300 hover:bg-red-100 dark:hover:bg-slate-900'
+                      : 'bg-white dark:bg-[#111728]/80 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-[#111728] shadow-sm'
                   }`}
                 >
-                  {hasAlert && (
-                    <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-alert-500 animate-ping" />
-                  )}
-
-                  <div className="flex items-center justify-between mb-2">
-                    <span
-                      className={`w-2.5 h-2.5 rounded-full ${
-                        hosp.isDiverting
-                          ? 'bg-alert-500'
-                          : hosp.status === 'busy'
-                          ? 'bg-amber-400'
-                          : 'bg-emerald-400'
-                      }`}
-                    />
-                    <span className="text-[10px] font-mono text-slate-400">{hosp.code}</span>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                      {h.code}
+                    </span>
+                    <span className={`w-2 h-2 rounded-full ${isDiverting ? 'bg-red-500 animate-ping' : 'bg-emerald-500'}`} />
                   </div>
-
-                  <h4 className="text-xs font-black text-white truncate">{hosp.name}</h4>
-                  <p className="text-[10px] text-slate-400 mt-0.5">{hosp.district}</p>
-
-                  <div className="flex items-center gap-2 mt-2 pt-2 border-t border-slate-800 text-[10px] text-slate-300 font-mono">
-                    <span>ICU: {hosp.availableIcuBeds}/{hosp.totalIcuBeds}</span>
-                    <span>·</span>
-                    <span>Trauma: {hosp.availableTraumaBays}</span>
+                  <div className="font-bold text-xs text-slate-900 dark:text-white truncate">{h.name}</div>
+                  <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 mt-1">
+                    {h.availableIcuBeds} ICU Beds · {h.availableTraumaBays} Bays Free
                   </div>
                 </button>
               );
             })}
           </div>
 
-          {/* Active Incidents Banner Bar */}
-          <div className="relative z-10 bg-slate-900/90 backdrop-blur-md p-3 rounded-2xl border border-slate-800 flex items-center justify-between text-xs">
-            <span className="font-bold text-slate-300">
-              🚨 {activeIncidents.length} Active Real-Time Emergency Dispatches in Jurisdiction
+          {/* Bottom Live Dispatch Ticker */}
+          <div className="relative z-10 bg-white dark:bg-[#111728]/90 backdrop-blur-md p-3 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs font-mono shadow-sm">
+            <span className="text-slate-600 dark:text-slate-400 flex items-center gap-2">
+              <Radio className="w-4 h-4 text-red-500 animate-pulse" />
+              <span>Active GPS Traces: {activeIncidents.length} Ambulances En Route</span>
             </span>
-            <span className="font-mono text-sky-400">OSRM Road Routing Matrix Connected</span>
+            <span className="text-emerald-700 dark:text-emerald-400 font-bold">100% SLA Maintained</span>
           </div>
         </div>
 
-        {/* Right Selected Facility / Incident Dossier View */}
-        <div className="bg-slate-50 rounded-3xl p-5 border border-slate-200 flex flex-col justify-between space-y-4">
-          {selectedHospital ? (
-            <div>
-              <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-3">
+        {/* Right Selected Facility Inspector */}
+        <div className="bg-white dark:bg-[#111728] rounded-3xl p-6 border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm flex flex-col justify-between">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
+              <span className="text-xs font-mono font-bold text-slate-500 dark:text-slate-400 uppercase">Facility Telemetry</span>
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30">
+                {selectedHospital?.tier}
+              </span>
+            </div>
+
+            {selectedHospital ? (
+              <div className="space-y-4">
                 <div>
-                  <span className="text-[10px] font-black uppercase tracking-wider text-sky-700 bg-sky-100 px-2 py-0.5 rounded">
-                    {selectedHospital.tier}
-                  </span>
-                  <h4 className="text-base font-black text-slate-900 mt-1">{selectedHospital.name}</h4>
+                  <h4 className="text-base font-black text-slate-900 dark:text-white">{selectedHospital.name}</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-mono">{selectedHospital.address}</p>
+                  <p className="text-xs text-indigo-700 dark:text-indigo-300 mt-0.5 font-mono">Emergency: {selectedHospital.emergencyPhone}</p>
                 </div>
-                <span className="text-xs font-mono font-bold text-slate-500">{selectedHospital.code}</span>
-              </div>
 
-              <div className="space-y-2.5 text-xs text-slate-700">
-                <p>
-                  <strong>Address:</strong> {selectedHospital.address}
-                </p>
-                <p>
-                  <strong>District:</strong> {selectedHospital.district}
-                </p>
-                <p>
-                  <strong>Emergency Direct:</strong> <span className="font-mono font-bold text-sky-700">{selectedHospital.emergencyPhone}</span>
-                </p>
-                <p>
-                  <strong>Specialties:</strong> {selectedHospital.specialties.join(', ')}
-                </p>
-
-                <div className="grid grid-cols-2 gap-2 pt-2 text-center font-mono">
-                  <div className="bg-white p-2.5 rounded-xl border border-slate-200">
-                    <span className="text-slate-400 text-[10px] block">ICU BEDS</span>
-                    <span className="text-base font-black text-slate-900">
-                      {selectedHospital.availableIcuBeds} / {selectedHospital.totalIcuBeds}
-                    </span>
+                <div className="grid grid-cols-2 gap-3 text-xs font-mono">
+                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#080d16] border border-slate-200 dark:border-slate-800">
+                    <span className="text-slate-500 block text-[10px]">ICU Capacity</span>
+                    <span className="text-lg font-bold text-emerald-700 dark:text-emerald-400">{selectedHospital.availableIcuBeds} / {selectedHospital.totalIcuBeds}</span>
                   </div>
-                  <div className="bg-white p-2.5 rounded-xl border border-slate-200">
-                    <span className="text-slate-400 text-[10px] block">TRAUMA BAYS</span>
-                    <span className="text-base font-black text-slate-900">
-                      {selectedHospital.availableTraumaBays} / {selectedHospital.totalTraumaBays}
+                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#080d16] border border-slate-200 dark:border-slate-800">
+                    <span className="text-slate-500 block text-[10px]">Trauma Bays</span>
+                    <span className="text-lg font-bold text-sky-700 dark:text-sky-400">{selectedHospital.availableTraumaBays} / {selectedHospital.totalTraumaBays}</span>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#080d16] border border-slate-200 dark:border-slate-800 text-xs font-mono">
+                  <span className="text-slate-500 block text-[10px] uppercase mb-1">Status</span>
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${selectedHospital.isDiverting ? 'bg-red-500' : 'bg-emerald-500'}`} />
+                    <span className="font-bold text-slate-900 dark:text-white">
+                      {selectedHospital.isDiverting ? 'DIVERSION ACTIVE (Bypassing)' : 'NORMAL ADMISSION INTAKE'}
                     </span>
                   </div>
                 </div>
-
-                <div className="bg-white p-3 rounded-xl border border-slate-200 mt-3 space-y-1">
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">SLA Compliance:</span>
-                    <strong className="text-emerald-700">{selectedHospital.complianceRate}%</strong>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Mean Response Time:</span>
-                    <strong className="text-slate-900">{selectedHospital.slaResponseTimeSec}s</strong>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Total Alerts Handled:</span>
-                    <strong className="text-slate-900">{selectedHospital.totalAlertsHandled}</strong>
-                  </div>
-                </div>
               </div>
-            </div>
-          ) : (
-            <div className="text-center py-12 text-slate-400 text-xs">
-              Click a hospital pin on the map to inspect live metrics.
-            </div>
-          )}
+            ) : (
+              <p className="text-xs text-slate-500">Select a hospital node from radar canvas.</p>
+            )}
+          </div>
 
-          <div className="text-[11px] text-slate-500 border-t border-slate-200 pt-3">
-            District Health Authority Regulatory Surveillance Active.
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 text-[10px] font-mono text-slate-400 dark:text-slate-500 text-center">
+            LifeLine Region IV Super-Orchestrator
           </div>
         </div>
       </div>

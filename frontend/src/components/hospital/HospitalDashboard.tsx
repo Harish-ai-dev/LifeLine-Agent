@@ -20,19 +20,27 @@ import { HospitalBloodBank } from './HospitalBloodBank';
 import { DonorNotificationPanel } from './DonorNotificationPanel';
 import { HospitalAuditLog } from './HospitalAuditLog';
 import { AlertDetailModal } from './AlertDetailModal';
+import { HospitalIssueTracker } from './HospitalIssueTracker';
+import { HospitalInventoryManager } from './HospitalInventoryManager';
 import { EmergencyIncidentAlert } from '../../types/dashboard';
 
 export const HospitalDashboard: React.FC = () => {
-  const { currentHospital, alerts, activeHospitalId, selectedAlert, setSelectedAlert, donorRequests } =
+  const { currentHospital, alerts, activeHospitalId, selectedAlert, setSelectedAlert, donorRequests, issues, inventory } =
     useDashboard();
 
   const [activeTab, setActiveTab] = useState<
-    'queue' | 'blood_bank' | 'donor_activity' | 'capacity' | 'audit'
+    'queue' | 'blood_bank' | 'inventory' | 'issues' | 'donor_activity' | 'capacity' | 'audit'
   >('queue');
 
   // Stats for current hospital
   const hospitalAlerts = alerts.filter((a) => a.assignedHospitalId === activeHospitalId);
   const pendingCount = hospitalAlerts.filter((a) => a.status === 'pending_ack').length;
+  const activeIssuesCount = issues.filter(
+    (i) => (i.hospital_id === activeHospitalId || i.hospital_name === currentHospital.name) && i.status !== 'resolved'
+  ).length;
+  const lowStockCount = inventory.filter(
+    (i) => i.hospital_id === activeHospitalId && i.is_low_stock
+  ).length;
 
   // Active inbound donors for THIS hospital
   const hospitalRequests = donorRequests.filter((r) => r.hospitalId === activeHospitalId);
@@ -144,7 +152,41 @@ export const HospitalDashboard: React.FC = () => {
           }`}
         >
           <Droplet className="w-4 h-4 text-rose-500 fill-rose-500" />
-          <span>Blood Bank Inventory</span>
+          <span>Blood Bank</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('inventory')}
+          className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition ${
+            activeTab === 'inventory'
+              ? 'bg-slate-900 text-white shadow-sm'
+              : 'text-slate-600 hover:bg-slate-100'
+          }`}
+        >
+          <Droplet className="w-4 h-4 text-amber-500" />
+          <span>Supplies & Meds</span>
+          {lowStockCount > 0 && (
+            <span className="bg-alert-600 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full animate-pulse">
+              {lowStockCount} Low
+            </span>
+          )}
+        </button>
+
+        <button
+          onClick={() => setActiveTab('issues')}
+          className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition ${
+            activeTab === 'issues'
+              ? 'bg-slate-900 text-white shadow-sm'
+              : 'text-slate-600 hover:bg-slate-100'
+          }`}
+        >
+          <AlertTriangle className="w-4 h-4 text-amber-500" />
+          <span>Issue Tracker</span>
+          {activeIssuesCount > 0 && (
+            <span className="bg-amber-600 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full">
+              {activeIssuesCount}
+            </span>
+          )}
         </button>
 
         <button
@@ -192,6 +234,8 @@ export const HospitalDashboard: React.FC = () => {
       {/* ── Tab Views ────────────────────────────────────────────────────── */}
       {activeTab === 'queue' && <LiveAlertQueue onSelectAlert={(alert) => setSelectedAlert(alert)} />}
       {activeTab === 'blood_bank' && <HospitalBloodBank />}
+      {activeTab === 'inventory' && <HospitalInventoryManager />}
+      {activeTab === 'issues' && <HospitalIssueTracker />}
       {activeTab === 'donor_activity' && <DonorNotificationPanel />}
       {activeTab === 'capacity' && <CapacityManager />}
       {activeTab === 'audit' && <HospitalAuditLog />}
@@ -203,3 +247,4 @@ export const HospitalDashboard: React.FC = () => {
     </div>
   );
 };
+

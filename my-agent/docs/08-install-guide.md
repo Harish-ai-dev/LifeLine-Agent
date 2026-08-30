@@ -16,11 +16,10 @@
 ```bash
 git clone https://github.com/your-org/lifeline-agent.git
 cd lifeline-agent
-make install
-# or:  pip install -e ".[dev]"
+pip install -e ".[dev]"
 ```
 
-After install, the `lifeline` CLI is available globally:
+After install, the `lifeline` CLI is available:
 ```bash
 lifeline --help
 ```
@@ -31,7 +30,7 @@ lifeline --help
 
 ```bash
 lifeline admin
-# or: make admin
+# or: python start.py
 ```
 
 This opens the **Super Admin Panel** in your browser.
@@ -50,21 +49,12 @@ Keys are **AES-256 encrypted** on disk and never written to source code.
 
 ---
 
-## 3. Pull Real Hospital Data
+## 3. Pull Real Hospital Data & Seed
 
 ```bash
 lifeline fetch-hospitals --city mumbai
-# or: make fetch CITY=mumbai
-```
-
-Saves real hospital locations from OpenStreetMap → `data/hospitals_raw.json`
-
-```bash
 lifeline seed
-# or: make seed
 ```
-
-Enriches with simulated bed/specialty data → `data/hospitals.json`
 
 ---
 
@@ -72,7 +62,7 @@ Enriches with simulated bed/specialty data → `data/hospitals.json`
 
 ```bash
 lifeline run
-# or: make run
+# or: python -m uvicorn lifeline.main:app --port 8000 --reload
 ```
 
 API live at: `http://localhost:8000`  
@@ -81,22 +71,22 @@ API docs: `http://localhost:8000/docs`
 
 ---
 
-## 5. Launch the Demo UI
+## 5. Launch the Frontend UI
 
 ```bash
-lifeline ui
-# or: make ui
+cd frontend
+npm install
+npm run dev
 ```
 
-Opens Streamlit at `http://localhost:8501` — pick a scenario and hit **Dispatch**.
+Opens Frontend Portal at `http://localhost:3000` or `http://localhost:5173`.
 
 ---
 
 ## 6. Run Tests
 
 ```bash
-make test
-# or: pytest tests/ -v
+pytest tests/ -v
 ```
 
 ---
@@ -104,23 +94,20 @@ make test
 ## 7. Docker Build & Cloud Run Deploy
 
 ```bash
-make docker-build          # build image
-make docker-run            # test locally
-
-make deploy                # push to GCR + deploy to Cloud Run
+docker build -t lifeline-agent -f deploy/Dockerfile .
+gcloud run deploy lifeline-agent --source . --region us-central1 --allow-unauthenticated
 ```
-
-Requires `GCP_PROJECT_ID` set in `.env`.
 
 ---
 
 ## Models Used
 
-| Agent | Model | Reason |
+| Agent / Service | Model | Reason |
 |---|---|---|
-| Triage Agent | `gemini-3.1-pro` | Deepest clinical reasoning |
+| Triage Agent | `gemini-3.1-pro` | Deepest clinical reasoning (Clinical Flagship) |
 | Bed-Matching Agent | `gemini-3.5-flash` | Fast matching + ranking |
 | Routing Agent | `gemini-3.5-flash` | Format OSRM output |
-| Briefing Agent | `gemini-3.5-flash` | Single summary call |
+| Briefing Agent | `gemini-3.5-flash` | Single SBAR summary call |
+| Daily AI Intelligence Report | `gemini-3.5-flash` | Executive regional intelligence briefing |
 
 To change models: edit [`lifeline/models.py`](../lifeline/models.py)

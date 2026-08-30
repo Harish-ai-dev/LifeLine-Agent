@@ -4,7 +4,7 @@
 
 ### ✅ Primary Request: Single Terminal Operation
 - **Fixed**: `start.bat` now launches both backend and frontend in one terminal window
-- **Working**: `start.bat` command starts API (port 8000) and UI (port 5173) simultaneously
+- **Working**: `start.bat` command starts API (port 8000) and Next.js UI (port 3000) simultaneously
 
 ### ✅ CLI Availability & Command Not Found Error
 - **Fixed**: `lifeline` command is now registered and working
@@ -72,12 +72,12 @@ python -m lifeline dispatch
 ```bash
 python -m lifeline ui
 ```
-Access at: http://localhost:5173
+Access at: http://localhost:3000
 
 ## 📋 VERIFICATION CHECKLIST
 
 - [x] Backend API starts on http://localhost:8000
-- [x] Frontend UI starts on http://localhost:5173  
+- [x] Next.js Frontend UI starts on http://localhost:3000  
 - [x] CLI commands work: `lifeline version`, `lifeline status`, etc.
 - [x] Dispatch pipeline runs: `python -m lifeline dispatch`
 - [x] Data files exist: `data/hospitals.json`

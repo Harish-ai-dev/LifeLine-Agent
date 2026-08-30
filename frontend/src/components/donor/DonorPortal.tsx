@@ -369,6 +369,60 @@ export const DonorPortal: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* ── Verified Donation History Log ────────────────────────────────── */}
+          <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-sm space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <Droplet className="w-5 h-5 text-rose-600 fill-rose-600" />
+                <h4 className="text-base font-black text-slate-900">
+                  Verified Donation History & Certificates
+                </h4>
+                <span className="text-xs font-mono font-bold bg-rose-50 text-rose-700 px-2 py-0.5 rounded">
+                  {currentDonor.donation_history?.length || 0} Verified Records
+                </span>
+              </div>
+              <span className="text-xs text-slate-400 font-mono">
+                NBTC & NOTTO National Registry Sync
+              </span>
+            </div>
+
+            {(!currentDonor.donation_history || currentDonor.donation_history.length === 0) ? (
+              <p className="text-xs text-slate-500 text-center py-4">
+                No past donation records logged yet. Your first donation certificate will appear here!
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {currentDonor.donation_history.map((record) => (
+                  <div
+                    key={record.donation_id}
+                    className="p-4 rounded-2xl border border-slate-200 bg-slate-50/70 hover:bg-slate-50 transition space-y-2 text-xs"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-extrabold text-slate-900">{record.hospital_name}</span>
+                      <span className="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px] uppercase">
+                        {record.units} Unit ({record.type.replace('_', ' ')})
+                      </span>
+                    </div>
+
+                    <div className="text-slate-500 space-y-0.5">
+                      <p><strong>Date:</strong> {record.date}</p>
+                      <p className="text-[11px] font-mono text-slate-400">
+                        Certificate: {record.donation_id}
+                      </p>
+                    </div>
+
+                    <div className="pt-1.5 border-t border-slate-200 flex items-center justify-between text-[11px] text-emerald-700 font-bold">
+                      <span className="flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Verified & Stored</span>
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </>
       )}
 
@@ -516,7 +570,7 @@ export const DonorPortal: React.FC = () => {
                       Quick Donor Action
                     </h4>
                     <p className="text-xs text-slate-300">
-                      You can inspect this donor's complete medical dossier or switch active session to test emergency matching as this donor.
+                      You can inspect this donor&apos;s complete medical dossier or switch active session to test emergency matching as this donor.
                     </p>
 
                     <button

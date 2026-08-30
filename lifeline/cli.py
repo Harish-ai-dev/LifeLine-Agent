@@ -1,30 +1,30 @@
+from __future__ import annotations
+
 """
 LifeLine Agent CLI
 ==================
 Installed as the `lifeline` command when you run:  pip install -e .
 Also runnable as:                                   python -m lifeline
 
-Commands
---------
-  lifeline                  -> show help
-  lifeline version          -> show version
-  lifeline init             -> interactive setup wizard (first-run)
-  lifeline status           -> system health dashboard
-  lifeline admin            -> super admin panel (API keys, Firebase login)
-  lifeline run              -> start FastAPI agent server
-  lifeline ui               -> launch demo Streamlit UI
-  lifeline fetch-hospitals  -> pull real hospital data (OpenStreetMap)
-  lifeline seed             -> enrich hospitals with simulated bed data
-  lifeline dispatch         -> run a single dispatch from the terminal
-  lifeline test             -> run test suite
-  lifeline logs             -> tail recent Firestore audit records
+Operational Verbs Supported:
+----------------------------
+  lifeline setup           -> interactive validating key & credential setup wizard
+  lifeline install         -> install python package and frontend npm dependencies
+  lifeline status          -> live system health and configuration dashboard
+  lifeline run             -> start API backend server and Next.js frontend (pre-flight check)
+  lifeline ui              -> launch Next.js user frontend
+  lifeline dispatch        -> execute agent pipeline directly from terminal
+  lifeline logs            -> stream recent audit database records
+  lifeline seed            -> enrich hospitals with simulated bed & specialty data
+  lifeline fetch-hospitals -> pull real hospital data from OpenStreetMap (Overpass API)
+  lifeline test            -> run test suite with pytest
+  lifeline version         -> show version and runtime info
+  lifeline init            -> alias for lifeline setup
 """
 
-from __future__ import annotations
-
-import io
 import json
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -32,7 +32,6 @@ from pathlib import Path
 from typing import Annotated, Optional
 
 import typer
-from rich import print as rprint
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
@@ -40,20 +39,28 @@ from rich.prompt import Confirm, Prompt
 from rich.rule import Rule
 from rich.table import Table
 
-# ── Windows UTF-8 fix ─────────────────────────────────────────────────────────
-# Force UTF-8 output so emoji render correctly on Windows terminals.
-# Falls back gracefully if the terminal truly can't handle it.
+from lifeline.config_validator import (
+    audit_full_system_config,
+    validate_firebase_service_account,
+    validate_firebase_web_key,
+    validate_gcp_project,
+    validate_gemini_key,
+)
+
+# ── Cross-Platform Windows UTF-8 Output Safety ────────────────────────────────
 if sys.platform == "win32":
     try:
-        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+        if sys.stdout and hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        if sys.stderr and hasattr(sys.stderr, "reconfigure"):
+            sys.stderr.reconfigure(encoding="utf-8", errors="replace")
     except Exception:
         pass
 
-# ── App ───────────────────────────────────────────────────────────────────────
+# ── App Setup ─────────────────────────────────────────────────────────────────
 app = typer.Typer(
     name="lifeline",
-    help="[LifeLine Agent] Autonomous Emergency Dispatch powered by Gemini + ADK",
+    help="🚑 [LifeLine Agent] Autonomous Emergency Dispatch powered by Gemini + Google ADK",
     add_completion=True,
     rich_markup_mode="rich",
     no_args_is_help=True,
@@ -64,7 +71,8 @@ console = Console()
 err_console = Console(stderr=True, style="bold red")
 
 # ── Constants ─────────────────────────────────────────────────────────────────
-PROJECT_ROOT = Path(__file__).parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+FRONTEND_DIR = PROJECT_ROOT / "frontend"
 CITIES = ["mumbai", "delhi", "bangalore", "london", "seattle", "new york"]
 
 
@@ -72,8 +80,12 @@ CITIES = ["mumbai", "delhi", "bangalore", "london", "seattle", "new york"]
 # SHARED HELPERS
 # ══════════════════════════════════════════════════════════════════════════════
 
-def _banner(subtitle: str = "Autonomous Emergency Dispatch · Gemini + ADK + Firebase"):
-    from lifeline import __version__
+def _banner(subtitle: str = "Autonomous Emergency Dispatch · Gemini + ADK + Firestore"):
+    try:
+        from lifeline import __version__
+    except Exception:
+        __version__ = "0.1.0"
+
     console.print()
     console.print(Panel(
         f"[bold red]🚑  LifeLine Agent[/bold red]  [dim]v{__version__}[/dim]\n"
@@ -86,26 +98,102 @@ def _banner(subtitle: str = "Autonomous Emergency Dispatch · Gemini + ADK + Fir
 
 
 def _inject_config(warn: bool = True) -> dict:
-    """Load encrypted admin config → push into os.environ. Returns config dict."""
+    """Load configuration from environment, .env file, and encrypted admin config."""
+    config: dict[str, str] = {}
+    
+    # 1. Read .env file if present
+    env_path = PROJECT_ROOT / ".env"
+    if env_path.exists():
+        try:
+            with open(env_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, v = line.split("=", 1)
+                        k, v = k.strip(), v.strip().strip("'\"")
+                        if k and k not in os.environ:
+                            os.environ[k] = v
+                        config[k] = os.environ.get(k, v)
+        except Exception:
+            pass
+
+    # 2. Read encrypted admin config if available
     try:
         from admin.config_manager import get_runtime_config, inject_to_env
-        config = get_runtime_config()
-        inject_to_env(config)
-        if warn and not config.get("GEMINI_API_KEY"):
-            console.print(
-                "[yellow]⚠  Gemini API key not configured.[/yellow] "
-                "Run [bold]lifeline init[/bold] or [bold]lifeline admin[/bold] to set it up.\n"
-            )
-        return config
+        admin_cfg = get_runtime_config()
+        inject_to_env(admin_cfg)
+        config.update(admin_cfg)
     except Exception:
-        return {}
+        pass
+
+    # 3. Fill from environment variables
+    for key in [
+        "GOOGLE_API_KEY", "GEMINI_API_KEY", "FIRESTORE_PROJECT_ID", "GCP_PROJECT_ID",
+        "DEMO_AUTH_MODE", "DEMO_CITY", "FIRESTORE_COLLECTION", "VITE_API_BASE_URL",
+        "PORT", "HOST", "FIREBASE_SERVICE_ACCOUNT_JSON", "FIREBASE_WEB_API_KEY",
+        "GOOGLE_APPLICATION_CREDENTIALS"
+    ]:
+        val = os.environ.get(key)
+        if val:
+            config[key] = val
+
+    return config
 
 
 def _check(condition: bool, label: str, ok_msg: str = "OK", fail_msg: str = "MISSING"):
     icon = "✅" if condition else "❌"
     status = f"[green]{ok_msg}[/green]" if condition else f"[red]{fail_msg}[/red]"
-    console.print(f"  {icon}  {label:<35} {status}")
+    console.print(f"  {icon}  {label:<38} {status}")
     return condition
+
+
+def _save_all_config(new_config: dict) -> None:
+    """Save configuration to both .env and encrypted admin config."""
+    # 1. Update .env
+    env_file = PROJECT_ROOT / ".env"
+    existing_lines = {}
+    if env_file.exists():
+        try:
+            with open(env_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    if line.strip() and not line.strip().startswith("#") and "=" in line:
+                        k, v = line.strip().split("=", 1)
+                        existing_lines[k.strip()] = v.strip().strip("'\"")
+        except Exception:
+            pass
+
+    existing_lines.update(new_config)
+    
+    # Standard format
+    env_content = [
+        "# Core AI & LLM Models\n",
+        f"GOOGLE_API_KEY={existing_lines.get('GOOGLE_API_KEY', '')}\n",
+        f"GEMINI_API_KEY={existing_lines.get('GOOGLE_API_KEY', '')}\n\n",
+        "# Server & Runtime Configuration\n",
+        f"HOST={existing_lines.get('HOST', '0.0.0.0')}\n",
+        f"PORT={existing_lines.get('PORT', '8000')}\n",
+        f"DEMO_CITY={existing_lines.get('DEMO_CITY', 'mumbai')}\n",
+        f"DEMO_AUTH_MODE={existing_lines.get('DEMO_AUTH_MODE', 'true')}\n",
+        f"VITE_API_BASE_URL={existing_lines.get('VITE_API_BASE_URL', 'http://localhost:8000')}\n\n",
+        "# Google Cloud & Firestore Database\n",
+        f"FIRESTORE_PROJECT_ID={existing_lines.get('FIRESTORE_PROJECT_ID', '')}\n",
+        f"GCP_PROJECT_ID={existing_lines.get('FIRESTORE_PROJECT_ID', '')}\n",
+        f"FIRESTORE_COLLECTION={existing_lines.get('FIRESTORE_COLLECTION', 'dispatch_cases')}\n",
+    ]
+    if "FIREBASE_WEB_API_KEY" in existing_lines:
+        env_content.append(f"FIREBASE_WEB_API_KEY={existing_lines.get('FIREBASE_WEB_API_KEY')}\n")
+    if "FIREBASE_SERVICE_ACCOUNT_JSON" in existing_lines:
+        env_content.append(f"FIREBASE_SERVICE_ACCOUNT_JSON={existing_lines.get('FIREBASE_SERVICE_ACCOUNT_JSON')}\n")
+
+    with open(env_file, "w", encoding="utf-8") as f:
+        f.writelines(env_content)
+
+    # 2. Save encrypted config
+    try:
+        from admin.config_manager import save_config
+        save_config(existing_lines)
+    except Exception:
+        pass
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -113,8 +201,12 @@ def _check(condition: bool, label: str, ok_msg: str = "OK", fail_msg: str = "MIS
 # ══════════════════════════════════════════════════════════════════════════════
 @app.command()
 def version():
-    """Show the installed version of LifeLine Agent."""
-    from lifeline import __version__, __author__
+    """Display version, author, and runtime platform information."""
+    try:
+        from lifeline import __version__, __author__
+    except Exception:
+        __version__, __author__ = "0.1.0", "LifeLine Agent Team"
+
     console.print(
         Panel(
             f"[bold]lifeline-agent[/bold]  v[bold green]{__version__}[/bold green]\n"
@@ -129,256 +221,395 @@ def version():
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# init  ← THE FIRST THING A NEW USER RUNS
+# setup / init
 # ══════════════════════════════════════════════════════════════════════════════
 @app.command()
-def init():
+def setup(
+    key: Annotated[
+        Optional[str],
+        typer.Option("--key", "-k", help="Specific key/credential to reconfigure (gemini, gcp, firebase, city, auth, all)")
+    ] = "all",
+):
     """
-    Interactive first-run setup wizard.
-
-    Guides you through:
-      1. Checking dependencies
-      2. Creating your Firebase admin account
-      3. Setting all required API keys
-      4. Pulling hospital data for your demo city
+    Interactive key & credential setup wizard.
+    Validates each key live before saving to encrypted storage and .env.
     """
-    _banner("First-Run Setup Wizard")
+    _banner("Interactive Key & Credential Setup Wizard")
+    config = _inject_config(warn=False)
+    updated_values = dict(config)
 
-    console.print("[bold]Welcome to LifeLine Agent![/bold]")
-    console.print(
-        "This wizard will get you from zero to a running agent in under 5 minutes.\n"
-    )
+    target = (key or "all").lower().strip()
 
-    # ── Step 1: Dependency check ──────────────────────────────────────────────
-    console.print(Rule("[bold]Step 1 — Dependency Check[/bold]"))
-    all_ok = True
+    # ── 1. Gemini API Key (Mandatory) ─────────────────────────────────────────
+    if target in ["all", "gemini", "google"]:
+        console.print(Rule("[bold]Gemini API Key Setup (Mandatory)[/bold]"))
+        curr_gemini = config.get("GOOGLE_API_KEY") or config.get("GEMINI_API_KEY") or ""
+        masked = (curr_gemini[:4] + "••••" + curr_gemini[-4:]) if len(curr_gemini) > 8 else "not set"
+        console.print(f"Current Gemini API Key: [cyan]{masked}[/cyan]")
+        
+        while True:
+            new_key = Prompt.ask(
+                "Enter GOOGLE_API_KEY (from https://aistudio.google.com/apikey)",
+                default=curr_gemini if curr_gemini else "",
+                password=True,
+            )
+            if not new_key.strip():
+                err_console.print("⚠ Gemini API Key is mandatory for live agent reasoning.")
+                if not Confirm.ask("Skip Gemini validation for now?", default=False):
+                    continue
+                else:
+                    break
 
-    # Python version
-    py_ok = sys.version_info >= (3, 11)
-    all_ok &= _check(py_ok, "Python ≥ 3.11", sys.version.split()[0], sys.version.split()[0])
+            with Progress(SpinnerColumn(), TextColumn("[bold cyan]Validating Gemini API Key live...[/bold cyan]"), console=console) as p:
+                p.add_task("val", total=None)
+                is_valid, msg = validate_gemini_key(new_key.strip())
 
-    # Check key packages
-    for pkg_name, import_name in [
-        ("google-adk", "google.adk"),
-        ("google-genai", "google.genai"),
-        ("firebase-admin", "firebase_admin"),
-        ("fastapi", "fastapi"),
-        ("streamlit", "streamlit"),
-        ("typer", "typer"),
-        ("rich", "rich"),
-    ]:
-        try:
-            __import__(import_name)
-            all_ok &= _check(True, pkg_name)
-        except ImportError:
-            all_ok &= _check(False, pkg_name, fail_msg="NOT INSTALLED")
+            if is_valid:
+                console.print(f"[bold green]✓ {msg}[/bold green]\n")
+                updated_values["GOOGLE_API_KEY"] = new_key.strip()
+                updated_values["GEMINI_API_KEY"] = new_key.strip()
+                os.environ["GOOGLE_API_KEY"] = new_key.strip()
+                break
+            else:
+                err_console.print(f"✗ Validation Failed: {msg}")
+                if not Confirm.ask("Try entering Gemini API Key again?", default=True):
+                    if Confirm.ask("Save this key anyway?", default=False):
+                        updated_values["GOOGLE_API_KEY"] = new_key.strip()
+                        updated_values["GEMINI_API_KEY"] = new_key.strip()
+                    break
 
-    console.print()
-    if not all_ok:
-        console.print("[yellow]Some packages are missing. Run:[/yellow]")
-        console.print("  [bold]pip install -e \".[dev]\"[/bold]\n")
-        if not Confirm.ask("Continue anyway?", default=False):
-            raise typer.Exit(1)
-
-    # ── Step 2: Firebase project check ───────────────────────────────────────
-    console.print(Rule("[bold]Step 2 — Firebase & API Keys[/bold]"))
-    console.print(
-        "LifeLine Agent uses Firebase for authentication and Firestore for audit logs.\n"
-        "You'll need a Firebase project. Create one free at [link]https://console.firebase.google.com[/link]\n"
-    )
-
-    has_keys = Confirm.ask(
-        "Do you have your Firebase Web API Key and Service Account JSON ready?",
-        default=False,
-    )
-    if has_keys:
-        console.print(
-            "\n[green]Great![/green] Opening the Admin Panel now — "
-            "go to the [bold]🔑 API Keys[/bold] tab to enter them.\n"
+    # ── 2. GCP Project ID (Optional) ──────────────────────────────────────────
+    if target in ["all", "gcp", "firestore"]:
+        console.print(Rule("[bold]GCP / Firestore Project ID (Optional)[/bold]"))
+        curr_gcp = config.get("FIRESTORE_PROJECT_ID") or config.get("GCP_PROJECT_ID") or ""
+        new_gcp = Prompt.ask(
+            "Enter GCP / Firestore Project ID (press Enter for mock offline mode)",
+            default=curr_gcp if curr_gcp else "lifeline-3725b",
         )
-        time.sleep(1)
-        subprocess.run([sys.executable, "-m", "streamlit", "run",
-                        str(PROJECT_ROOT / "admin" / "superadmin.py")])
+        if new_gcp.strip():
+            is_valid, msg = validate_gcp_project(new_gcp.strip())
+            if is_valid:
+                console.print(f"[green]✓ {msg}[/green]\n")
+            else:
+                console.print(f"[yellow]⚠ {msg}[/yellow]\n")
+            updated_values["FIRESTORE_PROJECT_ID"] = new_gcp.strip()
+            updated_values["GCP_PROJECT_ID"] = new_gcp.strip()
+
+    # ── 3. Firebase Credentials (Optional) ────────────────────────────────────
+    if target in ["all", "firebase"]:
+        console.print(Rule("[bold]Firebase Credentials (Optional)[/bold]"))
+        curr_sa = config.get("FIREBASE_SERVICE_ACCOUNT_JSON") or config.get("GOOGLE_APPLICATION_CREDENTIALS") or ""
+        sa_path = Prompt.ask(
+            "Enter path to Firebase Service Account JSON file (or press Enter to skip)",
+            default=curr_sa if os.path.exists(curr_sa) else "",
+        )
+        if sa_path.strip():
+            is_valid, msg = validate_firebase_service_account(sa_path.strip())
+            if is_valid:
+                console.print(f"[green]✓ {msg}[/green]\n")
+                updated_values["FIREBASE_SERVICE_ACCOUNT_JSON"] = sa_path.strip()
+                updated_values["GOOGLE_APPLICATION_CREDENTIALS"] = sa_path.strip()
+            else:
+                console.print(f"[yellow]⚠ Service Account check notice: {msg}[/yellow]\n")
+
+        curr_web = config.get("FIREBASE_WEB_API_KEY") or ""
+        web_key = Prompt.ask(
+            "Enter Firebase Web API Key (optional for client auth)",
+            default=curr_web,
+            password=True,
+        )
+        if web_key.strip():
+            updated_values["FIREBASE_WEB_API_KEY"] = web_key.strip()
+
+    # ── 4. Demo City & Auth Mode ──────────────────────────────────────────────
+    if target in ["all", "city", "auth"]:
+        console.print(Rule("[bold]Demo Runtime Settings[/bold]"))
+        curr_city = config.get("DEMO_CITY", "mumbai")
+        new_city = Prompt.ask("Select default Demo City for hospital data", choices=CITIES, default=curr_city)
+        updated_values["DEMO_CITY"] = new_city
+
+        curr_auth = config.get("DEMO_AUTH_MODE", "true")
+        new_auth = Confirm.ask("Enable zero-friction DEMO_AUTH_MODE?", default=(curr_auth == "true"))
+        updated_values["DEMO_AUTH_MODE"] = "true" if new_auth else "false"
+
+    # Save all updated values
+    _save_all_config(updated_values)
+
+    # ── Validation Summary Table ──────────────────────────────────────────────
+    console.print()
+    console.print(Rule("[bold green]Validation & Health Summary[/bold green]"))
+    audit_results = audit_full_system_config(updated_values)
+
+    table = Table(show_header=True, header_style="bold", border_style="dim")
+    table.add_column("Credential / Setting", width=32)
+    table.add_column("Status", width=16)
+    table.add_column("Validation Details", width=42)
+
+    all_mandatory_ok = True
+    for key_name, item in audit_results.items():
+        if item["mandatory"] and not item["valid"]:
+            all_mandatory_ok = False
+        
+        status_str = "[bold green]VALIDATED[/bold green]" if item["valid"] else (
+            "[bold red]FAILED[/bold red]" if item["mandatory"] else "[yellow]OFFLINE / MOCK[/yellow]"
+        )
+        table.add_row(item["label"], status_str, item["message"])
+
+    console.print(table)
+    console.print()
+
+    if all_mandatory_ok:
+        console.print("[bold green]✅ Configuration saved and validated successfully![/bold green]")
+        console.print("Run [bold]lifeline run[/bold] to start the application stack.\n")
     else:
-        console.print(
-            "\n[yellow]No problem.[/yellow] When you're ready:\n"
-            "  1. Create a Firebase project → [link]https://console.firebase.google.com[/link]\n"
-            "  2. Run [bold]lifeline admin[/bold] to enter your keys\n"
-        )
+        console.print("[bold red]❌ Mandatory credentials failed validation.[/bold red]")
+        console.print("Run [bold]lifeline setup --key gemini[/bold] to reconfigure your Gemini API Key.\n")
 
-    # ── Step 3: Demo city ─────────────────────────────────────────────────────
-    console.print(Rule("[bold]Step 3 — Hospital Data[/bold]"))
-    console.print("Pull real hospital locations from OpenStreetMap for your demo city.\n")
 
-    city = Prompt.ask(
-        "Which city should we use?",
-        choices=CITIES,
-        default="mumbai",
-    )
+@app.command(name="init")
+def init():
+    """First-run interactive setup wizard (alias for lifeline setup)."""
+    setup(key="all")
 
-    if Confirm.ask(f"Fetch hospital data for [bold]{city}[/bold] now?", default=True):
-        _run_fetch(city)
-        _run_seed()
 
-    # ── Done ──────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+# install
+# ══════════════════════════════════════════════════════════════════════════════
+@app.command()
+def install():
+    """
+    Install Python backend package and Next.js frontend dependencies.
+    Wraps pip install and npm install into a single unified CLI command.
+    """
+    _banner("Unified Package & Dependency Installer")
+
+    # ── Step 1: Prerequisite Check ────────────────────────────────────────────
+    console.print(Rule("[bold]Step 1 — Prerequisite Version Check[/bold]"))
+    
+    # Python check
+    py_ok = sys.version_info >= (3, 11)
+    _check(py_ok, "Python ≥ 3.11", sys.version.split()[0], sys.version.split()[0])
+    if not py_ok:
+        err_console.print("✗ Python 3.11 or higher is required. Download at https://www.python.org/downloads/")
+        raise typer.Exit(1)
+
+    # Node.js check
+    node_bin = shutil.which("node") or shutil.which("node.exe")
+    node_ok = False
+    node_ver = "NOT INSTALLED"
+    if node_bin:
+        try:
+            res = subprocess.run([node_bin, "-v"], capture_output=True, text=True, timeout=5, shell=(sys.platform == "win32"))
+            if res.returncode == 0:
+                node_ver = res.stdout.strip()
+                digits = "".join([c for c in node_ver if c.isdigit() or c == "."])
+                if digits:
+                    major = int(digits.split(".")[0])
+                    node_ok = major >= 18
+        except Exception:
+            pass
+
+    _check(node_ok, "Node.js ≥ 18", node_ver, node_ver)
+    if not node_ok:
+        err_console.print("✗ Node.js 18 or higher is required to run the Next.js frontend. Download at https://nodejs.org/")
+        raise typer.Exit(1)
+
+    # npm check
+    npm_bin = shutil.which("npm.cmd" if sys.platform == "win32" else "npm") or "npm"
+    npm_ok = bool(shutil.which(npm_bin))
+    _check(npm_ok, "npm package manager", "AVAILABLE", "MISSING")
+    if not npm_ok:
+        err_console.print("✗ npm package manager is required. Ensure Node.js and npm are installed in PATH.")
+        raise typer.Exit(1)
+
     console.print()
+
+    # ── Step 2: Install Python Backend Package ────────────────────────────────
+    console.print(Rule("[bold]Step 2 — Python Backend Package Installation[/bold]"))
+    with Progress(SpinnerColumn(), TextColumn("[bold cyan]Installing Python package (pip install -e .)...[/bold cyan]"), console=console) as p:
+        p.add_task("pip", total=None)
+        cmd_pip = [sys.executable, "-m", "pip", "install", "-e", ".", "--no-deps"]
+        res_pip = subprocess.run(cmd_pip, cwd=str(PROJECT_ROOT), capture_output=True, text=True)
+
+    if res_pip.returncode == 0:
+        console.print("[bold green]✓ Python backend package installed successfully.[/bold green]\n")
+    else:
+        err_console.print("✗ Python package installation failed:")
+        err_console.print(res_pip.stderr or res_pip.stdout)
+        raise typer.Exit(1)
+
+    # ── Step 3: Install Next.js Frontend Dependencies ─────────────────────────
+    console.print(Rule("[bold]Step 3 — Next.js Frontend Dependencies Installation[/bold]"))
+    if not FRONTEND_DIR.exists() or not (FRONTEND_DIR / "package.json").exists():
+        err_console.print(f"✗ Frontend package.json not found at {FRONTEND_DIR}")
+        raise typer.Exit(1)
+
+    with Progress(SpinnerColumn(), TextColumn("[bold cyan]Installing Next.js dependencies (npm install)...[/bold cyan]"), console=console) as p:
+        p.add_task("npm", total=None)
+        cmd_npm = [npm_bin, "install", "--prefer-offline", "--no-audit", "--no-fund"]
+        res_npm = subprocess.run(cmd_npm, cwd=str(FRONTEND_DIR), capture_output=True, text=True, shell=(sys.platform == "win32"))
+
+    if res_npm.returncode == 0:
+        console.print("[bold green]✓ Next.js frontend dependencies installed successfully.[/bold green]\n")
+    else:
+        err_console.print("✗ npm install failed inside frontend/ directory:")
+        err_console.print(res_npm.stderr or res_npm.stdout)
+        raise typer.Exit(1)
+
     console.print(Panel(
-        "[bold green]✅  Setup complete![/bold green]\n\n"
-        "Next steps:\n"
-        "  [bold]lifeline run[/bold]    → start the agent API server\n"
-        "  [bold]lifeline ui[/bold]     → open the demo dispatch UI\n"
-        "  [bold]lifeline status[/bold] → check system health\n",
+        "[bold green]🎉  Installation Complete![/bold green]\n\n"
+        "Both Python backend and Next.js frontend dependencies are ready.\n"
+        "Run [bold]lifeline setup[/bold] to configure your API keys, or [bold]lifeline run[/bold] to start.",
         border_style="green",
         expand=False,
     ))
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# status  ← REAL-TIME HEALTH DASHBOARD
+# status
 # ══════════════════════════════════════════════════════════════════════════════
 @app.command()
 def status():
-    """Show a live system health dashboard — config, data files, services."""
-    _banner("System Status Dashboard")
+    """Live system health and configuration status dashboard."""
+    _banner("System Status & Health Dashboard")
     config = _inject_config(warn=False)
+    audit = audit_full_system_config(config)
 
-    # ── Config status ─────────────────────────────────────────────────────────
-    console.print(Rule("[bold]Configuration[/bold]"))
-    keys_status = {
-        "GEMINI_API_KEY":                "Gemini API Key",
-        "GCP_PROJECT_ID":                "GCP Project ID",
-        "FIREBASE_WEB_API_KEY":          "Firebase Web API Key",
-        "FIREBASE_SERVICE_ACCOUNT_JSON": "Firebase Service Account",
-        "FIRESTORE_COLLECTION":          "Firestore Collection",
-        "DEMO_CITY":                     "Demo City",
-    }
-    all_configured = True
-    for key, label in keys_status.items():
-        val = config.get(key) or os.environ.get(key)
-        ok = bool(val)
-        all_configured &= ok
-        masked = (val[:4] + "••••" + val[-4:]) if val and len(val) > 8 else ("set" if val else "")
-        _check(ok, label, ok_msg=masked or "set", fail_msg="NOT SET")
+    # ── 1. Configuration Audit Table ──────────────────────────────────────────
+    console.print(Rule("[bold]API Key & Credential Audit[/bold]"))
+    table = Table(show_header=True, header_style="bold", border_style="dim")
+    table.add_column("Setting / Credential", width=32)
+    table.add_column("Status", width=16)
+    table.add_column("Validation Message", width=44)
 
-    # ── Data files ────────────────────────────────────────────────────────────
+    all_mandatory_valid = True
+    for key_name, item in audit.items():
+        if item["mandatory"] and not item["valid"]:
+            all_mandatory_valid = False
+        
+        status_str = "[bold green]VALIDATED[/bold green]" if item["valid"] else (
+            "[bold red]FAILED[/bold red]" if item["mandatory"] else "[yellow]OFFLINE / MOCK[/yellow]"
+        )
+        table.add_row(item["label"], status_str, item["message"])
+
+    console.print(table)
+
+    # ── 2. Data Files ─────────────────────────────────────────────────────────
     console.print()
-    console.print(Rule("[bold]Data Files[/bold]"))
+    console.print(Rule("[bold]Hospital & Clinical Datasets[/bold]"))
     data_files = {
         "data/hospitals_raw.json": "Raw hospital locations (OSM)",
-        "data/hospitals.json":     "Enriched hospital data (seeded)",
-        "data/demo_cases.json":    "Demo scenarios",
+        "data/hospitals.json":     "Enriched hospital dataset (seeded)",
+        "data/demo_cases.json":    "Demo clinical scenarios",
     }
     for filepath, label in data_files.items():
         path = PROJECT_ROOT / filepath
         exists = path.exists()
         size = f"{path.stat().st_size // 1024} KB" if exists else ""
-        _check(exists, label, ok_msg=size or "exists", fail_msg="missing → run fetch/seed")
+        _check(exists, label, ok_msg=size or "exists", fail_msg="missing → run lifeline seed")
 
-    # ── Model info ────────────────────────────────────────────────────────────
+    # ── 3. Gemini LLM Tiers ───────────────────────────────────────────────────
     console.print()
-    console.print(Rule("[bold]Models[/bold]"))
+    console.print(Rule("[bold]Gemini LLM Agent Model Tiers[/bold]"))
     try:
         from lifeline.models import AGENT_MODELS
-        table = Table(show_header=True, header_style="bold", box=None, padding=(0, 2))
-        table.add_column("Agent")
-        table.add_column("Model", style="green")
+        mod_table = Table(show_header=True, header_style="bold", box=None, padding=(0, 2))
+        mod_table.add_column("Agent / Task Role")
+        mod_table.add_column("Assigned Gemini Tier Model", style="green")
         for agent, model in AGENT_MODELS.items():
-            table.add_row(agent, model)
-        console.print(table)
+            mod_table.add_row(agent, model)
+        console.print(mod_table)
     except Exception as e:
-        console.print(f"  [red]Could not load models: {e}[/red]")
+        console.print(f"  [red]Could not load model registry: {e}[/red]")
 
     # ── Summary ───────────────────────────────────────────────────────────────
     console.print()
-    if all_configured:
-        console.print("[bold green]✅  System is fully configured and ready.[/bold green]")
-        console.print("Run [bold]lifeline run[/bold] to start the agent server.")
+    if all_mandatory_valid:
+        console.print("[bold green]✅  System is fully configured and ready for execution.[/bold green]")
+        console.print("Run [bold]lifeline run[/bold] to start the full stack.")
     else:
-        console.print("[bold yellow]⚠  Some configuration is missing.[/bold yellow]")
-        console.print("Run [bold]lifeline init[/bold] or [bold]lifeline admin[/bold] to fix it.")
+        console.print("[bold red]❌  Mandatory Gemini API key is missing or invalid.[/bold red]")
+        console.print("Run [bold]lifeline setup --key gemini[/bold] to configure your API key.")
     console.print()
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# admin
-# ══════════════════════════════════════════════════════════════════════════════
-@app.command()
-def admin():
-    """
-    Launch the Super Admin Panel.
-
-    Set API keys, manage Firebase auth, view system configuration.
-    Opens at [link]http://localhost:8501[/link]
-    """
-    _banner("Super Admin Panel")
-    console.print("[dim]Opening admin panel at http://localhost:8501 ...[/dim]\n")
-    subprocess.run([
-        sys.executable, "-m", "streamlit", "run",
-        str(PROJECT_ROOT / "admin" / "superadmin.py"),
-        "--server.headless", "false",
-        "--browser.gatherUsageStats", "false",
-    ])
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# run  — starts BOTH backend + frontend by default
+# run
 # ══════════════════════════════════════════════════════════════════════════════
 @app.command()
 def run(
-    host: Annotated[str, typer.Option("--host", "-h", help="Bind host")] = "0.0.0.0",
-    port: Annotated[int, typer.Option("--port", "-p", help="Backend API port")] = 8000,
-    frontend_port: Annotated[int, typer.Option("--frontend-port", help="Streamlit UI port")] = 8501,
-    frontend: Annotated[str, typer.Option("--frontend", "-f", help="UI type: 'streamlit' or 'next'")] = "streamlit",
-    reload: Annotated[bool, typer.Option("--reload", help="Auto-reload backend on code changes (dev)")] = False,
-    backend_only: Annotated[bool, typer.Option("--backend-only", "-b", help="Start only the API server, skip UI")] = False,
+    host: Annotated[str, typer.Option("--host", "-h", help="Bind host address")] = "0.0.0.0",
+    port: Annotated[int, typer.Option("--port", "-p", help="FastAPI backend port")] = 8000,
+    frontend_port: Annotated[int, typer.Option("--frontend-port", help="Next.js frontend port")] = 3000,
+    reload: Annotated[bool, typer.Option("--reload", help="Enable auto-reload for development")] = False,
+    backend_only: Annotated[bool, typer.Option("--backend-only", "-b", help="Start only the FastAPI backend")] = False,
 ):
     """
-    Start the full LifeLine Agent stack — Backend API + Streamlit UI.
-
-    By default launches BOTH services in one terminal:
-
-      \b
-      Backend API  →  http://localhost:8000
-      API Docs     →  http://localhost:8000/docs
-      Streamlit UI →  http://localhost:8501
-
-    Use [bold]--backend-only[/bold] to start just the API server.
+    Start the LifeLine Agent backend and Next.js frontend concurrently.
+    Refuses to start if the mandatory Gemini API key is missing or invalid.
     """
     _banner()
-    _inject_config()
+    config = _inject_config(warn=False)
+
+    # ── Pre-flight Key & Config Validation Check ──────────────────────────────
+    audit = audit_full_system_config(config)
+    gemini_status = audit["GEMINI_API_KEY"]
+
+    if not gemini_status["valid"]:
+        console.print(Panel(
+            f"[bold red]🛑  STARTUP BLOCKED — MANDATORY GEMINI API KEY MISSING OR INVALID[/bold red]\n\n"
+            f"  [yellow]Reason:[/yellow] {gemini_status['message']}\n\n"
+            "  The LifeLine multi-agent system requires a valid Gemini API key for clinical triage,\n"
+            "  bed-matching, routing, and daily intelligence summaries.\n\n"
+            "  [bold cyan]To fix this issue, run:[/bold cyan]\n"
+            "    [bold white]lifeline setup --key gemini[/bold white]\n\n"
+            "  Get your key from: [link]https://aistudio.google.com/apikey[/link]",
+            border_style="red",
+            expand=False,
+        ))
+        raise typer.Exit(1)
+
+    # Check optional feature degraded modes
+    gcp_status = audit["GCP_PROJECT_ID"]
+    fb_status = audit["FIREBASE_SERVICE_ACCOUNT"]
+    if not gcp_status["valid"] or not fb_status["valid"]:
+        console.print(
+            "[yellow]⚡ Notice:[/yellow] Remote Firestore credentials not detected. "
+            "Running in [bold cyan]Offline Dev Memory Audit Mode[/bold cyan] (mock tokens & thread-safe store active).\n"
+        )
 
     start_script = PROJECT_ROOT / "start.py"
 
     if not backend_only and start_script.exists():
-        # ── Launch both services ──────────────────────────────────────────────
         console.print(Panel(
-            "[bold green]▶  Starting Backend API + Streamlit UI[/bold green]\n\n"
-            f"  Backend API  →  [link]http://localhost:{port}[/link]\n"
-            f"  API Docs     →  [link]http://localhost:{port}/docs[/link]\n"
-            f"  Streamlit UI →  [link]http://localhost:{frontend_port}[/link]\n\n"
-            "[dim]Press Ctrl+C to stop all services[/dim]",
+            "[bold green]▶  Starting LifeLine Agent Stack (Backend + Frontend)[/bold green]\n\n"
+            f"  FastAPI Backend  →  [link]http://localhost:{port}[/link]\n"
+            f"  API Docs         →  [link]http://localhost:{port}/docs[/link]\n"
+            f"  Next.js Frontend →  [link]http://localhost:{frontend_port}[/link]\n\n"
+            "[dim]Press Ctrl+C to gracefully terminate all services[/dim]",
             border_style="green",
             expand=False,
         ))
         cmd = [
             sys.executable, str(start_script),
-            "--host", host,
             "--port", str(port),
-            "--frontend", frontend,
             "--frontend-port", str(frontend_port),
         ]
         if reload:
             cmd.append("--reload")
-        subprocess.run(cmd, cwd=str(PROJECT_ROOT))
+        try:
+            subprocess.run(cmd, cwd=str(PROJECT_ROOT))
+        except KeyboardInterrupt:
+            pass
         return
 
-    # ── Backend-only mode ─────────────────────────────────────────────────────
+    # Backend-only mode
     console.print(Panel(
-        f"[bold yellow]▶  Starting API Server (backend only)[/bold yellow]\n\n"
+        f"[bold yellow]▶  Starting FastAPI Backend (Port {port})[/bold yellow]\n\n"
         f"  URL:     [link]http://{host}:{port}[/link]\n"
         f"  Docs:    [link]http://{host}:{port}/docs[/link]\n"
         f"  Health:  [link]http://{host}:{port}/health[/link]\n"
-        f"  Reload:  {'on (dev)' if reload else 'off'}",
+        f"  Reload:  {'enabled' if reload else 'disabled'}",
         border_style="yellow",
         expand=False,
     ))
@@ -390,7 +621,10 @@ def run(
     ]
     if reload:
         cmd.append("--reload")
-    subprocess.run(cmd, cwd=str(PROJECT_ROOT))
+    try:
+        subprocess.run(cmd, cwd=str(PROJECT_ROOT))
+    except KeyboardInterrupt:
+        pass
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -398,285 +632,205 @@ def run(
 # ══════════════════════════════════════════════════════════════════════════════
 @app.command()
 def ui(
-    port: Annotated[int, typer.Option("--port", "-p", help="Streamlit port")] = 8501,
+    port: Annotated[int, typer.Option("--port", "-p", help="Next.js frontend port")] = 3000,
+    no_browser: Annotated[bool, typer.Option("--no-browser", help="Do not automatically open browser")] = False,
 ):
     """
-    Launch the Streamlit demo dispatch UI.
-
-    Shows 5 preset emergency scenarios with a Dispatch button.
-    Each click runs the full Triage → Bed-Matching pipeline.
-    Opens at [link]http://localhost:8501[/link]
+    Launch the Next.js multi-role user frontend.
+    Opens at http://localhost:3000
     """
-    _banner("Demo Dispatch UI — Streamlit")
-    _inject_config()
+    _banner("Next.js Multi-Role Frontend Portal")
+    _inject_config(warn=False)
 
-    ui_script = PROJECT_ROOT / "ui" / "streamlit_app.py"
-    if not ui_script.exists():
-        err_console.print(f"UI script not found: {ui_script}")
+    if not FRONTEND_DIR.exists() or not (FRONTEND_DIR / "package.json").exists():
+        err_console.print(f"✗ Frontend directory or package.json not found at: {FRONTEND_DIR}")
         raise typer.Exit(1)
 
+    npm_bin = shutil.which("npm.cmd" if sys.platform == "win32" else "npm") or "npm"
+
     console.print(Panel(
-        f"[bold cyan]▶  Launching Streamlit UI[/bold cyan]\n\n"
+        f"[bold cyan]▶  Launching Next.js Frontend[/bold cyan]\n\n"
         f"  URL:  [link]http://localhost:{port}[/link]\n\n"
-        "[dim]Make sure the backend is running: lifeline run --backend-only[/dim]",
+        "[dim]Ensure FastAPI backend is running: lifeline run --backend-only[/dim]",
         border_style="cyan",
         expand=False,
     ))
 
-    subprocess.run([
-        sys.executable, "-m", "streamlit", "run",
-        str(ui_script),
-        "--server.port", str(port),
-        "--server.fileWatcherType", "none",
-    ], cwd=str(PROJECT_ROOT))
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# fetch-hospitals
-# ══════════════════════════════════════════════════════════════════════════════
-@app.command(name="fetch-hospitals")
-def fetch_hospitals(
-    city: Annotated[str, typer.Argument(help=f"City to fetch. Options: {', '.join(CITIES)}")] = "mumbai",
-):
-    """
-    Pull real hospital locations from OpenStreetMap (Overpass API).
-
-    No API key required. Saves to [bold]data/hospitals_raw.json[/bold].
-    Run [bold]lifeline seed[/bold] next to add simulated bed data.
-    """
-    _banner()
-    _run_fetch(city)
-
-
-def _run_fetch(city: str):
-    from lifeline.tools.places_api import fetch_hospitals_overpass
-    (PROJECT_ROOT / "data").mkdir(exist_ok=True)
-
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        console=console,
-    ) as progress:
-        task = progress.add_task(
-            f"Fetching hospitals in [bold]{city}[/bold] from OpenStreetMap...", total=None
-        )
+    if not no_browser:
         try:
-            hospitals = fetch_hospitals_overpass(city)
-            progress.update(task, description=f"[green]✓  Found {len(hospitals)} hospitals[/green]")
-        except Exception as e:
-            progress.stop()
-            err_console.print(f"✗ Overpass API error: {e}")
-            raise typer.Exit(1)
+            import webbrowser
+            webbrowser.open(f"http://localhost:{port}")
+        except Exception:
+            pass
 
-    out_path = PROJECT_ROOT / "data" / "hospitals_raw.json"
-    with open(out_path, "w") as f:
-        json.dump(hospitals, f, indent=2)
-
-    console.print(f"[green]✓[/green]  Saved [bold]{len(hospitals)}[/bold] hospitals → [dim]{out_path}[/dim]")
-    console.print("[dim]Next: run [bold]lifeline seed[/bold] to add bed data.[/dim]\n")
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# seed
-# ══════════════════════════════════════════════════════════════════════════════
-@app.command()
-def seed(
-    icu_max:     Annotated[int, typer.Option(help="Max ICU beds")] = 12,
-    general_max: Annotated[int, typer.Option(help="Max general beds")] = 40,
-    surgical_max:Annotated[int, typer.Option(help="Max surgical beds")] = 8,
-):
-    """
-    Add simulated bed counts & specialties to hospitals_raw.json.
-
-    Saves to [bold]data/hospitals.json[/bold] — the Bed-Matching Agent's source of truth.
-    Bed data is intentionally simulated (real EHR integration is future work).
-    """
-    _banner()
-    _run_seed(icu_max, general_max, surgical_max)
-
-
-def _run_seed(icu_max=12, general_max=40, surgical_max=8):
-    import random
-    SPECIALTIES = ["cardiac", "trauma", "general", "surgical", "pediatric", "burn"]
-
-    raw_path = PROJECT_ROOT / "data" / "hospitals_raw.json"
-    if not raw_path.exists():
-        err_console.print(
-            "✗  data/hospitals_raw.json not found.\n"
-            "   Run: [bold]lifeline fetch-hospitals[/bold] first."
-        )
-        raise typer.Exit(1)
-
-    with open(raw_path) as f:
-        hospitals = json.load(f)
-
-    with Progress(SpinnerColumn(), TextColumn("{task.description}"), console=console) as p:
-        task = p.add_task(f"Seeding {len(hospitals)} hospitals...", total=None)
-        for h in hospitals:
-            h["icu_beds"]      = max(0, random.randint(1, icu_max) - random.randint(0, 3))
-            h["general_beds"]  = max(0, random.randint(5, general_max) - random.randint(0, 10))
-            h["surgical_beds"] = max(0, random.randint(1, surgical_max) - random.randint(0, 2))
-            h["specialties"]   = random.sample(SPECIALTIES, k=random.randint(1, 3))
-        p.update(task, description=f"[green]✓  Seeded {len(hospitals)} hospitals[/green]")
-
-    out_path = PROJECT_ROOT / "data" / "hospitals.json"
-    with open(out_path, "w") as f:
-        json.dump(hospitals, f, indent=2)
-
-    console.print(f"[green]✓[/green]  Saved → [dim]{out_path}[/dim]")
-    console.print("[dim]⚠  Bed data is SIMULATED. Real EHR integration is future work.[/dim]\n")
+    cmd = [npm_bin, "run", "dev", "--", "-p", str(port)]
+    try:
+        subprocess.run(cmd, cwd=str(FRONTEND_DIR), shell=(sys.platform == "win32"))
+    except KeyboardInterrupt:
+        pass
+    except Exception as e:
+        err_console.print(f"✗ Could not start npm dev server: {e}")
+        console.print("\n[yellow]To run manually via CLI:[/yellow]")
+        console.print("  [bold]lifeline install[/bold] && [bold]lifeline run[/bold]\n")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# dispatch  ← RUN A CASE FROM THE TERMINAL
+# dispatch
 # ══════════════════════════════════════════════════════════════════════════════
 @app.command()
 def dispatch(
     scenario: Annotated[
         Optional[str],
-        typer.Argument(help="Scenario name from data/demo_cases.json (leave blank to pick)")
+        typer.Argument(help="Scenario key from data/demo_cases.json (or leave blank to pick interactively)")
     ] = None,
-    lat: Annotated[float, typer.Option(help="Patient latitude")] = 19.076,
-    lng: Annotated[float, typer.Option(help="Patient longitude")] = 72.877,
+    lat: Annotated[float, typer.Option(help="Patient latitude coordinate")] = 19.055,
+    lng: Annotated[float, typer.Option(help="Patient longitude coordinate")] = 72.840,
+    api_url: Annotated[str, typer.Option("--api-url", help="API URL for dispatch execution")] = "http://localhost:8000/dispatch",
 ):
     """
-    Run the full agent pipeline for a scenario directly in the terminal.
-
-    Calls POST /dispatch on the running API server.
-    Make sure [bold]lifeline run[/bold] is already running.
+    Execute the multi-agent emergency dispatch pipeline directly from the terminal.
+    Runs NEWS2 Scoring → Gemini 3.1 Pro Triage → Gemini 3.5 Flash Bed Matching → OSRM Routing → Briefing.
     """
-    import requests as http
-
-    _banner("Terminal Dispatch")
-    config = _inject_config()
+    _banner("Autonomous Dispatch Pipeline")
+    _inject_config(warn=False)
 
     cases_path = PROJECT_ROOT / "data" / "demo_cases.json"
     if not cases_path.exists():
         err_console.print("✗  data/demo_cases.json not found.")
         raise typer.Exit(1)
 
-    with open(cases_path) as f:
-        cases = json.load(f)
+    try:
+        with open(cases_path, "r", encoding="utf-8") as f:
+            cases = json.load(f)
+    except Exception as e:
+        err_console.print(f"✗  Could not parse demo_cases.json: {e}")
+        raise typer.Exit(1)
 
     if not scenario:
-        console.print("[bold]Available scenarios:[/bold]")
-        for i, name in enumerate(cases.keys(), 1):
+        console.print("[bold]Available Emergency Scenarios:[/bold]")
+        case_keys = list(cases.keys())
+        for i, name in enumerate(case_keys, 1):
             console.print(f"  {i}. {name}")
-        choice = Prompt.ask("\nPick a scenario", choices=[str(i) for i in range(1, len(cases)+1)])
-        scenario = list(cases.keys())[int(choice) - 1]
+        choice = Prompt.ask("\nSelect scenario number", choices=[str(i) for i in range(1, len(case_keys) + 1)], default="1")
+        scenario = case_keys[int(choice) - 1]
 
-    case = cases.get(scenario)
-    if not case:
-        err_console.print(f"✗  Scenario '{scenario}' not found.")
+    case_data = cases.get(scenario)
+    if not case_data:
+        err_console.print(f"✗  Scenario '{scenario}' not found in demo_cases.json.")
         raise typer.Exit(1)
 
-    payload = {**case, "patient_location": {"lat": lat, "lng": lng}}
-    api_url = f"http://localhost:8000/dispatch"
+    console.print(f"\n[bold]Running Emergency Case:[/bold] [red]{scenario}[/red]")
+    console.print(f"[dim]Patient GPS Location: ({lat}, {lng})[/dim]\n")
 
-    console.print(f"\n[bold]Running:[/bold] {scenario}")
-    console.print(f"[dim]Patient location: ({lat}, {lng})[/dim]\n")
+    result = None
 
-    with Progress(SpinnerColumn(), TextColumn("{task.description}"), console=console) as p:
-        task = p.add_task("Triage Agent thinking...", total=None)
+    try:
+        import requests
+        payload = {"case": case_data, "patient_location": {"lat": lat, "lng": lng}}
+        with Progress(SpinnerColumn(), TextColumn("[bold green]Executing agent pipeline via API...[/bold green]"), console=console) as p:
+            p.add_task("dispatch", total=None)
+            resp = requests.post(api_url, json=payload, timeout=45)
+            if resp.ok:
+                result = resp.json()
+    except Exception:
+        pass
+
+    if not result:
         try:
-            resp = http.post(api_url, json=payload, timeout=60)
-            p.update(task, description="[green]✓  Pipeline complete[/green]")
+            from lifeline.schemas import Case, Location
+            from lifeline.orchestrator import run_dispatch
+
+            case_obj = Case(**case_data)
+            loc_obj = Location(lat=lat, lng=lng)
+
+            with Progress(SpinnerColumn(), TextColumn("[bold yellow]Executing in-process multi-agent pipeline...[/bold yellow]"), console=console) as p:
+                p.add_task("pipeline", total=None)
+                result = run_dispatch(case_obj, loc_obj)
         except Exception as e:
-            p.stop()
-            err_console.print(f"✗  Could not reach API: {e}\n   Is [bold]lifeline run[/bold] running?")
+            err_console.print(f"✗ Pipeline execution error: {e}")
             raise typer.Exit(1)
 
-    if not resp.ok:
-        err_console.print(f"✗  API error {resp.status_code}: {resp.text}")
-        raise typer.Exit(1)
+    # ── Display Pretty Results ────────────────────────────────────────────────
+    console.print()
+    console.print(Rule("[bold red]🚨 NEWS2 Clinical Score[/bold red]"))
+    news2 = result.get("news2", {})
+    console.print(f"  Total Score:  [bold yellow]{news2.get('score', '—')}[/bold yellow]")
+    console.print(f"  Risk Band:    [bold]{str(news2.get('risk_band', '—')).upper()}[/bold]")
 
-    result = resp.json()
-
-    # Pretty print results
-    console.print(Rule("[bold]Triage Result[/bold]"))
+    console.print(Rule("[bold blue]🩺 Triage Reasoning (Gemini 3.1 Pro)[/bold blue]"))
     triage = result.get("triage", {})
-    console.print(f"  Severity:   [bold red]{triage.get('severity_label', '—').upper()}[/bold red]")
-    console.print(f"  Specialty:  [bold]{triage.get('required_specialty', '—')}[/bold]")
-    console.print(f"  Notes:      [dim]{triage.get('notes', '—')}[/dim]")
+    console.print(f"  Severity:     [bold red]{triage.get('severity_label', '—').upper()}[/bold red]")
+    console.print(f"  Specialty:    [bold]{triage.get('required_specialty', '—')}[/bold]")
+    console.print(f"  Clinical Log: [dim]{triage.get('notes', '—')}[/dim]")
 
-    console.print(Rule("[bold]Hospital Match[/bold]"))
+    console.print(Rule("[bold green]🏥 Bed-Matching (Gemini 3.5 Flash + OSM)[/bold green]"))
     match = result.get("bed_match", {})
     hospital = match.get("chosen_hospital", {})
-    console.print(f"  Hospital:   [bold green]{hospital.get('name', '—')}[/bold green]")
+    console.print(f"  Destination:  [bold green]{hospital.get('name', '—')}[/bold green]")
     if hospital.get("eta_minutes"):
-        console.print(f"  ETA:        [bold]{hospital['eta_minutes']} min[/bold] ({hospital.get('distance_km', '?')} km)")
-    console.print(f"  Reasoning:  [dim]{match.get('reasoning', '—')}[/dim]")
+        console.print(f"  Drive ETA:    [bold]{hospital['eta_minutes']} min[/bold] ({hospital.get('distance_km', '?')} km)")
+    console.print(f"  Match Rationale: [dim]{match.get('reasoning', '—')}[/dim]")
 
     alts = match.get("alternatives", [])
     if alts:
-        console.print(f"\n  [dim]Alternatives considered: {', '.join(a['name'] for a in alts)}[/dim]")
+        alt_names = [a.get("name", "") for a in alts if isinstance(a, dict)]
+        console.print(f"  Alternatives: [dim]{', '.join(alt_names)}[/dim]")
 
     if result.get("briefing"):
-        console.print(Rule("[bold]Pre-Arrival Brief[/bold]"))
+        console.print(Rule("[bold magenta]📋 SBAR Pre-Arrival Briefing[/bold magenta]"))
         console.print(f"  [italic]{result['briefing'].get('pre_arrival_brief', '')}[/italic]")
 
+    if result.get("audit_id"):
+        console.print(f"\n[dim]Audit Trace ID: {result['audit_id']}[/dim]")
     console.print()
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# logs  ← TAIL FIRESTORE AUDIT RECORDS
+# logs
 # ══════════════════════════════════════════════════════════════════════════════
 @app.command()
 def logs(
-    limit: Annotated[int, typer.Option("--limit", "-n", help="Number of records to show")] = 10,
+    limit: Annotated[int, typer.Option("--limit", "-n", help="Number of recent records to display")] = 10,
 ):
-    """
-    Show the most recent dispatch records from Firestore.
+    """Stream recent Firestore dispatch audit records."""
+    _banner("Audit Log Streamer")
+    _inject_config(warn=False)
 
-    Reads from the audit log collection configured in your admin panel.
-    """
-    _banner("Audit Log")
-    _inject_config()
-
+    records = []
     try:
         from lifeline.tools.firestore_client import get_recent_cases
+        records = get_recent_cases(limit=limit)
     except Exception as e:
-        err_console.print(f"✗  Could not connect to Firestore: {e}")
-        raise typer.Exit(1)
-
-    with Progress(SpinnerColumn(), TextColumn("Loading audit records..."), console=console) as p:
-        task = p.add_task("", total=None)
-        try:
-            records = get_recent_cases(limit=limit)
-            p.update(task, description=f"[green]✓  {len(records)} records loaded[/green]")
-        except Exception as e:
-            p.stop()
-            err_console.print(f"✗  Firestore error: {e}")
-            raise typer.Exit(1)
+        console.print(f"[yellow]Notice: Firestore client unavailable ({e}).[/yellow]")
 
     if not records:
-        console.print("[dim]No dispatch records found. Run a dispatch to create one.[/dim]")
+        console.print("[dim]No remote Firestore audit records found. Run a dispatch to generate logs.[/dim]\n")
         return
 
     table = Table(
-        title=f"Last {len(records)} Dispatch Records",
+        title=f"Last {len(records)} Emergency Dispatch Audit Records",
         show_header=True,
         header_style="bold",
         border_style="dim",
     )
-    table.add_column("ID", style="dim", width=12)
+    table.add_column("Case ID", style="dim", width=14)
     table.add_column("Timestamp", width=22)
-    table.add_column("Severity", width=10)
-    table.add_column("Specialty", width=12)
-    table.add_column("Hospital", width=30)
+    table.add_column("Severity", width=12)
+    table.add_column("Specialty", width=14)
+    table.add_column("Assigned Facility", width=28)
     table.add_column("ETA (min)", width=10)
 
     for rec in records:
         triage = rec.get("triage", {})
         match = rec.get("bed_match", {}).get("chosen_hospital", {})
         severity = triage.get("severity_label", "—")
-        color = {"critical": "red", "moderate": "yellow", "mild": "green"}.get(severity, "white")
+        color = {"critical": "red", "moderate": "yellow", "mild": "green"}.get(severity.lower(), "white")
         table.add_row(
-            rec["id"][:10] + "…",
+            rec.get("_id", rec.get("id", "CASE-xxxx"))[:12],
             rec.get("_timestamp", "—")[:19].replace("T", " "),
-            f"[{color}]{severity}[/{color}]",
+            f"[{color}]{severity.upper()}[/{color}]",
             triage.get("required_specialty", "—"),
-            match.get("name", "—")[:28],
+            match.get("name", "—")[:26],
             str(match.get("eta_minutes", "—")),
         )
 
@@ -685,26 +839,109 @@ def logs(
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# fetch-hospitals
+# ══════════════════════════════════════════════════════════════════════════════
+@app.command(name="fetch-hospitals")
+def fetch_hospitals(
+    city: Annotated[str, typer.Argument(help=f"Target city. Supported: {', '.join(CITIES)}")] = "mumbai",
+):
+    """Pull real hospital locations from OpenStreetMap (Overpass API)."""
+    _banner("OpenStreetMap Hospital Ingestion")
+    _run_fetch(city)
+
+
+def _run_fetch(city: str):
+    from lifeline.tools.places_api import fetch_hospitals_overpass
+    (PROJECT_ROOT / "data").mkdir(exist_ok=True)
+
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
+        task = progress.add_task(f"Querying OpenStreetMap Overpass API for [bold]{city}[/bold]...", total=None)
+        try:
+            hospitals = fetch_hospitals_overpass(city)
+            progress.update(task, description=f"[green]✓ Retrieved {len(hospitals)} facilities in {city}[/green]")
+        except Exception as e:
+            progress.stop()
+            err_console.print(f"✗ OSM Overpass error: {e}")
+            raise typer.Exit(1)
+
+    out_path = PROJECT_ROOT / "data" / "hospitals_raw.json"
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(hospitals, f, indent=2)
+
+    console.print(f"[green]✓ Saved {len(hospitals)} raw facilities → [bold]{out_path.name}[/bold][/green]")
+    console.print("[dim]Next step: run [bold]lifeline seed[/bold] to enrich with bed availability.[/dim]\n")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# seed
+# ══════════════════════════════════════════════════════════════════════════════
+@app.command()
+def seed(
+    icu_max: Annotated[int, typer.Option(help="Max ICU beds per facility")] = 12,
+    general_max: Annotated[int, typer.Option(help="Max general beds per facility")] = 40,
+    surgical_max: Annotated[int, typer.Option(help="Max surgical beds per facility")] = 8,
+):
+    """Enrich raw hospital data with simulated bed counts & clinical specialties."""
+    _banner("Hospital Data Seeder")
+    _run_seed(icu_max, general_max, surgical_max)
+
+
+def _run_seed(icu_max: int = 12, general_max: int = 40, surgical_max: int = 8):
+    import random
+    specialties_pool = ["cardiac", "trauma", "general", "surgical", "pediatric", "burn", "neurology"]
+
+    data_dir = PROJECT_ROOT / "data"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    raw_path = data_dir / "hospitals_raw.json"
+    if not raw_path.exists():
+        err_console.print(
+            "✗ data/hospitals_raw.json not found.\n"
+            "  Run: [bold]lifeline fetch-hospitals[/bold] first."
+        )
+        raise typer.Exit(1)
+
+    with open(raw_path, "r", encoding="utf-8") as f:
+        hospitals = json.load(f)
+
+    with Progress(SpinnerColumn(), TextColumn("{task.description}"), console=console) as p:
+        task = p.add_task(f"Enriching {len(hospitals)} hospital records...", total=None)
+        for h in hospitals:
+            h["icu_beds"] = max(0, random.randint(1, icu_max) - random.randint(0, 3))
+            h["general_beds"] = max(0, random.randint(5, general_max) - random.randint(0, 10))
+            h["surgical_beds"] = max(0, random.randint(1, surgical_max) - random.randint(0, 2))
+            h["specialties"] = random.sample(specialties_pool, k=random.randint(1, 3))
+        p.update(task, description=f"[green]✓ Enriched {len(hospitals)} hospital records[/green]")
+
+    out_path = data_dir / "hospitals.json"
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(hospitals, f, indent=2)
+
+    console.print(f"[green]✓ Saved enriched hospital dataset → [bold]{out_path.name}[/bold][/green]")
+    console.print("[dim]Bed data is plausibly simulated for hackathon evaluation.[/dim]\n")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # test
 # ══════════════════════════════════════════════════════════════════════════════
 @app.command()
 def test(
-    verbose: Annotated[bool, typer.Option("-v", "--verbose", help="Verbose pytest output")] = False,
-    cov:     Annotated[bool, typer.Option("--cov", help="Show coverage report")] = False,
+    verbose: Annotated[bool, typer.Option("-v", "--verbose", help="Verbose test execution output")] = False,
+    cov: Annotated[bool, typer.Option("--cov", help="Generate code coverage report")] = False,
 ):
-    """Run the full test suite with pytest."""
-    _banner()
+    """Run test suite with pytest."""
+    _banner("Test Suite Runner")
     args = [sys.executable, "-m", "pytest", "tests/"]
     if verbose:
         args.append("-v")
     if cov:
         args += ["--cov=lifeline", "--cov-report=term-missing"]
+    
     result = subprocess.run(args)
     raise typer.Exit(result.returncode)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Entry point
+# Main Entrypoint
 # ══════════════════════════════════════════════════════════════════════════════
 def main():
     app()
@@ -712,4 +949,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

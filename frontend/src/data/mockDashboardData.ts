@@ -6,6 +6,11 @@ import {
   DonorProfile,
   DonorRequest,
   BloodGroup,
+  AuthUser,
+  HospitalIssue,
+  InventoryItem,
+  DailyIntelligenceReport,
+  NaturalLanguageQueryResponse,
 } from '../types/dashboard';
 
 export const JURISDICTION_NAME = 'Mumbai Metropolitan Health Directorate — Region IV';
@@ -211,6 +216,81 @@ export const INITIAL_HOSPITALS: HospitalFacility[] = [
   },
 ];
 
+export const DEMO_USERS: AuthUser[] = [
+  {
+    id: 'user_doc1',
+    username: 'dr_mehta',
+    role: 'hospital_staff',
+    facility_id: 'hosp_mumbai_01',
+    facility_name: 'Lilavati Hospital & Research Centre',
+    title: 'Attending Emergency Physician',
+    avatar: '👨‍⚕️',
+  },
+  {
+    id: 'user_nurse1',
+    username: 'nurse_rao',
+    role: 'hospital_staff',
+    facility_id: 'hosp_mumbai_01',
+    facility_name: 'Lilavati Hospital & Research Centre',
+    title: 'ER Charge Nurse',
+    avatar: '👩‍⚕️',
+  },
+  {
+    id: 'usr_9814',
+    username: 'dr_verma',
+    role: 'hospital_staff',
+    facility_id: 'hosp-hinduja',
+    facility_name: 'P. D. Hinduja National Hospital',
+    title: 'Interventional Cardiologist',
+    avatar: '👨‍⚕️',
+  },
+  {
+    id: 'donor_6721',
+    username: 'rahul_sharma',
+    role: 'blood_donor',
+    donor_id: 'donor-101',
+    facility_name: 'Community Donor Network',
+    title: 'Lifesaver Platinum (O- Universal)',
+    avatar: '🩸',
+  },
+  {
+    id: 'donor_6722',
+    username: 'sneha_patil',
+    role: 'blood_donor',
+    donor_id: 'donor-102',
+    facility_name: 'Community Donor Network',
+    title: 'Gold Donor Guardian (B+)',
+    avatar: '🩸',
+  },
+  {
+    id: 'donor_6723',
+    username: 'vikram_deshpande',
+    role: 'blood_donor',
+    donor_id: 'donor-103',
+    facility_name: 'Community Donor Network',
+    title: 'Rare Blood Hero (AB-)',
+    avatar: '🩸',
+  },
+  {
+    id: 'gov_01',
+    username: 'dir_sharma',
+    role: 'government_authority',
+    facility_id: 'gov-region-4',
+    facility_name: 'Mumbai Metropolitan Health Directorate',
+    title: 'Regional Health Director',
+    avatar: '🏛️',
+  },
+  {
+    id: 'gov_02',
+    username: 'analyst_rao',
+    role: 'government_authority',
+    facility_id: 'gov-region-4',
+    facility_name: 'Emergency Dispatch Oversight Command',
+    title: 'Senior Clinical Operations Analyst',
+    avatar: '📊',
+  },
+];
+
 export const INITIAL_REGISTERED_DONORS: DonorProfile[] = [
   {
     id: 'donor-101',
@@ -230,6 +310,36 @@ export const INITIAL_REGISTERED_DONORS: DonorProfile[] = [
     eligibilityStatus: 'eligible',
     totalDonations: 8,
     badgeTitle: 'Lifesaver Platinum',
+    donation_history: [
+      {
+        donation_id: 'don_hist_101',
+        hospital_name: 'Lilavati Hospital & Research Centre',
+        date: '2026-04-28',
+        units: 1,
+        type: 'blood',
+      },
+      {
+        donation_id: 'don_hist_102',
+        hospital_name: 'King Edward Memorial (KEM) Hospital',
+        date: '2026-01-14',
+        units: 1,
+        type: 'blood',
+      },
+      {
+        donation_id: 'don_hist_103',
+        hospital_name: 'Lilavati Hospital & Research Centre',
+        date: '2025-10-02',
+        units: 1,
+        type: 'blood',
+      },
+      {
+        donation_id: 'don_hist_104',
+        hospital_name: 'P. D. Hinduja Hospital',
+        date: '2025-06-19',
+        units: 1,
+        type: 'platelets',
+      },
+    ],
   },
   {
     id: 'donor-102',
@@ -249,6 +359,22 @@ export const INITIAL_REGISTERED_DONORS: DonorProfile[] = [
     eligibilityStatus: 'eligible',
     totalDonations: 5,
     badgeTitle: 'Gold Donor Guardian',
+    donation_history: [
+      {
+        donation_id: 'don_hist_201',
+        hospital_name: 'King Edward Memorial (KEM) Hospital',
+        date: '2026-05-24',
+        units: 1,
+        type: 'blood',
+      },
+      {
+        donation_id: 'don_hist_202',
+        hospital_name: 'Lokmanya Tilak Municipal General Hospital',
+        date: '2026-02-10',
+        units: 1,
+        type: 'blood',
+      },
+    ],
   },
   {
     id: 'donor-103',
@@ -268,6 +394,22 @@ export const INITIAL_REGISTERED_DONORS: DonorProfile[] = [
     eligibilityStatus: 'eligible',
     totalDonations: 12,
     badgeTitle: 'Rare Blood Hero',
+    donation_history: [
+      {
+        donation_id: 'don_hist_301',
+        hospital_name: 'P. D. Hinduja Hospital',
+        date: '2026-03-30',
+        units: 1,
+        type: 'blood',
+      },
+      {
+        donation_id: 'don_hist_302',
+        hospital_name: 'Lilavati Hospital',
+        date: '2025-11-12',
+        units: 1,
+        type: 'blood',
+      },
+    ],
   },
   {
     id: 'donor-104',
@@ -287,6 +429,15 @@ export const INITIAL_REGISTERED_DONORS: DonorProfile[] = [
     eligibilityStatus: 'eligible',
     totalDonations: 4,
     badgeTitle: 'Silver Responder',
+    donation_history: [
+      {
+        donation_id: 'don_hist_401',
+        hospital_name: 'Lilavati Hospital & Research Centre',
+        date: '2026-05-10',
+        units: 1,
+        type: 'blood',
+      },
+    ],
   },
   {
     id: 'donor-105',
@@ -305,6 +456,15 @@ export const INITIAL_REGISTERED_DONORS: DonorProfile[] = [
     eligibilityStatus: 'eligible',
     totalDonations: 6,
     badgeTitle: 'Gold Donor Guardian',
+    donation_history: [
+      {
+        donation_id: 'don_hist_501',
+        hospital_name: 'Breach Candy Hospital Trust',
+        date: '2026-02-28',
+        units: 1,
+        type: 'blood',
+      },
+    ],
   },
 ];
 
@@ -669,3 +829,249 @@ export const INITIAL_ANALYTICS: JurisdictionAnalytics = {
   activeDonorRequests: 2,
   bloodUnitsFulfilledToday: 19,
 };
+
+export const INITIAL_HOSPITAL_ISSUES: HospitalIssue[] = [
+  {
+    id: 'iss-501',
+    hospital_id: 'hosp-lilavati',
+    hospital_name: 'Lilavati Hospital & Research Centre',
+    category: 'equipment',
+    title: 'CT Scanner #2 Gantry Calibration Offline',
+    description: 'Calibration fault in primary CT gantry; acute neuro cases temporarily redirected to MRI Suite / Scanner #1.',
+    severity: 'moderate',
+    status: 'investigating',
+    reported_by: 'Dr. Rajesh Smith (On-Call ER)',
+    created_at: '2026-08-29T14:10:00Z',
+    resolved_at: null,
+  },
+  {
+    id: 'iss-502',
+    hospital_id: 'hosp-lilavati',
+    hospital_name: 'Lilavati Hospital & Research Centre',
+    category: 'supplies',
+    title: 'O- Negative Blood Pack Reserve Below Minimum',
+    description: 'Only 2 units remaining on site. Automated STAT callout dispatched to registered community donors.',
+    severity: 'high',
+    status: 'in_progress',
+    reported_by: 'Blood Bank Officer',
+    created_at: '2026-08-29T15:20:00Z',
+    resolved_at: null,
+  },
+  {
+    id: 'iss-503',
+    hospital_id: 'hosp-kem',
+    hospital_name: 'King Edward Memorial (KEM) Hospital',
+    category: 'facility',
+    title: 'Trauma Elevator #4 Under Scheduled Maintenance',
+    description: 'Elevator 4 out of service for cable inspection until 18:00 UTC. Secondary elevator dedicated to trauma bay transfers.',
+    severity: 'low',
+    status: 'investigating',
+    reported_by: 'Facilities Eng. Team',
+    created_at: '2026-08-29T12:00:00Z',
+    resolved_at: null,
+  },
+  {
+    id: 'iss-504',
+    hospital_id: 'hosp-sion',
+    hospital_name: 'Lokmanya Tilak Municipal General (Sion) Hospital',
+    category: 'staffing',
+    title: 'Trauma Bay Shift Surge — Diversion Active',
+    description: 'Resuscitation bays at 100% capacity due to highway mass casualty incident; auto-routing bypass enabled.',
+    severity: 'critical',
+    status: 'in_progress',
+    reported_by: 'Dr. K. Nair (Triage Chief)',
+    created_at: '2026-08-29T16:00:00Z',
+    resolved_at: null,
+  },
+];
+
+export const INITIAL_INVENTORY: InventoryItem[] = [
+  // Blood Bank
+  {
+    id: 'inv-101',
+    hospital_id: 'hosp-lilavati',
+    category: 'blood_bank',
+    item_name: 'O- Packed Red Blood Cells (Universal)',
+    current_stock: 2,
+    minimum_threshold: 6,
+    unit: 'Units (450ml)',
+    is_low_stock: true,
+    last_updated: '2026-08-29T16:00:00Z',
+  },
+  {
+    id: 'inv-102',
+    hospital_id: 'hosp-lilavati',
+    category: 'blood_bank',
+    item_name: 'O+ Packed Red Blood Cells',
+    current_stock: 18,
+    minimum_threshold: 10,
+    unit: 'Units (450ml)',
+    is_low_stock: false,
+    last_updated: '2026-08-29T16:00:00Z',
+  },
+  {
+    id: 'inv-103',
+    hospital_id: 'hosp-lilavati',
+    category: 'blood_bank',
+    item_name: 'AB- Fresh Frozen Plasma',
+    current_stock: 1,
+    minimum_threshold: 4,
+    unit: 'Units (250ml)',
+    is_low_stock: true,
+    last_updated: '2026-08-29T15:30:00Z',
+  },
+  {
+    id: 'inv-104',
+    hospital_id: 'hosp-lilavati',
+    category: 'blood_bank',
+    item_name: 'Platelet Concentrate (Single Donor)',
+    current_stock: 8,
+    minimum_threshold: 5,
+    unit: 'Bags',
+    is_low_stock: false,
+    last_updated: '2026-08-29T14:45:00Z',
+  },
+  // Emergency Medications
+  {
+    id: 'inv-201',
+    hospital_id: 'hosp-lilavati',
+    category: 'medication',
+    item_name: 'Epinephrine 1mg/1mL Auto-Ampules',
+    current_stock: 45,
+    minimum_threshold: 20,
+    unit: 'Vials',
+    is_low_stock: false,
+    last_updated: '2026-08-29T13:00:00Z',
+  },
+  {
+    id: 'inv-202',
+    hospital_id: 'hosp-lilavati',
+    category: 'medication',
+    item_name: 'Norepinephrine Bitartrate 4mg/4mL',
+    current_stock: 12,
+    minimum_threshold: 15,
+    unit: 'Ampules',
+    is_low_stock: true,
+    last_updated: '2026-08-29T16:15:00Z',
+  },
+  {
+    id: 'inv-203',
+    hospital_id: 'hosp-lilavati',
+    category: 'medication',
+    item_name: 'Amiodarone HCl 150mg/3mL',
+    current_stock: 28,
+    minimum_threshold: 10,
+    unit: 'Vials',
+    is_low_stock: false,
+    last_updated: '2026-08-29T12:00:00Z',
+  },
+  {
+    id: 'inv-204',
+    hospital_id: 'hosp-lilavati',
+    category: 'medication',
+    item_name: 'Tranexamic Acid (TXA) 1000mg/10mL',
+    current_stock: 35,
+    minimum_threshold: 15,
+    unit: 'Vials',
+    is_low_stock: false,
+    last_updated: '2026-08-29T11:00:00Z',
+  },
+  // Trauma & Critical Care Supplies
+  {
+    id: 'inv-301',
+    hospital_id: 'hosp-lilavati',
+    category: 'trauma_supplies',
+    item_name: 'Chest Tube Thoracostomy Kit (28 Fr / 32 Fr)',
+    current_stock: 4,
+    minimum_threshold: 8,
+    unit: 'Kits',
+    is_low_stock: true,
+    last_updated: '2026-08-29T15:00:00Z',
+  },
+  {
+    id: 'inv-302',
+    hospital_id: 'hosp-lilavati',
+    category: 'trauma_supplies',
+    item_name: 'Video Laryngoscope Disposable Blades (Size 3/4)',
+    current_stock: 22,
+    minimum_threshold: 10,
+    unit: 'Blades',
+    is_low_stock: false,
+    last_updated: '2026-08-29T10:00:00Z',
+  },
+  {
+    id: 'inv-303',
+    hospital_id: 'hosp-lilavati',
+    category: 'equipment',
+    item_name: 'Rapid Blood / Fluid Warmer Infusion Sets',
+    current_stock: 14,
+    minimum_threshold: 6,
+    unit: 'Sets',
+    is_low_stock: false,
+    last_updated: '2026-08-29T09:30:00Z',
+  },
+  {
+    id: 'inv-304',
+    hospital_id: 'hosp-lilavati',
+    category: 'equipment',
+    item_name: 'Cervical Immobilization Rigid Collars (Adult/Ped)',
+    current_stock: 18,
+    minimum_threshold: 8,
+    unit: 'Units',
+    is_low_stock: false,
+    last_updated: '2026-08-29T08:00:00Z',
+  },
+];
+
+export const INITIAL_DAILY_REPORT: DailyIntelligenceReport = {
+  report_id: 'rep_2026_0829',
+  date: '2026-08-29',
+  model_used: 'gemini-3.5-flash',
+  headline: 'Mumbai Metropolitan Emergency Dispatch & Network Strain Intelligence Report',
+  summary_markdown: `### Executive Clinical Briefing
+- **Incident Volumes**: 38 emergency dispatches logged across Mumbai West, Central, and South corridors. Cardiac emergencies accounted for 44% of critical alerts, followed by polytrauma (32%) and severe respiratory crises (24%).
+- **SLA & Triage Performance**: Mean time to hospital assignment and bed preparation was **41 seconds**, maintaining **96.4%** regulatory compliance across the district.
+- **Facility Capacity & Diversion**: Lokmanya Tilak (Sion) Hospital entered diversion at 16:00 UTC due to highway trauma surge; 2 high-risk inbound cases were automatically rerouted to Hinduja and Lilavati under Tier 1 auto-dispatch.
+- **Blood Bank & Donor Response**: O- and AB- inventory triggered automated STAT callouts across 2 facilities. 3 registered community donors accepted emergency transit with a mean ETA of 6.5 minutes.
+- **Recommendations**: Maintain elevated readiness in Cardiac Cath Labs across Bandra and Mahim; authorize regional blood replenishment from central reserves for Lilavati Blood Bank.`,
+  key_metrics: {
+    total_cases: 38,
+    critical_cases: 7,
+    sla_compliance_pct: 96.4,
+    auto_reroutes: 2,
+  },
+  generated_at: '2026-08-29T16:45:00Z',
+};
+
+export const SAMPLE_NL_QUERIES: Array<{ query: string; response: NaturalLanguageQueryResponse }> = [
+  {
+    query: 'Which hospitals are currently experiencing cardiac ICU bed shortages?',
+    response: {
+      query: 'Which hospitals are currently experiencing cardiac ICU bed shortages?',
+      answer:
+        'Based on live telemetry, Lokmanya Tilak (Sion) Hospital is at critical capacity with only 1 ICU bed available and is currently on diversion. Breach Candy Hospital has 2 open ICU beds. Lilavati Hospital and Hinduja Hospital currently have 6 and 5 available ICU beds respectively.',
+      referenced_facilities: ['Lokmanya Tilak (Sion) Hospital', 'Breach Candy Hospital', 'Lilavati Hospital', 'Hinduja Hospital'],
+      timestamp: '2026-08-29T16:46:00Z',
+    },
+  },
+  {
+    query: 'What is the current O- negative blood reserve status across the district?',
+    response: {
+      query: 'What is the current O- negative blood reserve status across the district?',
+      answer:
+        'O- Negative (Universal RBC) is currently in deficit status across 2 key facilities: Lilavati Hospital has 2 units on-site (STAT callout active), and Breach Candy has 1 unit. Total district O- reserve is 15 units. 3 registered donors are currently en route.',
+      referenced_facilities: ['Lilavati Hospital & Research Centre', 'Breach Candy Hospital Trust'],
+      timestamp: '2026-08-29T16:47:00Z',
+    },
+  },
+  {
+    query: 'Summarize all Tier 1 and Tier 2 auto-escalations today.',
+    response: {
+      query: 'Summarize all Tier 1 and Tier 2 auto-escalations today.',
+      answer:
+        'Today, 2 cases triggered Tier 1 auto-rerouting due to hospital surge capacity (Sion Hospital bypass). 1 critical case (LL-2026-9019, Sepsis Code Grey) exceeded the 90s SLA timeout and was escalated to Tier 2 Government Authority oversight, successfully reassigned to Hinduja Hospital.',
+      referenced_facilities: ['Lokmanya Tilak (Sion) Hospital', 'P. D. Hinduja National Hospital'],
+      timestamp: '2026-08-29T16:48:00Z',
+    },
+  },
+];
