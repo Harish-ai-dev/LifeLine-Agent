@@ -80,6 +80,23 @@ async def create_issue(payload: IssueCreateRequest):
     issue_dict["created_at"] = now_iso
     issue_dict["resolved_at"] = None
 
+    # Run AI Classification
+    try:
+        from lifeline.agents.issue_classifier_agent import run_issue_classification
+        classification = run_issue_classification(
+            title=payload.title,
+            description=payload.description,
+            hospital_id=payload.hospital_id
+        )
+        issue_dict["ai_classification"] = classification
+        # Overwrite default severity/category with AI's judgment if applicable
+        if classification.get("severity"):
+            issue_dict["severity"] = classification["severity"]
+        if classification.get("category"):
+            issue_dict["category"] = classification["category"]
+    except Exception:
+        pass
+
     created = await store.async_create("issues", issue_dict, actor=payload.reported_by)
     created["id"] = created["_id"]
 

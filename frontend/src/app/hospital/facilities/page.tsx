@@ -66,7 +66,7 @@ export default function FacilitiesDirectoryPage() {
       </div>
 
       {/* Hospital Facilities Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-6">
         {filteredHospitals.map((hospital) => {
           const hospitalAlerts = alerts.filter(
             (a) => a.assignedHospitalId === hospital.id && a.status !== 'resolved'

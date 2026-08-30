@@ -44,7 +44,7 @@ export default function GovernmentPage() {
   const regionalOccupancy = Math.round(((totalIcuCapacity - totalIcuAvailable) / Math.max(1, totalIcuCapacity)) * 100);
 
   return (
-    <div className="space-y-6 max-w-[1600px] mx-auto pb-16">
+    <div className="space-y-6 w-full pb-16">
       {/* ── 1. REGIONAL AUTHORITY HERO COMMAND BANNER ────────────────────── */}
       <div className="bg-white dark:bg-[#0d1424] p-6 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
@@ -91,7 +91,7 @@ export default function GovernmentPage() {
       </div>
 
       {/* ── 2. FOUR CORE REGIONAL TELEMETRY CARDS ─────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4">
         <Link
           href="/government/network"
           className="glass-panel-glow-blue p-5 rounded-3xl transition-all duration-300 hover:scale-[1.02] cursor-pointer block space-y-3"

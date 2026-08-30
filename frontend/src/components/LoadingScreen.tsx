@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Activity } from 'lucide-react';
+import { Activity, RefreshCw } from 'lucide-react';
 
 export default function LoadingScreen() {
   return (
@@ -31,9 +31,13 @@ export default function LoadingScreen() {
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
             <span>Establishing Secure Handshake...</span>
           </div>
+          <div className="flex items-center justify-between w-full max-w-[240px]">
+            <span>Orchestrator (Root Agent):</span>
+            <span className="text-emerald-400 font-bold animate-pulse flex items-center gap-1">
+              <RefreshCw className="w-3 h-3 animate-spin" /> LOOPING
+            </span>
+          </div>
           <div className="flex items-center gap-1 text-[9px] opacity-75">
-            <span>Orchestrator L1: ONLINE</span>
-            <span className="mx-1.5">·</span>
             <span>Triage L2: READY</span>
             <span className="mx-1.5">·</span>
             <span>Gemini: SYNCED</span>

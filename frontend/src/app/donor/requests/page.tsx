@@ -151,7 +151,7 @@ export default function DonorRequestsPage() {
                 {/* Request Body */}
                 <div className="p-6 space-y-6">
                   {/* Clinical Details */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-6">
                     <div className="space-y-3">
                       <div className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">
                         Patient Indication / Dispatch Brief

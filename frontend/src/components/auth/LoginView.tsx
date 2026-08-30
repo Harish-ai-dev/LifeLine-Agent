@@ -29,6 +29,7 @@ import {
 import { DEMO_USERS } from '../../data/mockDashboardData';
 import { soundEffects } from '../../utils/soundEffects';
 import { Suspense } from 'react';
+import { Logo } from '../../components/ui/Logo';
 
 type RoleKey = 'hospital_staff' | 'blood_donor' | 'government_authority';
 
@@ -167,14 +168,7 @@ function LoginContent({ isModal = false }: { isModal?: boolean }) {
       {/* ── Top bar ──────────────────────────────────────────── */}
       <header className="flex items-center justify-between px-4 sm:px-6 py-4 bg-white dark:bg-[#08091a] border-b border-slate-200 dark:border-slate-800 shrink-0">
         <div className="flex items-center gap-3">
-          {/* Square logo */}
-          <div className="w-9 h-9 rounded-xl overflow-hidden bg-white border border-slate-200 dark:border-slate-700 shadow-md shrink-0">
-            <img
-              src="/logo.png"
-              alt="LifeLine"
-              className="w-full h-full object-contain"
-            />
-          </div>
+          <Logo />
           <div>
             <span className="font-black text-base text-slate-900 dark:text-white tracking-tight">
               LifeLine

@@ -131,7 +131,13 @@ export function Topbar() {
     pathname
       .split('/')
       .filter(Boolean)
-      .map((s) => s.charAt(0).toUpperCase() + s.slice(1).replace('-', ' '))
+      .map((s) => {
+        if (s.startsWith('hosp-')) {
+          const matchedHospital = hospitals.find(h => h.id === s);
+          return matchedHospital ? matchedHospital.name : 'Facility';
+        }
+        return s.charAt(0).toUpperCase() + s.slice(1).replace(/-/g, ' ');
+      })
       .join(' / ') || 'Overview';
 
   return (
@@ -152,7 +158,7 @@ export function Topbar() {
           <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-mono text-slate-500 dark:text-slate-400 min-w-0">
             <span className="uppercase tracking-wider font-semibold hidden sm:inline">{currentUser.role.replace('_', ' ')}</span>
             <span className="text-slate-300 dark:text-slate-600 hidden sm:inline">/</span>
-            <span className="text-slate-900 dark:text-white font-bold text-xs sm:text-sm tracking-tight font-sans truncate">{pageTitle}</span>
+            <span className="text-slate-900 dark:text-white font-bold text-xs sm:text-sm tracking-tight font-sans whitespace-normal break-words">{pageTitle}</span>
           </div>
 
           {currentUser.role === 'hospital_staff' && (
@@ -163,7 +169,7 @@ export function Topbar() {
               >
                 <Building2 className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
                 <span
-                  className="font-semibold text-slate-900 dark:text-white max-w-[280px] truncate"
+                  className="font-semibold text-slate-900 dark:text-white max-w-sm whitespace-normal text-left leading-tight"
                   title={currentHospital.name}
                 >
                   {currentHospital.name}
