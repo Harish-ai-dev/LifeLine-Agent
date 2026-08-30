@@ -47,6 +47,9 @@ start "LifeLine-Backend" /B python -m uvicorn lifeline.main:app --host 0.0.0.0 -
 echo [2/2] Starting Next.js Frontend on port 3000...
 start "LifeLine-Frontend" /B cmd /c "cd frontend && npm run start"
 
+echo [3/3] Starting ADK Continuous Pipeline Loop...
+start "LifeLine-ADK-Loop" /B python -c "import time, subprocess, sys, random; scenarios=['Scenario 1 - Mild', 'Scenario 2 - Moderate', 'Scenario 3 - Critical Cardiac']; print('\n[ADK LOOP] Starting...'); while True: s=random.choice(scenarios); subprocess.run([sys.executable, '-m', 'lifeline', 'dispatch', s], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL); time.sleep(20)"
+
 echo.
 echo ===================================================
 echo ✅ LifeLine Agent is now LIVE!
@@ -66,3 +69,4 @@ echo Press CTRL+C or close this window to stop all services.
 echo.
 
 pause >nul
+
