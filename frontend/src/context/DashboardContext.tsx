@@ -160,6 +160,11 @@ interface DashboardContextType {
   copilotListen: boolean;
   openCopilot: (tab?: 'all' | 'notifications' | 'copilot', autoListen?: boolean) => void;
   closeCopilot: () => void;
+
+  // Mobile Navigation Drawer (<md viewports)
+  isMobileSidebarOpen: boolean;
+  setIsMobileSidebarOpen: (open: boolean) => void;
+  toggleMobileSidebar: () => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -244,6 +249,12 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
   const closeCopilot = useCallback(() => {
     setIsCopilotOpen(false);
     setCopilotListen(false);
+  }, []);
+
+  // ── MOBILE NAVIGATION DRAWER STATE (<md viewports) ──────────────────────
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const toggleMobileSidebar = useCallback(() => {
+    setIsMobileSidebarOpen((prev) => !prev);
   }, []);
 
   const router = useRouter();
@@ -1764,6 +1775,9 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
         copilotListen,
         openCopilot,
         closeCopilot,
+        isMobileSidebarOpen,
+        setIsMobileSidebarOpen,
+        toggleMobileSidebar,
       }}
     >
       {children}

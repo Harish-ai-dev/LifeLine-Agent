@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import {
   Landmark,
@@ -38,13 +40,13 @@ export const AuthorityDashboard: React.FC = () => {
     <div className="space-y-6 max-w-[1600px] mx-auto pb-16">
       {/* ── Government Authority Header Banner ────────────────────────────── */}
       <div className="bg-gradient-to-r from-slate-950 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 sm:p-7 border border-indigo-800/60 shadow-xl relative overflow-hidden">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="flex items-start gap-4">
             <div className="w-14 h-14 rounded-2xl bg-indigo-600/30 text-indigo-300 border border-indigo-400/40 flex items-center justify-center font-black text-2xl shadow-lg shrink-0">
               🏛️
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="text-[10px] font-black uppercase tracking-widest bg-indigo-500/30 text-indigo-200 border border-indigo-400/40 px-2 py-0.5 rounded">
                   REGULATORY HEALTH SURVEILLANCE
                 </span>
@@ -59,8 +61,8 @@ export const AuthorityDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Regional Oversight KPI Summary */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs">
+          {/* Regional Oversight KPI Summary - Responsive Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-center text-xs w-full lg:w-auto">
             <div className="bg-slate-900/80 p-3 rounded-2xl border border-indigo-900">
               <span className="text-slate-400 text-[10px] uppercase font-bold block">
                 Regional Active Alerts
@@ -93,11 +95,11 @@ export const AuthorityDashboard: React.FC = () => {
               <span className="text-slate-400 text-[10px] uppercase font-bold block">
                 Tier 2 Escalations
               </span>
-              <span className="text-2xl font-black text-alert-400 font-mono">
+              <span className="text-2xl font-black text-red-400 font-mono">
                 {escalatedCount}
               </span>
               {escalatedCount > 0 ? (
-                <span className="text-[10px] text-alert-400 font-black block animate-pulse">
+                <span className="text-[10px] text-red-400 font-black block animate-pulse">
                   Action Required
                 </span>
               ) : (
@@ -109,13 +111,13 @@ export const AuthorityDashboard: React.FC = () => {
       </div>
 
       {/* ── Sub-Navigation Tabs ───────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-2">
+      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
         <button
           onClick={() => setActiveTab('radar')}
           className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition ${
             activeTab === 'radar'
-              ? 'bg-slate-900 text-white shadow-sm'
-              : 'text-slate-600 hover:bg-slate-100'
+              ? 'bg-slate-900 dark:bg-indigo-600 text-white shadow-sm'
+              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
           <Navigation className="w-4 h-4 text-indigo-400" />
@@ -127,7 +129,7 @@ export const AuthorityDashboard: React.FC = () => {
           className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition ${
             activeTab === 'daily_report'
               ? 'bg-indigo-600 text-white shadow-sm font-black'
-              : 'text-slate-600 hover:bg-slate-100'
+              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
           <span className="text-amber-300">✨</span>
@@ -139,7 +141,7 @@ export const AuthorityDashboard: React.FC = () => {
           className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition ${
             activeTab === 'nl_query'
               ? 'bg-indigo-600 text-white shadow-sm font-black'
-              : 'text-slate-600 hover:bg-slate-100'
+              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
           <span className="text-sky-300">💬</span>
@@ -150,14 +152,14 @@ export const AuthorityDashboard: React.FC = () => {
           onClick={() => setActiveTab('escalations')}
           className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition ${
             activeTab === 'escalations'
-              ? 'bg-slate-900 text-white shadow-sm'
-              : 'text-slate-600 hover:bg-slate-100'
+              ? 'bg-slate-900 dark:bg-indigo-600 text-white shadow-sm'
+              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
-          <ShieldAlert className="w-4 h-4 text-alert-500" />
+          <ShieldAlert className="w-4 h-4 text-red-500" />
           <span>Tier 2 Escalation Center</span>
           {escalatedCount > 0 && (
-            <span className="bg-alert-600 text-white text-[10px] font-black px-2 py-0.2 rounded-full animate-ping">
+            <span className="bg-red-600 text-white text-[10px] font-black px-2 py-0.2 rounded-full animate-ping">
               {escalatedCount}
             </span>
           )}
@@ -167,12 +169,12 @@ export const AuthorityDashboard: React.FC = () => {
           onClick={() => setActiveTab('blood_network')}
           className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition ${
             activeTab === 'blood_network'
-              ? 'bg-slate-900 text-white shadow-sm'
-              : 'text-slate-600 hover:bg-slate-100'
+              ? 'bg-slate-900 dark:bg-indigo-600 text-white shadow-sm'
+              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
           <Activity className="w-4 h-4 text-rose-500" />
-          <span>Blood & Organ Network</span>
+          <span>Blood &amp; Organ Network</span>
           {donorRequests.length > 0 && (
             <span className="bg-rose-600 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full">
               {donorRequests.length}
@@ -184,20 +186,20 @@ export const AuthorityDashboard: React.FC = () => {
           onClick={() => setActiveTab('compliance')}
           className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition ${
             activeTab === 'compliance'
-              ? 'bg-slate-900 text-white shadow-sm'
-              : 'text-slate-600 hover:bg-slate-100'
+              ? 'bg-slate-900 dark:bg-indigo-600 text-white shadow-sm'
+              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
           <FileSpreadsheet className="w-4 h-4 text-emerald-500" />
-          <span>Hospital Compliance & Reports</span>
+          <span>Hospital Compliance &amp; Reports</span>
         </button>
 
         <button
           onClick={() => setActiveTab('registry')}
           className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition ${
             activeTab === 'registry'
-              ? 'bg-slate-900 text-white shadow-sm'
-              : 'text-slate-600 hover:bg-slate-100'
+              ? 'bg-slate-900 dark:bg-indigo-600 text-white shadow-sm'
+              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
           <Building2 className="w-4 h-4 text-sky-500" />
@@ -208,8 +210,8 @@ export const AuthorityDashboard: React.FC = () => {
           onClick={() => setActiveTab('audit')}
           className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition ${
             activeTab === 'audit'
-              ? 'bg-slate-900 text-white shadow-sm'
-              : 'text-slate-600 hover:bg-slate-100'
+              ? 'bg-slate-900 dark:bg-indigo-600 text-white shadow-sm'
+              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
           <History className="w-4 h-4 text-amber-500" />

@@ -165,9 +165,9 @@ function LoginContent({ isModal = false }: { isModal?: boolean }) {
       } flex flex-col bg-slate-100 dark:bg-[#050810] transition-colors duration-200`}
     >
       {/* ── Top bar ──────────────────────────────────────────── */}
-      <header className="flex items-center justify-between px-6 py-4 bg-white dark:bg-[#08091a] border-b border-slate-200 dark:border-slate-800 shrink-0">
+      <header className="flex items-center justify-between px-4 sm:px-6 py-4 bg-white dark:bg-[#08091a] border-b border-slate-200 dark:border-slate-800 shrink-0">
         <div className="flex items-center gap-3">
-          {/* Square logo — no distortion */}
+          {/* Square logo */}
           <div className="w-9 h-9 rounded-xl overflow-hidden bg-white border border-slate-200 dark:border-slate-700 shadow-md shrink-0">
             <img
               src="/logo.png"
@@ -184,7 +184,7 @@ function LoginContent({ isModal = false }: { isModal?: boolean }) {
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 text-[11px] font-mono text-emerald-700 dark:text-emerald-400">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
             SYSTEM ONLINE
@@ -200,30 +200,30 @@ function LoginContent({ isModal = false }: { isModal?: boolean }) {
       </header>
 
       {/* ── Step content ─────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-10">
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 sm:py-10">
         {!selected ? (
           // ── STEP 1: Portal selection grid ─────────────────────
           <div className="w-full max-w-4xl">
-            <div className="text-center mb-10">
-              <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+            <div className="text-center mb-8 sm:mb-10">
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                 Select Your Portal
               </h1>
-              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 font-mono">
-                Click a card to open the sign-in form
+              <p className="mt-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-mono">
+                Click a portal card to access your role-specific dashboard
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
               {PORTALS.map((portal) => {
                 const { Icon } = portal;
                 return (
                   <button
                     key={portal.id}
                     onClick={() => handleSelect(portal)}
-                    className={`group flex flex-col rounded-3xl border-2 ${portal.border} bg-white dark:bg-[#0e1120] shadow-md hover:shadow-xl hover:${portal.glow} overflow-hidden transition-all duration-300 hover:-translate-y-1 text-left cursor-pointer`}
+                    className={`group flex flex-col rounded-3xl border-2 ${portal.border} bg-white dark:bg-[#0e1120] shadow-md hover:shadow-xl hover:${portal.glow} overflow-hidden transition-all duration-300 hover:-translate-y-1 text-left cursor-pointer p-0 focus:outline-none focus:ring-2 ${portal.ring}`}
                   >
                     {/* Card gradient header */}
-                    <div className={`bg-gradient-to-br ${portal.gradient} ${portal.gradientHover} px-5 py-6 relative overflow-hidden transition-all`}>
+                    <div className={`bg-gradient-to-br ${portal.gradient} ${portal.gradientHover} px-5 py-5 sm:py-6 relative overflow-hidden transition-all`}>
                       <div className="absolute -right-4 -top-4 w-20 h-20 rounded-full bg-white/10" />
                       <div className="absolute right-0 bottom-0 w-12 h-12 rounded-full bg-white/10 translate-x-4 translate-y-4" />
                       <div className="relative z-10">
@@ -245,7 +245,7 @@ function LoginContent({ isModal = false }: { isModal?: boolean }) {
                       ))}
                     </div>
 
-                    <div className={`mx-5 mb-5 py-2.5 rounded-xl bg-gradient-to-r ${portal.gradient} text-white text-xs font-black font-mono flex items-center justify-center gap-2 group-hover:gap-3 transition-all`}>
+                    <div className={`mx-4 sm:mx-5 mb-4 sm:mb-5 py-2.5 rounded-xl bg-gradient-to-r ${portal.gradient} text-white text-xs font-black font-mono flex items-center justify-center gap-2 group-hover:gap-3 transition-all shadow-sm`}>
                       SIGN IN <ArrowRight className="w-3.5 h-3.5" />
                     </div>
                   </button>
@@ -268,7 +268,7 @@ function LoginContent({ isModal = false }: { isModal?: boolean }) {
             {/* Form card */}
             <div className={`rounded-3xl border-2 ${selected.activeBorder} bg-white dark:bg-[#0e1120] shadow-xl ${selected.glow} overflow-hidden`}>
               {/* Portal header */}
-              <div className={`bg-gradient-to-br ${selected.gradient} px-7 py-7 relative overflow-hidden`}>
+              <div className={`bg-gradient-to-br ${selected.gradient} px-6 sm:px-7 py-6 sm:py-7 relative overflow-hidden`}>
                 <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full bg-white/10" />
                 <div className="absolute right-4 -bottom-8 w-20 h-20 rounded-full bg-white/10" />
                 <div className="relative z-10 flex items-center gap-4">
@@ -302,7 +302,7 @@ function LoginContent({ isModal = false }: { isModal?: boolean }) {
 // ── Login form (shown after portal selected) ─────────────────────────────────
 function LoginForm({ portal }: { portal: PortalDef }) {
   const { login, hospitals } = useDashboard();
-  const [selectedFacilityId, setSelectedFacilityId] = useState('');
+  const [selectedFacilityId, setSelectedFacilityId] = useState(hospitals[0]?.id || 'hosp-lilavati');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
@@ -316,9 +316,18 @@ function LoginForm({ portal }: { portal: PortalDef }) {
     soundEffects.playTelemetryPing();
     setError('');
     if (isHospitalPortal) {
-      setSelectedFacilityId(hospitals[0]?.id || 'hosp-lilavati');
-      setUsername('dr_mehta');
-      setPassword('clinical2026');
+      const targetFacility = selectedFacilityId || hospitals[0]?.id || 'hosp-lilavati';
+      setSelectedFacilityId(targetFacility);
+      if (targetFacility === 'hosp-kem' || targetFacility === 'hosp_mumbai_02') {
+        setUsername('nurse_rao');
+        setPassword('clinical2026');
+      } else if (targetFacility === 'hosp-hinduja' || targetFacility === 'hosp_mumbai_03') {
+        setUsername('dr_verma');
+        setPassword('clinical2026');
+      } else {
+        setUsername('dr_mehta');
+        setPassword('clinical2026');
+      }
     } else if (portal.id === 'donor') {
       setUsername('rahul_sharma');
       setPassword('donor2026');
@@ -373,7 +382,7 @@ function LoginForm({ portal }: { portal: PortalDef }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="px-7 py-6 space-y-4">
+    <form onSubmit={handleSubmit} className="px-5 sm:px-7 py-6 space-y-4">
       {/* 1. Facility Selector (Hospital / Clinical Staff Portals) */}
       {isHospitalPortal && (
         <div className="space-y-1.5">
@@ -385,7 +394,28 @@ function LoginForm({ portal }: { portal: PortalDef }) {
             <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
             <select
               value={selectedFacilityId}
-              onChange={(e) => { setSelectedFacilityId(e.target.value); setError(''); }}
+              onChange={(e) => {
+                const facId = e.target.value;
+                setSelectedFacilityId(facId);
+                setError('');
+                // Auto-sync staff demo credentials if a demo user is populated
+                if (facId === 'hosp-kem' || facId === 'hosp_mumbai_02') {
+                  if (username === 'dr_mehta' || username === 'dr_verma' || !username) {
+                    setUsername('nurse_rao');
+                    setPassword('clinical2026');
+                  }
+                } else if (facId === 'hosp-hinduja' || facId === 'hosp_mumbai_03') {
+                  if (username === 'dr_mehta' || username === 'nurse_rao' || !username) {
+                    setUsername('dr_verma');
+                    setPassword('clinical2026');
+                  }
+                } else if (facId === 'hosp-lilavati' || facId === 'hosp_mumbai_01') {
+                  if (username === 'nurse_rao' || username === 'dr_verma' || !username) {
+                    setUsername('dr_mehta');
+                    setPassword('clinical2026');
+                  }
+                }
+              }}
               className={`w-full pl-10 pr-8 py-3 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 ${portal.ring} text-slate-900 dark:text-white font-mono transition-all appearance-none cursor-pointer`}
             >
               <option value="" disabled>
@@ -432,7 +462,7 @@ function LoginForm({ portal }: { portal: PortalDef }) {
           <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type={showPw ? 'text' : 'password'}
-            placeholder="Enter clinical access code"
+            placeholder="Enter access code"
             value={password}
             onChange={(e) => { setPassword(e.target.value); setError(''); }}
             className={`w-full pl-10 pr-11 py-3 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 ${portal.ring} text-slate-900 dark:text-white placeholder:text-slate-400 font-mono transition-all`}

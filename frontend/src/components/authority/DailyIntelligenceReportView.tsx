@@ -25,7 +25,7 @@ export const DailyIntelligenceReportView: React.FC = () => {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await refreshDailyReport();
-    setTimeout(() => setIsRefreshing(false), 600);
+    setTimeout(() => setIsRefreshing(false), 800);
   };
 
   const handleExportMarkdown = () => {
@@ -90,39 +90,62 @@ export const DailyIntelligenceReportView: React.FC = () => {
         </div>
       </div>
 
-      {/* Key Metrics Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono">
-        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#111728] border border-slate-200 dark:border-slate-800 shadow-sm">
-          <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase">Total Dispatches</span>
-          <span className="text-2xl font-black text-slate-900 dark:text-white">{dailyReport.key_metrics.total_cases}</span>
-          <span className="text-[10px] text-sky-700 dark:text-sky-400 block mt-0.5">Autonomous Routing</span>
+      {isRefreshing ? (
+        /* ── LOADING SHIMMER SKELETON STATE ──────────────────────────────── */
+        <div className="space-y-6 animate-pulse">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-24 bg-slate-100 dark:bg-slate-800/60 rounded-2xl p-4 space-y-2">
+                <div className="h-3 w-20 bg-slate-200 dark:bg-slate-700 rounded" />
+                <div className="h-7 w-14 bg-slate-300 dark:bg-slate-600 rounded" />
+                <div className="h-2 w-24 bg-slate-200 dark:bg-slate-700 rounded" />
+              </div>
+            ))}
+          </div>
+          <div className="p-6 rounded-2xl bg-slate-100 dark:bg-slate-800/60 space-y-3">
+            <div className="h-4 w-3/4 bg-slate-200 dark:bg-slate-700 rounded" />
+            <div className="h-4 w-full bg-slate-200 dark:bg-slate-700 rounded" />
+            <div className="h-4 w-5/6 bg-slate-200 dark:bg-slate-700 rounded" />
+            <div className="h-4 w-2/3 bg-slate-200 dark:bg-slate-700 rounded" />
+          </div>
         </div>
+      ) : (
+        <>
+          {/* Key Metrics Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono">
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#111728] border border-slate-200 dark:border-slate-800 shadow-sm">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase">Total Dispatches</span>
+              <span className="text-2xl font-black text-slate-900 dark:text-white">{dailyReport.key_metrics.total_cases}</span>
+              <span className="text-[10px] text-sky-700 dark:text-sky-400 block mt-0.5">Autonomous Routing</span>
+            </div>
 
-        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#111728] border border-slate-200 dark:border-slate-800 shadow-sm">
-          <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase">Critical (NEWS2 ≥ 7)</span>
-          <span className="text-2xl font-black text-red-600 dark:text-red-400">{dailyReport.key_metrics.critical_cases}</span>
-          <span className="text-[10px] text-red-600 dark:text-red-400 block mt-0.5">Level-1 Trauma Bays</span>
-        </div>
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#111728] border border-slate-200 dark:border-slate-800 shadow-sm">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase">Critical (NEWS2 ≥ 7)</span>
+              <span className="text-2xl font-black text-red-600 dark:text-red-400">{dailyReport.key_metrics.critical_cases}</span>
+              <span className="text-[10px] text-red-600 dark:text-red-400 block mt-0.5">Level-1 Trauma Bays</span>
+            </div>
 
-        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#111728] border border-slate-200 dark:border-slate-800 shadow-sm">
-          <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase">SLA Compliance</span>
-          <span className="text-2xl font-black text-emerald-700 dark:text-emerald-400">{dailyReport.key_metrics.sla_compliance_pct}%</span>
-          <span className="text-[10px] text-emerald-700 dark:text-emerald-400 block mt-0.5">&lt; 15s Target Met</span>
-        </div>
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#111728] border border-slate-200 dark:border-slate-800 shadow-sm">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase">SLA Compliance</span>
+              <span className="text-2xl font-black text-emerald-700 dark:text-emerald-400">{dailyReport.key_metrics.sla_compliance_pct}%</span>
+              <span className="text-[10px] text-emerald-700 dark:text-emerald-400 block mt-0.5">&lt; 15s Target Met</span>
+            </div>
 
-        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#111728] border border-slate-200 dark:border-slate-800 shadow-sm">
-          <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase">Auto-Reroutes</span>
-          <span className="text-2xl font-black text-purple-700 dark:text-purple-400">{dailyReport.key_metrics.auto_reroutes}</span>
-          <span className="text-[10px] text-purple-700 dark:text-purple-400 block mt-0.5">Diversion Bypasses</span>
-        </div>
-      </div>
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#111728] border border-slate-200 dark:border-slate-800 shadow-sm">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase">Auto-Reroutes</span>
+              <span className="text-2xl font-black text-purple-700 dark:text-purple-400">{dailyReport.key_metrics.auto_reroutes}</span>
+              <span className="text-[10px] text-purple-700 dark:text-purple-400 block mt-0.5">Diversion Bypasses</span>
+            </div>
+          </div>
 
-      {/* Markdown Content Panel */}
-      <div className="p-6 rounded-2xl bg-slate-50 dark:bg-[#111728] border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs leading-relaxed space-y-4 font-sans shadow-sm">
-        <div className="whitespace-pre-wrap font-sans text-xs sm:text-sm text-slate-800 dark:text-slate-300 leading-relaxed">
-          {dailyReport.summary_markdown}
-        </div>
-      </div>
+          {/* Markdown Content Panel */}
+          <div className="p-6 rounded-2xl bg-slate-50 dark:bg-[#111728] border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs leading-relaxed space-y-4 font-sans shadow-sm">
+            <div className="whitespace-pre-wrap font-sans text-xs sm:text-sm text-slate-800 dark:text-slate-300 leading-relaxed">
+              {dailyReport.summary_markdown}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

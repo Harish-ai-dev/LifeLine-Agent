@@ -721,8 +721,8 @@ export function UnifiedCopilotModal() {
               ))}
             </div>
 
-            {/* ── PINNED Input Bar at Bottom */}
-            <div className="shrink-0 px-4 pb-4 pt-3 border-t border-slate-100 dark:border-slate-800/60 bg-white dark:bg-[#0d1220]">
+            {/* ── PINNED Sticky Input Bar at Bottom */}
+            <div className="shrink-0 sticky bottom-0 z-10 px-4 pb-4 pt-3 border-t border-slate-100 dark:border-slate-800/60 bg-white dark:bg-[#0d1220]">
               {voiceConfirmed && (
                 <div className="mb-2.5 flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/30 text-[10px] font-mono text-indigo-700 dark:text-indigo-300">
                   <span className="truncate">🎤 Transcribed: &ldquo;{transcribedText}&rdquo;</span>

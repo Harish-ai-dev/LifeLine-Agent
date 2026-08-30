@@ -213,8 +213,8 @@ export default function DonorRequestsPage() {
                       </span>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex gap-2 w-full md:w-auto">
+                    {/* Action Buttons Container */}
+                    <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
                       {currentStatus === 'pending' && (
                         <>
                           <button
