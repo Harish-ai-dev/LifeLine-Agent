@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   PortalView,
   UserRole,
@@ -222,31 +223,32 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   const watchdogRanRef = useRef(false);
 
+  const router = useRouter();
+
   // ── AUTH ACTIONS ──────────────────────────────────────────────────────────
   const login = useCallback(
     async (username: string, role: UserRole, facilityId?: string, donorId?: string) => {
       // ── Try live backend API first ───────────────────────────────────────
       try {
         const data = await api.login({ username, role, facility_id: facilityId });
-        setCurrentUser(data.user);
-        setAuthToken(data.token);
-        if (data.user.facility_id) setActiveHospitalId(data.user.facility_id);
-        if (donorId) setActiveDonorId(donorId);
-        if (data.user.role === 'hospital_staff') window.location.href = '/hospital';
-        else if (data.user.role === 'government_authority') window.location.href = '/government';
-        else if (data.user.role === 'blood_donor') window.location.href = '/donor';
-        return;
+        if (data && data.user && data.token && data.user.role) {
+          setCurrentUser(data.user);
+          setAuthToken(data.token);
+          if (data.user.facility_id) setActiveHospitalId(data.user.facility_id);
+          if (donorId) setActiveDonorId(donorId);
+          if (data.user.role === 'hospital_staff') router.push('/hospital');
+          else if (data.user.role === 'government_authority') router.push('/government');
+          else if (data.user.role === 'blood_donor') router.push('/donor');
+          return;
+        }
       } catch (e) {
         console.warn('[LifeLine] Backend API unreachable — using offline demo auth mode.');
       }
 
-      // ── Offline Demo Fallback (no backend required) ──────────────────────
-      // 1. Exact username + role match (case-insensitive)
-      // 2. Role match with facilityId
-      // 3. First user of matching role
-      let demoUser =
+      // ── Offline Demo Fallback (always reliable) ───────────────────────────
+      const demoUser =
         DEMO_USERS.find(
-          (u) => u.username.toLowerCase() === username.toLowerCase() && u.role === role
+          (u) => u.username.toLowerCase() === username.trim().toLowerCase() && u.role === role
         ) ||
         DEMO_USERS.find(
           (u) => u.role === role && (!facilityId || u.facility_id === facilityId)
@@ -259,7 +261,7 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
       setAuthToken(demoToken);
       api.setToken(demoToken);
 
-      // Resolve the correct facility ID from the hospitals list
+      // Resolve facility ID
       const targetFacilityId = facilityId || demoUser.facility_id;
       if (targetFacilityId) {
         const matched = INITIAL_HOSPITALS.find(
@@ -268,18 +270,20 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
         if (matched) setActiveHospitalId(matched.id);
         else setActiveHospitalId(INITIAL_HOSPITALS[0].id);
       }
-      if (donorId) setActiveDonorId(donorId);
+      if (donorId || demoUser.donor_id) {
+        setActiveDonorId(donorId || demoUser.donor_id || 'donor-101');
+      }
 
-      if (demoUser.role === 'hospital_staff') window.location.href = '/hospital';
-      else if (demoUser.role === 'government_authority') window.location.href = '/government';
-      else if (demoUser.role === 'blood_donor') window.location.href = '/donor';
+      if (demoUser.role === 'hospital_staff') router.push('/hospital');
+      else if (demoUser.role === 'government_authority') router.push('/government');
+      else if (demoUser.role === 'blood_donor') router.push('/donor');
     },
-    []
+    [router]
   );
 
   const logout = useCallback(() => {
-    window.location.href = '/login';
-  }, []);
+    router.push('/');
+  }, [router]);
 
   const switchUserRole = useCallback(
     (role: UserRole) => {

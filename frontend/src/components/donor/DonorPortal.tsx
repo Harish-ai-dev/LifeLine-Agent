@@ -570,7 +570,7 @@ export const DonorPortal: React.FC = () => {
                       Quick Donor Action
                     </h4>
                     <p className="text-xs text-slate-300">
-                      You can inspect this donor's complete medical dossier or switch active session to test emergency matching as this donor.
+                      You can inspect this donor&apos;s complete medical dossier or switch active session to test emergency matching as this donor.
                     </p>
 
                     <button

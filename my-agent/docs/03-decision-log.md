@@ -10,7 +10,7 @@ If a new decision is genuinely needed, add it here with a date and reason, then 
 | **Agent framework** | Google ADK (`LlmAgent`, `SequentialAgent`) + Google Genkit | ADK for agent orchestration; Genkit for prompt/flow management. Both satisfy hackathon's mandatory agent framework requirement. |
 | **Auth** | Firebase Authentication (Prod) & Demo/Mock Token Mode (Evaluation) | Dual-mode auth. Supports zero-friction hackathon evaluation via mock bearer token `lifeline_mock_<role>_<uid>` across `blood_donor`, `hospital_staff`, and `government_authority` personas, while preserving clean upgrade path to Firebase Auth Admin SDK. *(Added 2026-08-29)* |
 | **AI Daily Intelligence Model** | `gemini-3.5-flash` | Assigned to `/reports/daily` and `/reports/query` natural-language endpoints. Provides fast executive-level summarization over regional incident telemetry and capacity metrics under 2 seconds. *(Added 2026-08-29)* |
-| **Multi-Role Frontend Portal** | React + Vite + TypeScript (Role-Scoped Screens) | Three dedicated visual screen architectures: lightweight card-based portal for `blood_donor`, dense clinical operations console for `hospital_staff`, and macro-analytics dashboard for `government_authority`. *(Added 2026-08-29)* |
+| **Multi-Role Frontend Portal** | Next.js App Router + TypeScript (Role-Scoped Screens) | Three dedicated visual screen architectures: lightweight card-based portal for `blood_donor`, dense clinical operations console for `hospital_staff`, and macro-analytics dashboard for `government_authority`. *(Added 2026-08-29)* |
 | **DataStore & Client Adapter** | Universal Firestore Client with In-Memory Offline Fallback | Thin client layer in `lifeline/tools/` and `lifeline/firebase.py` wrapping standard CRUD for `dispatch_cases`, `donors`, `requests`, `patients`, `issues`, `inventory`, and `reports`. Gracefully falls back to mock IDs and memory caches if cloud credentials are absent. *(Added 2026-08-29)* |
 | **Cloud deployment** | Cloud Run (FastAPI app) | Satisfies mandatory Google Cloud service requirement. Simple container deploy, scales to zero between demo runs. |
 | **Audit storage** | Firestore (Firebase Admin SDK) | Serverless, minimal setup, real-time capable. Doubles as the "auditability" story from the original pitch. |
@@ -22,6 +22,7 @@ If a new decision is genuinely needed, add it here with a date and reason, then 
 | **Demo input mode** | Preset scenarios & Interactive SOS Trigger | Reliability over flexibility for live demo while supporting manual ER triggers from the hospital console. |
 | **Stretch agents** | Routing Agent + Briefing Agent are OPTIONAL | Only built if Day 1–2 finish early. See `07-scope-lock.md`. |
 | **Model registry** | `lifeline/models.py` — single source of truth | All agents import `AGENT_MODELS[agent_name]`. Upgrade all models by editing one file. |
+| **Unauthorized Feature Removal** | Removed "Judge Review Board" & Supabase integration | Feature was out of scope per `docs/07-scope-lock.md` §1/§4 and violated the locked single-datastore architecture (Universal Firestore Client). All associated routes (`/reviews`), components (`JudgeFeedbackSection`), nav links, and tech stack references were completely excised. *(Added 2026-08-30)* |
 
 ## ⚠️ Eligibility Compliance Checklist
 

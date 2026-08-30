@@ -19,16 +19,18 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 py-3 transition-all">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <div className="w-full px-2 sm:px-4 lg:px-6 flex items-center justify-between gap-4">
         {/* Brand Logo & Name */}
         <button
           onClick={() => onNavigate('dashboard')}
           className="flex items-center gap-2.5 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 rounded-lg p-1"
           aria-label="LifeLine Agent Home"
         >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-700 to-sky-500 flex items-center justify-center text-white shadow-md shadow-sky-600/20">
-            <HeartHandshake className="w-5 h-5" />
-          </div>
+          <img
+            src="/logo.png"
+            alt="LifeLine Agent Logo"
+            className="w-10 h-10 rounded-xl shadow-md shadow-sky-600/20 hover:scale-105 transition-transform duration-300"
+          />
           <div>
             <div className="flex items-center gap-1.5">
               <span className="font-extrabold text-slate-900 text-lg tracking-tight">LifeLine</span>

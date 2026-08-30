@@ -17,7 +17,7 @@ export function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
 
   useEffect(() => {
     if (!authToken || !currentUser) {
-      router.push('/login');
+      router.push('/');
     }
   }, [authToken, currentUser, router]);
 

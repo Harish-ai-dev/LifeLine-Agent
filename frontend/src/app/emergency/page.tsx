@@ -104,7 +104,7 @@ export default function EmergencyAirGapPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#05080f] text-slate-900 dark:text-slate-100 p-4 sm:p-8 flex flex-col justify-between max-w-5xl mx-auto space-y-6">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#05080f] text-slate-900 dark:text-slate-100 p-4 sm:p-8 flex flex-col justify-between w-full space-y-6">
       {/* ── 1. MISSION CRITICAL FAIL-SAFE HEADER ──────────────────────────── */}
       <div className="p-6 rounded-3xl bg-red-50 dark:bg-gradient-to-r dark:from-red-950 dark:via-[#111728] dark:to-[#111728] border-2 border-red-500 shadow-md space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

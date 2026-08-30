@@ -74,7 +74,7 @@ export default function DedicatedFacilityPage() {
   const isDiverting = hospital.isDiverting;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-16">
+    <div className="space-y-6 w-full px-2 sm:px-4 lg:px-6 pb-16">
       {/* Back to Directory Link */}
       <div className="flex items-center justify-between">
         <Link
