@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useDashboard } from '@/context/DashboardContext';
+import { api } from '@/utils/apiClient';
 import {
   Bot,
   Sparkles,
@@ -116,64 +117,61 @@ export function AIAssistant({ isOpen: externalIsOpen, onClose: externalOnClose }
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    const updatedMessages = [...messages, userMsg];
+    setMessages(updatedMessages);
     setInput('');
     setIsThinking(true);
 
-    // Simulate Agentic Supervisor Reasoning Engine
-    setTimeout(() => {
-      let responseText = '';
-      let agentTrace = null;
-
-      const lowerQuery = query.toLowerCase();
-
-      if (lowerQuery.includes('triage') || lowerQuery.includes('news2') || lowerQuery.includes('patient')) {
-        const criticalCount = alerts.filter((a) => a.severity === 'critical').length;
-        responseText = `### 🏥 Clinical Triage & Dispatch Analysis\n\n- **Active Monitored Emergencies:** ${alerts.length} cases\n- **Critical (NEWS2 ≥ 7):** ${criticalCount} patients en route to Level 1 trauma bays.\n- **Orchestrator Decision Quality:** 100% matched within clinical SLA (< 15s latency).\n- **Specialty Routing:** Neuro-trauma and Cardiac catheterization pathways locked.`;
-        agentTrace = {
-          agent: 'TriageCoordinator (Level 2 LoopAgent)',
-          model: 'gemini-3.1-pro',
-          schemaValidated: true,
-          iterations: 1,
-          fallbacksTriggered: 0,
-        };
-      } else if (lowerQuery.includes('capacity') || lowerQuery.includes('bed') || lowerQuery.includes('icu')) {
-        responseText = `### 🛏️ Hospital Bed & Diversion Status\n\n- **Facility:** ${currentHospital.name}\n- **Available ICU Beds:** ${currentHospital.availableIcuBeds} of ${currentHospital.totalIcuBeds}\n- **Trauma Bays:** ${currentHospital.availableTraumaBays} of ${currentHospital.totalTraumaBays}\n- **Diversion Status:** ${currentHospital.isDiverting ? '⚠️ ACTIVE DIVERSION' : '✅ OPEN FOR ADMISSIONS'}\n- **Recommendation:** Keep general trauma bay reserved for inbound ambulance ETA 4m.`;
-        agentTrace = {
-          agent: 'BedMatchingCoordinator (Level 2 LoopAgent)',
-          model: 'gemini-3.5-flash',
-          osrmEnriched: true,
-          heuristicDistanceKm: 2.8,
-        };
-      } else if (lowerQuery.includes('blood') || lowerQuery.includes('donor')) {
-        responseText = `### 🩸 Regional Blood Bank & Inbound Responders\n\n- **Urgent Shortages:** O-Negative reserve below safety buffer (2 units remaining).\n- **Autonomous Donor Broadcast:** Activated 14 minutes ago.\n- **Matched Live Responders:** 2 verified donors en-route with estimated arrival in 18 mins.`;
-        agentTrace = {
-          agent: 'RequestMatchingCoordinator (Level 2 LoopAgent)',
-          model: 'gemini-3.5-flash',
-          targetBloodGroup: 'O-',
-          notifiedDonors: 5,
-          acceptedDonors: 2,
-        };
-      } else {
-        responseText = `### 🤖 LifeLine Autonomous Supervisor Response\n\nAnalyzed multi-agent telemetry for **${currentHospital.name}**:\n- All 3 Level-2 Coordinators (Triage, Bed-Matching, Resource) are executing deterministically.\n- Audit logs cryptographically signed and stored in Firestore audit collection.\n- Current Regional SLA compliance is **99.8%**.`;
-        agentTrace = {
-          agent: 'SequentialOrchestrator (Level 1 RootAgent)',
-          subagents: ['TriageLeaf', 'BedMatchLeaf', 'BriefingLeaf'],
-          status: 'SUCCESS',
-        };
+    const aiMsgId = `ai-${Date.now()}`;
+    const aiMsgPlaceholder = {
+      id: aiMsgId,
+      role: 'assistant' as const,
+      text: '',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      agentTrace: {
+        agent: currentUser?.role === 'government_authority' 
+          ? 'HealthAuthorityDirector (L1 RootAgent)' 
+          : currentUser?.role === 'blood_donor' 
+          ? 'RequestMatchingCoordinator (L2 LoopAgent)' 
+          : 'TriageCoordinator (L2 LoopAgent)',
+        model: 'gemini-2.5-flash',
+        realtime: true,
       }
+    };
 
-      const aiMsg = {
-        id: `ai-${Date.now()}`,
-        role: 'assistant' as const,
-        text: responseText,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        agentTrace,
+    setMessages((prev) => [...prev, aiMsgPlaceholder]);
+
+    try {
+      // Map to API shape: {role, content}
+      const apiMessages = updatedMessages.map(m => ({
+        role: m.role,
+        content: m.text
+      }));
+
+      const contextPayload = {
+        role: currentUser?.role || 'hospital_staff',
+        facility_name: currentHospital?.name || 'Lilavati Hospital & Research Centre',
+        title: currentUser?.title || 'Emergency Operations',
       };
 
-      setMessages((prev) => [...prev, aiMsg]);
+      await api.streamChat(apiMessages, contextPayload, (token) => {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === aiMsgId ? { ...msg, text: msg.text + token } : msg
+          )
+        );
+      });
+    } catch (e: any) {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === aiMsgId
+            ? { ...msg, text: `⚠️ **System Error:** Failed to communicate with live Gemini Co-Pilot.\n\n*Detail:* ${e.message || e}` }
+            : msg
+        )
+      );
+    } finally {
       setIsThinking(false);
-    }, 900);
+    }
   };
 
   if (!isOpen) return null;

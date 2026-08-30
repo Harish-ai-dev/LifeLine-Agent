@@ -105,6 +105,57 @@ class ApiClient {
       body: JSON.stringify({ query }),
     });
   }
+
+  // Live Chat Stream
+  async streamChat(
+    messages: { role: string; content: string }[],
+    context: { role: string; facility_name?: string; title?: string },
+    onToken: (token: string) => void
+  ): Promise<void> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (this.token) {
+      headers['Authorization'] = `Bearer ${this.token}`;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/chat`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ messages, context }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.detail || 'Failed to initialize chat stream');
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) return;
+
+    const decoder = new TextDecoder('utf-8');
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        const cleanLine = line.trim();
+        if (cleanLine.startsWith('data: ')) {
+          const data = cleanLine.slice(6);
+          if (data === '[DONE]') {
+            return;
+          }
+          onToken(data);
+        }
+      }
+    }
+  }
 }
 
 export const api = new ApiClient();

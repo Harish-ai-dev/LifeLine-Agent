@@ -24,6 +24,7 @@ from lifeline.routes import (
     issues,
     inventory,
     reports,
+    chat,
 )
 
 app = FastAPI(
@@ -174,3 +175,4 @@ app.include_router(transfers.router, tags=["Patient Transfers & Diversion"])
 app.include_router(issues.router, prefix="/issues", tags=["Hospital Issues Logging"])
 app.include_router(inventory.router, prefix="/inventory", tags=["Medicine & Equipment Inventory"])
 app.include_router(reports.router, tags=["Regional Intelligence & Executive Reports"])
+app.include_router(chat.router, tags=["AI Co-Pilot & Supervisor Assistance"])
