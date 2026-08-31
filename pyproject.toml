@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "lifeline-agent"
 version = "0.1.0"
 description = "AI-powered emergency dispatch system — Google ADK + Gemini 3.5 + Firebase"
-readme = "my-agent/README.md"
+readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.11"
 authors = [{ name = "LifeLine Agent Team" }]

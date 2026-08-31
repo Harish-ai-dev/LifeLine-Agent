@@ -25,6 +25,7 @@ COPY lifeline /app/lifeline
 COPY admin /app/admin
 COPY data /app/data
 COPY scripts /app/scripts
+COPY README.md /app/README.md
 RUN pip install --no-cache-dir --no-deps -e .
 
 # ── Stage 2: Production Runtime ──────────────────────────────────────────────
