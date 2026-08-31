@@ -210,21 +210,40 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
           const token = await user.getIdToken();
           setAuthToken(token);
           
-          const db = getFirebaseDb();
+                    const db = getFirebaseDb();
           if (db) {
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            if (userDoc.exists()) {
-              const data = userDoc.data();
-              setCurrentUser({
-                id: user.uid,
-                username: data.name || user.email,
-                role: data.role as UserRole,
-                facility_id: data.hospitalId,
-                donor_id: data.role === "blood_donor" ? user.uid : undefined,
-              });
-              if (data.hospitalId) setActiveHospitalId(data.hospitalId);
-            } else {
-              console.warn("No user profile found in Firestore. Gracefully mocking role for demo purposes."); const match = DEMO_USERS.find(u => u.username === user.email); const role = match ? match.role : "hospital_staff"; const hosp = match ? match.facility_id : "hosp-lilavati"; setCurrentUser({ id: user.uid, username: user.email || "Demo User", role: role as UserRole, facility_id: hosp }); if(hosp) setActiveHospitalId(hosp);
+            try {
+              const getDocPromise = getDoc(doc(db, "users", user.uid));
+                let timeoutHandle: any;
+                const timeoutPromise = new Promise((_, reject) => {
+                  timeoutHandle = setTimeout(() => reject(new Error("Firestore timeout")), 2000);
+                });
+                
+                const userDoc = await Promise.race([
+                  getDocPromise.then(res => { clearTimeout(timeoutHandle); return res; }),
+                  timeoutPromise
+                ]) as any;
+              
+              if (userDoc && userDoc.exists()) {
+                const data = userDoc.data();
+                setCurrentUser({
+                  id: user.uid,
+                  username: data.name || user.email,
+                  role: data.role as UserRole,
+                  facility_id: data.hospitalId,
+                  donor_id: data.role === "blood_donor" ? user.uid : undefined,
+                });
+                if (data.hospitalId) setActiveHospitalId(data.hospitalId);
+              } else {
+                throw new Error("No user profile found");
+              }
+            } catch (err) {
+              console.warn("Firestore fetch failed or timed out. Gracefully mocking role.", err);
+              const match = DEMO_USERS.find(u => u.username === user.email);
+              const role = match ? match.role : "hospital_staff";
+              const hosp = match ? match.facility_id : "hosp-lilavati";
+              setCurrentUser({ id: user.uid, username: user.email || "Demo User", role: role as UserRole, facility_id: hosp });
+              if(hosp) setActiveHospitalId(hosp);
             }
           }
         } catch (err) {
@@ -1833,3 +1852,5 @@ export const useDashboard = () => {
   }
   return context;
 };
+
+

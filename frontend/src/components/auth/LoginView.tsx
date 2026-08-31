@@ -305,8 +305,8 @@ import { useRouter } from 'next/navigation';
 
 // ── Login form (shown after portal selected) ─────────────────────────────────
 function LoginForm({ portal }: { portal: PortalDef }) {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState(portal.hint);
+  const [password, setPassword] = useState(process.env.NEXT_PUBLIC_DEMO_PASSWORD || 'password123');
   const [showPw, setShowPw] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
