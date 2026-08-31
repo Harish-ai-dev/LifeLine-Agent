@@ -72,16 +72,24 @@ try:
                                     yield chunk
                                 return
                             except Exception as fallback_err:
-                                raise RuntimeError(
-                                    f"Gemini API is currently overloaded. The fallback model ({fallback_model}) "
-                                    f"also failed. Please try your request again in a few minutes."
-                                ) from fallback_err
+                                from google.genai.types import GenerateContentResponse, Candidate, Content, Part
+                                logging.error(f"[Gemini Retry] Fallback model also failed! Yielding mock fallback to prevent crash.")
+                                mock_text = "?? **System Fallback Active:** The Gemini API is currently unavailable due to strict rate limits (Quota Exceeded). Please wait a few moments before sending another request, or upgrade your API tier."
+                                mock_resp = GenerateContentResponse(
+                                    candidates=[Candidate(content=Content(parts=[Part.from_text(text=mock_text)]))]
+                                )
+                                yield mock_resp
+                                return
                         else:
-                            raise RuntimeError(
-                                f"Gemini API is currently experiencing unusually high demand. "
-                                f"We tried {max_retries} times but could not connect. "
-                                "Please wait a moment and try again."
-                            ) from e
+                            from google.genai.types import GenerateContentResponse, Candidate, Content, Part
+                            import json
+                            logging.error(f"[Gemini Retry] Exhausted retries! Yielding mock fallback to prevent crash.")
+                            mock_text = "?? **System Fallback Active:** The Gemini API is currently unavailable due to strict rate limits (Quota Exceeded). Please wait a few moments before sending another request, or upgrade your API tier."
+                            mock_resp = GenerateContentResponse(
+                                candidates=[Candidate(content=Content(parts=[Part.from_text(text=mock_text)]))]
+                            )
+                            yield mock_resp
+                            return
                 else:
                     raise
     
@@ -486,6 +494,9 @@ Answer grounded strictly in verified system data using your tools (check_hospita
 
 # Export root_agent for Google ADK discovery
 root_agent = orchestrator_agent
+
+
+
 
 
 
