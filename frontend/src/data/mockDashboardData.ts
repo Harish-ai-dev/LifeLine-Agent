@@ -219,7 +219,7 @@ export const INITIAL_HOSPITALS: HospitalFacility[] = [
 export const DEMO_USERS: AuthUser[] = [
   {
     id: 'user_doc1',
-    username: 'dr_mehta',
+    username: 'dr.mehta@lilavati.com',
     role: 'hospital_staff',
     facility_id: 'hosp_mumbai_01',
     facility_name: 'Lilavati Hospital & Research Centre',
@@ -228,7 +228,7 @@ export const DEMO_USERS: AuthUser[] = [
   },
   {
     id: 'user_nurse1',
-    username: 'nurse_rao',
+    username: 'nurse.rao@lilavati.com',
     role: 'hospital_staff',
     facility_id: 'hosp_mumbai_01',
     facility_name: 'Lilavati Hospital & Research Centre',
@@ -237,7 +237,7 @@ export const DEMO_USERS: AuthUser[] = [
   },
   {
     id: 'usr_9814',
-    username: 'dr_verma',
+    username: 'dr.verma@hinduja.com',
     role: 'hospital_staff',
     facility_id: 'hosp-hinduja',
     facility_name: 'P. D. Hinduja National Hospital',
@@ -246,7 +246,7 @@ export const DEMO_USERS: AuthUser[] = [
   },
   {
     id: 'donor_6721',
-    username: 'rahul_sharma',
+    username: 'rahul.sharma@example.com',
     role: 'blood_donor',
     donor_id: 'donor-101',
     facility_name: 'Community Donor Network',
@@ -255,7 +255,7 @@ export const DEMO_USERS: AuthUser[] = [
   },
   {
     id: 'donor_6722',
-    username: 'sneha_patil',
+    username: 'sneha.patil@example.com',
     role: 'blood_donor',
     donor_id: 'donor-102',
     facility_name: 'Community Donor Network',
@@ -264,7 +264,7 @@ export const DEMO_USERS: AuthUser[] = [
   },
   {
     id: 'donor_6723',
-    username: 'vikram_deshpande',
+    username: 'vikram.d@example.com',
     role: 'blood_donor',
     donor_id: 'donor-103',
     facility_name: 'Community Donor Network',
@@ -273,7 +273,7 @@ export const DEMO_USERS: AuthUser[] = [
   },
   {
     id: 'gov_01',
-    username: 'dir_sharma',
+    username: 'dir.sharma@gov.in',
     role: 'government_authority',
     facility_id: 'gov-region-4',
     facility_name: 'Mumbai Metropolitan Health Directorate',
@@ -282,7 +282,7 @@ export const DEMO_USERS: AuthUser[] = [
   },
   {
     id: 'gov_02',
-    username: 'analyst_rao',
+    username: 'analyst.rao@gov.in',
     role: 'government_authority',
     facility_id: 'gov-region-4',
     facility_name: 'Emergency Dispatch Oversight Command',

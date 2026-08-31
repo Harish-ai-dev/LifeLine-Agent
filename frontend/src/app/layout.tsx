@@ -4,6 +4,7 @@ import './globals.css';
 import { DashboardProvider } from '@/context/DashboardContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { NextAuthProvider } from '@/components/auth/NextAuthProvider';
 
 
 import { AppWrapper } from '@/components/layout/AppWrapper';
@@ -29,13 +30,15 @@ export default function RootLayout({
     <html lang="en" className="">
       <body className={`${inter.className} h-screen overflow-hidden flex select-none bg-slate-50 text-slate-900`}>
         <ErrorBoundary isRoot={true}>
-          <ThemeProvider>
-            <DashboardProvider>
-              <AppWrapper>
-                {children}
-              </AppWrapper>
-            </DashboardProvider>
-          </ThemeProvider>
+          <NextAuthProvider>
+            <ThemeProvider>
+              <DashboardProvider>
+                <AppWrapper>
+                  {children}
+                </AppWrapper>
+              </DashboardProvider>
+            </ThemeProvider>
+          </NextAuthProvider>
         </ErrorBoundary>
       </body>
     </html>

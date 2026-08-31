@@ -46,6 +46,8 @@ import {
   SAMPLE_NL_QUERIES,
 } from '../data/mockDashboardData';
 import { api } from '../utils/apiClient';
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 interface DashboardContextType {
   // Auth & Role State (09-parallel-build-contract.md)
@@ -191,21 +193,98 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [issues, setIssues] = useState<HospitalIssue[]>(INITIAL_HOSPITAL_ISSUES);
   const [inventory, setInventory] = useState<InventoryItem[]>(INITIAL_INVENTORY);
 
-  useEffect(() => {
-    if (authToken) {
-      api.setToken(authToken);
-      
-      // Fetch real data from backend
-      Promise.all([
-        api.getIssues().catch(e => { console.error('Failed to get issues', e); return INITIAL_HOSPITAL_ISSUES; }),
-        api.getInventory().catch(e => { console.error('Failed to get inventory', e); return INITIAL_INVENTORY; })
-      ]).then(([fetchedIssues, fetchedInventory]) => {
-        setIssues(fetchedIssues);
-        setInventory(fetchedInventory);
-      });
-    }
-  }, [authToken]);
 
+
+  useEffect(() => {
+    if (authToken && db) {
+      api.setToken(authToken);
+
+      // Listen to real-time issues for the active hospital
+      const issuesQuery = query(collection(db, "issues"), where("facilityId", "==", activeHospitalId));
+      const unsubscribeIssues = onSnapshot(issuesQuery, (snapshot) => {
+        if (!snapshot.empty) {
+          const loadedIssues = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as HospitalIssue));
+          setIssues(loadedIssues);
+        }
+      }, (error) => console.warn("Issues snapshot error:", error));
+
+      // Listen to real-time inventory for the active hospital
+      const inventoryQuery = query(collection(db, "inventory"), where("facilityId", "==", activeHospitalId));
+      const unsubscribeInventory = onSnapshot(inventoryQuery, (snapshot) => {
+        if (!snapshot.empty) {
+          const loadedInventory = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as InventoryItem));
+          setInventory(loadedInventory);
+        }
+      }, (error) => console.warn("Inventory snapshot error:", error));
+
+      // Listen to alerts (global or filtered by hospital)
+      const alertsQuery = query(collection(db, "alerts"));
+      const unsubscribeAlerts = onSnapshot(alertsQuery, (snapshot) => {
+        if (!snapshot.empty) {
+          const loadedAlerts = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as EmergencyIncidentAlert));
+          setAlerts(loadedAlerts);
+        }
+      }, (error) => console.warn("Alerts snapshot error:", error));
+
+      // Listen to audit logs
+      const auditLogsQuery = query(collection(db, "auditLogs"));
+      const unsubscribeAuditLogs = onSnapshot(auditLogsQuery, (snapshot) => {
+        if (!snapshot.empty) {
+          const loadedLogs = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as AuditEventLog));
+          setAuditLogs(loadedLogs);
+        }
+      }, (error) => console.warn("Audit logs snapshot error:", error));
+
+      // Listen to donor requests
+      const donorRequestsQuery = query(collection(db, "donorRequests"));
+      const unsubscribeDonorRequests = onSnapshot(donorRequestsQuery, (snapshot) => {
+        if (!snapshot.empty) {
+          const loadedRequests = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as DonorRequest));
+          setDonorRequests(loadedRequests);
+        }
+      }, (error) => console.warn("Donor requests snapshot error:", error));
+
+      // Listen to hospitals
+      const hospitalsQuery = query(collection(db, "hospitals"));
+      const unsubscribeHospitals = onSnapshot(hospitalsQuery, (snapshot) => {
+        if (!snapshot.empty) {
+          const loadedHospitals = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as HospitalFacility));
+          setHospitals(loadedHospitals);
+        }
+      }, (error) => console.warn("Hospitals snapshot error:", error));
+
+      // Listen to donors
+      const donorsQuery = query(collection(db, "donors"));
+      const unsubscribeDonors = onSnapshot(donorsQuery, (snapshot) => {
+        if (!snapshot.empty) {
+          const loadedDonors = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as DonorProfile));
+          setDonors(loadedDonors);
+        }
+      }, (error) => console.warn("Donors snapshot error:", error));
+
+      // Listen to analytics (assuming a single document or multiple, typically single global doc)
+      const analyticsQuery = query(collection(db, "analytics"));
+      const unsubscribeAnalytics = onSnapshot(analyticsQuery, (snapshot) => {
+        if (!snapshot.empty) {
+          // Assuming the first document is the global analytics
+          const loadedAnalytics = { id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as unknown as JurisdictionAnalytics;
+          setAnalytics(loadedAnalytics);
+        }
+      }, (error) => console.warn("Analytics snapshot error:", error));
+
+
+      return () => {
+        unsubscribeIssues();
+        unsubscribeInventory();
+        unsubscribeAlerts();
+        unsubscribeAuditLogs();
+        unsubscribeDonorRequests();
+        unsubscribeHospitals();
+        unsubscribeDonors();
+        unsubscribeAnalytics();
+      };
+    }
+  }, [authToken, activeHospitalId]);
   // ── AI DAILY REPORT & NL QUERY STATE (Gemini 3.5-flash) ───────────────────
   const [dailyReport, setDailyReport] = useState<DailyIntelligenceReport>(INITIAL_DAILY_REPORT);
 
