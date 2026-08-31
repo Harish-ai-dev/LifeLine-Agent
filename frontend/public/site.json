@@ -1,0 +1,26 @@
+{
+  "name": "LifeLine Agent",
+  "short_name": "LifeLine",
+  "description": "AI-Powered Autonomous Emergency Dispatch & Regional Healthcare Coordination Platform",
+  "version": "0.1.0",
+  "author": "LifeLine Agent Team",
+  "url": "https://lifeline-agent.vercel.app",
+  "api": {
+    "base_url": "/api",
+    "health_endpoint": "/api/health",
+    "dispatch_endpoint": "/api/dispatch",
+    "sos_endpoint": "/api/sos"
+  },
+  "theme": {
+    "color_scheme": "dark",
+    "primary_color": "#ef4444",
+    "background_color": "#0a0f1d"
+  },
+  "modules": [
+    { "name": "Emergency SOS", "path": "/emergency" },
+    { "name": "Hospital Command", "path": "/hospital" },
+    { "name": "Donor Network", "path": "/donor" },
+    { "name": "Government Portal", "path": "/government" },
+    { "name": "Agent Simulator", "path": "/simulator" }
+  ]
+}
