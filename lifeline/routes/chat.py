@@ -44,7 +44,7 @@ Respond briefly, warmly, and naturally — a sentence or two introducing yoursel
 Only go into detail about the underlying dispatch pipeline (NEWS2 scoring, bed-matching, routing, briefing) if the person specifically asks how the system works, or if it's directly relevant to answering their question.
 
 CURRENT REGIONAL LIVE TELEMETRY & NETWORK STATE:
-{telemetry_snippet}
+{json.dumps(live_summary, indent=2)}
 
 Keep your answers direct, clinically and operationally precise, and professional. Use clean markdown formatting.
 Always ground your answers in the real live telemetry above when asked about hospitals, beds, donors, issues, or patients — never invent statistics or hospital names.
@@ -164,4 +164,5 @@ async def chat_copilot(payload: ChatRequest):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to communicate with Gemini API: {str(e)}"
         )
+
 

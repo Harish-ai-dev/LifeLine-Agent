@@ -218,6 +218,42 @@ export const INITIAL_HOSPITALS: HospitalFacility[] = [
 
 export const DEMO_USERS: AuthUser[] = [
   {
+    id: 'user_gov_demo',
+    username: 'dir_sharma@lifelinedemo.app',
+    role: 'government_authority',
+    facility_id: undefined,
+    facility_name: undefined,
+    title: 'Regional Health Director',
+    avatar: '???????',
+  },
+  {
+    id: 'user_donor_demo',
+    username: 'rahul_sharma@lifelinedemo.app',
+    role: 'blood_donor',
+    facility_id: undefined,
+    facility_name: undefined,
+    title: 'Citizen Health Pass',
+    avatar: '????',
+  },
+  {
+    id: 'user_hosp_dir_demo',
+    username: 'director.lilavati@lifelinedemo.app',
+    role: 'hospital_staff',
+    facility_id: 'hosp_mumbai_01',
+    facility_name: 'Lilavati Hospital & Research Centre',
+    title: 'Hospital Director',
+    avatar: '???????',
+  },
+  {
+    id: 'user_nurse_demo',
+    username: 'nurse.rao@lifelinedemo.app',
+    role: 'hospital_staff',
+    facility_id: 'hosp_mumbai_01',
+    facility_name: 'Lilavati Hospital & Research Centre',
+    title: 'ER Charge Nurse',
+    avatar: '???????',
+  },
+  {
     id: 'user_doc1',
     username: 'dr.mehta@lilavati.com',
     role: 'hospital_staff',
@@ -1075,3 +1111,4 @@ export const SAMPLE_NL_QUERIES: Array<{ query: string; response: NaturalLanguage
     },
   },
 ];
+

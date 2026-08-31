@@ -166,7 +166,7 @@ export function Sidebar() {
   return (
     <aside
       className={`bg-white border-r border-slate-200 flex flex-col justify-between transition-all duration-300 z-30 shrink-0 select-none shadow-sm ${
-        collapsed ? 'w-20' : 'w-64'
+        collapsed ? 'w-20' : 'w-72'
       }`}
     >
       {/* Brand Header */}

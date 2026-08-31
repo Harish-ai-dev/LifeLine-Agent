@@ -26,6 +26,71 @@ if PROJECT_ROOT not in sys.path:
 from dotenv import load_dotenv
 load_dotenv()
 
+import asyncio
+import random
+import logging
+
+import asyncio
+import random
+import logging
+
+try:
+    from google.adk.models.google_llm import Gemini
+    from google.genai.errors import ServerError, APIError
+
+    if not hasattr(Gemini, "_orig_generate_content_async"):
+        Gemini._orig_generate_content_async = Gemini.generate_content_async
+
+    async def _patched_generate_content_async(self, *args, **kwargs):
+        max_retries = int(os.environ.get("GEMINI_MAX_RETRIES", 3))
+        fallback_model = os.environ.get("FALLBACK_MODEL", "gemini-3.5-flash")
+        
+        for attempt in range(max_retries + 1):
+            try:
+                agen = Gemini._orig_generate_content_async(self, *args, **kwargs)
+                async for chunk in agen:
+                    yield chunk
+                return
+            except Exception as e:
+                status_code = getattr(e, "code", getattr(e, "status_code", None))
+                if isinstance(e, (ServerError, APIError)) or status_code in [429, 500, 503, 504]:
+                    if attempt < max_retries:
+                        delay = (2 ** attempt) + random.uniform(0.5, 1.5)
+                        logging.warning(
+                            f"[Gemini Retry] Attempt {attempt+1}/{max_retries} failed with {status_code}. "
+                            f"Retrying in {delay:.2f}s..."
+                        )
+                        await asyncio.sleep(delay)
+                        continue
+                    else:
+                        if hasattr(self, "model") and self.model != fallback_model:
+                            logging.warning(f"[Gemini Retry] Exhausted retries. Failing over to {fallback_model}")
+                            self.model = fallback_model
+                            try:
+                                agen2 = Gemini._orig_generate_content_async(self, *args, **kwargs)
+                                async for chunk in agen2:
+                                    yield chunk
+                                return
+                            except Exception as fallback_err:
+                                raise RuntimeError(
+                                    f"Gemini API is currently overloaded. The fallback model ({fallback_model}) "
+                                    f"also failed. Please try your request again in a few minutes."
+                                ) from fallback_err
+                        else:
+                            raise RuntimeError(
+                                f"Gemini API is currently experiencing unusually high demand. "
+                                f"We tried {max_retries} times but could not connect. "
+                                "Please wait a moment and try again."
+                            ) from e
+                else:
+                    raise
+    
+    Gemini.generate_content_async = _patched_generate_content_async
+    logging.info("Gemini 503 Retry Monkey-Patch successfully fixed (AsyncGenerator).")
+except ImportError:
+    pass
+
+
 from google.adk.agents import LlmAgent
 from lifeline.models import TRIAGE_MODEL, DEFAULT_MODEL
 from lifeline.tools.news2 import news2_score
@@ -421,5 +486,7 @@ Answer grounded strictly in verified system data using your tools (check_hospita
 
 # Export root_agent for Google ADK discovery
 root_agent = orchestrator_agent
+
+
 
 
