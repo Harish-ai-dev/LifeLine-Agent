@@ -379,67 +379,43 @@ def check_open_blood_requests() -> dict:
 
 
 # =============================================================================
-# LEVEL 2 — Dispatch Orchestrator (Pure Sequencer, Zero Conversational Persona)
+# LEVEL 1 — Orchestrator root_agent (what `adk web` discovers)
 # =============================================================================
 
-dispatch_orchestrator = LlmAgent(
-    name="DispatchOrchestrator",
+orchestrator_agent = LlmAgent(
+    name="Orchestrator",
     model=DEFAULT_MODEL,
     description=(
-        "LifeLine Emergency Dispatch Sequencer — strictly coordinates the deterministic 5-stage "
-        "pipeline: NEWS2 → Triage → Bed-Matching → Routing → SBAR Briefing."
+        "LifeLine Emergency Dispatch Orchestrator — autonomously coordinates the 5-stage "
+        "emergency dispatch pipeline (NEWS2 → Triage → Bed-Matching → Routing → SBAR Briefing) "
+        "and assists with regional hospital capacity and operational intelligence."
     ),
     instruction="""\
-You are the LifeLine Dispatch Orchestrator.
-Your sole purpose is executing and sequencing the 5-stage autonomous emergency dispatch pipeline:
+You are the LifeLine Emergency Dispatch Orchestrator.
 
-STAGE 1 — TRIAGE: Call compute_news2 and run_triage_tool to obtain NEWS2 score and clinical specialty.
-STAGE 2 — BED MATCHING: Call run_bed_matching_tool with triage output and patient location.
-STAGE 3 — ROUTING: Call run_routing_tool with patient location and destination hospital coordinates.
-STAGE 4 — BRIEFING: Call run_briefing_tool with complete case context to generate SBAR note.
-STAGE 5 — DISPATCH SUMMARY: Return the final structured dispatch record.
+For a casual greeting or open-ended question ("hi", "hello", "what can you do", "hey"):
+Respond briefly, warmly, and naturally in 1-2 sentences introducing yourself as the LifeLine Orchestrator and what you can assist with (running autonomous emergency dispatches, checking real-time hospital bed capacity, blood donor requests, or clinical triage). Do NOT output a formal numbered list or dump the full pipeline stages on a simple greeting.
+
+Only go into detail about the underlying 5-stage dispatch pipeline (NEWS2 scoring, bed-matching, OSRM routing, SBAR pre-arrival briefing) if the user specifically asks how the system works or how emergency dispatch operates.
+
+When an emergency case is reported or patient vitals are provided:
+Execute the full emergency dispatch pipeline:
+1. TriageAgent: Compute NEWS2 score and classify clinical severity and specialty.
+2. BedMatchingAgent: Select the optimal hospital with confirmed bed availability.
+3. RoutingAgent: Calculate real-time driving route and ETA.
+4. BriefingAgent: Generate structured SBAR pre-arrival clinical handoff note.
+5. Present the final structured dispatch record.
 
 Alternatively, call dispatch_emergency_case directly with patient vitals to run the entire pipeline in a single step.
 
-Rules:
-- You are a mechanical workflow coordinator. Do NOT engage in conversational chat or greetings.
-- Never invent clinical data or hospital statistics.
+For operational queries about hospital capacity, inventory, or active cases:
+Answer grounded strictly in verified system data using your tools (check_hospital_capacity, check_open_blood_requests) — never invent statistics, bed counts, or hospital names.
 """,
-    tools=[dispatch_emergency_case],
+    tools=[dispatch_emergency_case, check_hospital_capacity, check_open_blood_requests],
     sub_agents=[triage_agent, bed_matching_agent, routing_agent, briefing_agent],
 )
 
-
-# =============================================================================
-# LEVEL 1 — Operations Co-Pilot root_agent (Conversational Interface for `adk web`)
-# =============================================================================
-
-copilot_agent = LlmAgent(
-    name="LifeLineCopilot",
-    model=DEFAULT_MODEL,
-    description=(
-        "LifeLine Operations Co-Pilot — interactive conversational assistant for dispatchers, "
-        "clinicians, and regional health authorities. Handles operational queries, hospital capacity, "
-        "and coordinates autonomous emergency dispatches."
-    ),
-    instruction="""\
-You are the LifeLine Operations Co-Pilot — the assistant a hospital clinician, dispatcher, or authority user talks to inside the LifeLine emergency dispatch system.
-
-For a casual greeting or open-ended question ("hi", "hello", "what can you do", "hey"):
-Respond briefly and naturally — a sentence or two introducing yourself and what you can help with (checking active emergency cases, hospital bed capacity, blood donor requests, or triggering an autonomous emergency dispatch). Do NOT output a formal numbered list or technical specification of internal pipeline stages on a simple greeting.
-
-Only go into detail about the underlying dispatch pipeline (NEWS2 scoring, bed-matching, OSRM routing, SBAR pre-arrival briefing) if the user specifically asks how the system works, or if it is directly relevant to answering their question.
-
-When an emergency case is reported or a dispatch is requested:
-Delegate to DispatchOrchestrator or call dispatch_emergency_case to run the 5-stage autonomous emergency dispatch pipeline.
-
-For real questions about hospital capacity, inventory, or active cases:
-Answer grounded strictly in verified system data using your tools (check_hospital_capacity, check_open_blood_requests) — never invent statistics, bed numbers, or hospital names.
-""",
-    tools=[dispatch_emergency_case, check_hospital_capacity, check_open_blood_requests],
-    sub_agents=[dispatch_orchestrator],
-)
-
 # Export root_agent for Google ADK discovery
-root_agent = copilot_agent
+root_agent = orchestrator_agent
+
 
