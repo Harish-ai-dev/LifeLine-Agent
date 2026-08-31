@@ -136,13 +136,19 @@ async def chat_copilot(payload: ChatRequest):
             temperature=0.2,
         )
 
+        # Build message history for Chat session
+        history = contents[:-1] if len(contents) > 1 else None
+        latest_message = contents[-1].parts[0].text if contents and contents[-1].parts else "Hello"
+
+        chat = client.chats.create(
+            model=DEFAULT_MODEL,
+            config=config,
+            history=history,
+        )
+
         def generate():
             try:
-                response = client.models.generate_content_stream(
-                    model=DEFAULT_MODEL,
-                    contents=contents,
-                    config=config
-                )
+                response = chat.send_message_stream(latest_message)
                 for chunk in response:
                     if chunk.text:
                         # Yield standard SSE format
