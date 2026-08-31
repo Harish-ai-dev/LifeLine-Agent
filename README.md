@@ -1,4 +1,4 @@
-# 🚑 LifeLine Agent
+ LifeLine Agent
 
 > **Autonomous Emergency Healthcare Coordination Platform & Hospital Bed Matchmaker**  
 > An autonomous multi-agent pipeline powered by **Gemini 3.1 Pro**, **Gemini 3.5 Flash**, **Google ADK**, **Genkit**, and **Google Cloud Run + Firestore**.
@@ -12,9 +12,9 @@
 
 ---
 
-## 🎯 Executive Summary & Value Proposition
+## ðŸŽ¯ Executive Summary & Value Proposition
 
-In acute medical crises—such as cardiac arrest, severe trauma, or hemorrhagic shock—**seconds save lives**. However, traditional emergency dispatch systems remain heavily fragmented and reliant on manual coordination. Paramedics wait on hold to secure open ICU beds; emergency room teams receive minimal advance clinical briefings; and blood bank shortages trigger frantic, time-consuming searches.
+In acute medical crisesâ€”such as cardiac arrest, severe trauma, or hemorrhagic shockâ€”**seconds save lives**. However, traditional emergency dispatch systems remain heavily fragmented and reliant on manual coordination. Paramedics wait on hold to secure open ICU beds; emergency room teams receive minimal advance clinical briefings; and blood bank shortages trigger frantic, time-consuming searches.
 
 **LifeLine Agent replaces manual delays with autonomous, deterministic multi-agent intelligence:**
 
@@ -27,7 +27,7 @@ In acute medical crises—such as cardiac arrest, severe trauma, or hemorrhagic 
 
 ---
 
-## 🛠️ The Unified lifeline CLI Toolkit
+## ðŸ› ï¸ The Unified lifeline CLI Toolkit
 
 LifeLine Agent is entirely driven by its robust, unified command-line interface. Whether you are running locally in VS Code or deploying to production, **you never need to manually run 
 pm install or pip**. The lifeline CLI handles everything.
@@ -51,11 +51,11 @@ lifeline --help
 
 ---
 
-## 🚀 Quickstart & Local Setup
+## ðŸš€ Quickstart & Local Setup
 
 ### Prerequisites
-- **Python**: ≥ 3.11
-- **Node.js**: ≥ 18 (for the Next.js frontend)
+- **Python**: â‰¥ 3.11
+- **Node.js**: â‰¥ 18 (for the Next.js frontend)
 - **Gemini API Key**: [Google AI Studio](https://aistudio.google.com/apikey)
 
 ### 3-Step Setup
@@ -77,16 +77,16 @@ lifeline run
 
 ---
 
-## 🏗️ System ```mermaid
+## ðŸ—ï¸ System ```mermaid
 flowchart TB
     subgraph Users [LifeLine Agent Ecosystem]
         direction LR
-        D[🩸 Blood Donor<br/><i>Mobile / Portal</i>]
-        H[🏥 Hospital Staff<br/><i>ER Ops Console & Bays</i>]
-        G[🏛️ Gov Authority<br/><i>Regional Exec Brief</i>]
+        D[ðŸ©¸ Blood Donor<br/><i>Mobile / Portal</i>]
+        H[ðŸ¥ Hospital Staff<br/><i>ER Ops Console & Bays</i>]
+        G[ðŸ›ï¸ Gov Authority<br/><i>Regional Exec Brief</i>]
     end
 
-    API[⚡ FastAPI Unified REST API Gateway<br/><i>Core Router for Auth, Donors, ER, and Intelligence</i>]
+    API[âš¡ FastAPI Unified REST API Gateway<br/><i>Core Router for Auth, Donors, ER, and Intelligence</i>]
 
     subgraph Core [LifeLine Autonomous Engine]
         direction LR
@@ -123,46 +123,46 @@ flowchart TB
     class Users,API primary
     class Pipeline secondary
     class DB db
-```�──────────────┬───────────────────────────────────────┘
-                                  │
-          ┌───────────────────────┴───────────────────────┐
-          ▼                                               ▼
-┌──────────────────────────────────┐    ┌─────────────────────────────────┐
-│  CORE MULTI-AGENT PIPELINE       │    │  GOOGLE CLOUD FIRESTORE         │
-│  1. Deterministic NEWS2 Engine   │    │  • dispatch_cases (Audit Log) │
-│  2. Triage (gemini-3.1-pro)    │    │  • donors, 
-equests         │
-│  3. Bed-Match (gemini-3.5-flash)    │  • patients, issues         │
-│  4. Routing & SBAR Briefing      │    │  • inventory, 
-eports       │
-└──────────────────────────────────┘    └─────────────────────────────────┘
+```€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                                  â”‚
+          â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+          â–¼                                               â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  CORE MULTI-AGENT PIPELINE       â”‚    â”‚  GOOGLE CLOUD FIRESTORE         â”‚
+â”‚  1. Deterministic NEWS2 Engine   â”‚    â”‚  â€¢ dispatch_cases (Audit Log) â”‚
+â”‚  2. Triage (gemini-3.1-pro)    â”‚    â”‚  â€¢ donors, 
+equests         â”‚
+â”‚  3. Bed-Match (gemini-3.5-flash)    â”‚  â€¢ patients, issues         â”‚
+â”‚  4. Routing & SBAR Briefing      â”‚    â”‚  â€¢ inventory, 
+eports       â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 `
 
 ---
 
-## 👥 Multi-Role Portal Walkthroughs
+## ðŸ‘¥ Multi-Role Portal Walkthroughs
 
 The Next.js unified portal provides three dedicated role personas accessible via instant demo authentication.
 
-### 1. 🩸 Blood & Organ Donor (lood_donor)
+### 1. ðŸ©¸ Blood & Organ Donor (lood_donor)
 - **Donor Profile & Pledge**: Manage contact info, blood type (e.g., O-, AB+), and organ donor pledge.
 - **STAT Emergency Callouts**: Real-time feed of urgent blood/organ requests raised by regional hospitals.
 - **One-Tap Transit Response**: Accept requests with estimated transit ETAs, receiving instant hospital routing.
 
-### 2. 🏥 Hospital ER Operations Console (hospital_staff)
+### 2. ðŸ¥ Hospital ER Operations Console (hospital_staff)
 - **Real-Time Intake Inbox**: Track inbound ambulance cases, vital telemetry, and live countdown ETAs.
 - **Clinical Admission Dossiers**: Review full patient summaries featuring computed NEWS2 risk scores and SBAR briefs.
 - **Advance Bay Reservation**: Reserve Cardiac ICU, Trauma, or General bays before patient arrival.
 - **Resource Requests**: Raise STAT blood requests and monitor blood bank / medication stock thresholds.
 
-### 3. 🏛️ Regional Health Authority (government_authority)
-- **District Telemetry Overview**: Real-time metrics across all regional hospitals—active critical alerts, mean response times, and SLAs.
+### 3. ðŸ›ï¸ Regional Health Authority (government_authority)
+- **District Telemetry Overview**: Real-time metrics across all regional hospitalsâ€”active critical alerts, mean response times, and SLAs.
 - **Hospital Strain Monitoring**: Live occupancy heatmaps identifying facilities nearing critical capacity.
 - **AI Executive Briefing**: Daily plain-language regional intelligence reports automatically generated by **Gemini 3.5 Flash**.
 
 ---
 
-## ☁️ Google Cloud Run Deployment
+## â˜ï¸ Google Cloud Run Deployment
 
 LifeLine Agent is packaged with a multi-stage Dockerfile and deployment manifests ready for production on Google Cloud Run.
 
@@ -182,18 +182,18 @@ gcloud run deploy lifeline-agent \
 
 ---
 
-## 📊 Data Sources & Grounding
+## ðŸ“Š Data Sources & Grounding
 
 | Component | Source | Verification |
 |---|---|---|
-| **Hospital Names & GPS** | OpenStreetMap (Overpass API) | ✅ **Real** |
-| **Clinical Triage Formula** | Royal College of Physicians NEWS2 Standard | ✅ **Real** |
-| **Driving ETAs & Routes** | OSRM Road Network Demo Server | ✅ **Real** |
-| **Agent Reasoning** | Gemini 3.1 Pro (Triage) & Gemini 3.5 Flash (Operations) | ✅ **Real** |
-| **Bed Counts & Specialties** | Algorithmic Simulation via lifeline seed | ⚠️ **Simulated** |
+| **Hospital Names & GPS** | OpenStreetMap (Overpass API) | âœ… **Real** |
+| **Clinical Triage Formula** | Royal College of Physicians NEWS2 Standard | âœ… **Real** |
+| **Driving ETAs & Routes** | OSRM Road Network Demo Server | âœ… **Real** |
+| **Agent Reasoning** | Gemini 3.1 Pro (Triage) & Gemini 3.5 Flash (Operations) | âœ… **Real** |
+| **Bed Counts & Specialties** | Algorithmic Simulation via lifeline seed | âš ï¸ **Simulated** |
 
 ---
 
-## 📄 License
+## ðŸ“„ License
 
-Apache 2.0 — see [LICENSE](LICENSE)
+Apache 2.0 â€” see [LICENSE](LICENSE)
