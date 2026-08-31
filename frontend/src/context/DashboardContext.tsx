@@ -197,6 +197,9 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [issues, setIssues] = useState<HospitalIssue[]>(INITIAL_HOSPITAL_ISSUES);
   const [inventory, setInventory] = useState<InventoryItem[]>(INITIAL_INVENTORY);
 
+  
+
+
 
 
   
@@ -206,7 +209,8 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        try {
+        setIsAuthLoading(true);
+          try {
           const token = await user.getIdToken();
           setAuthToken(token);
           
@@ -214,6 +218,7 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
           if (db) {
             try {
               const getDocPromise = getDoc(doc(db, "users", user.uid));
+              getDocPromise.catch(() => {});
                 let timeoutHandle: any;
                 const timeoutPromise = new Promise((_, reject) => {
                   timeoutHandle = setTimeout(() => reject(new Error("Firestore timeout")), 2000);
@@ -358,11 +363,56 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
   // ── REACTIVE 3-STAGE MULTI-AGENT DISPATCH STATE ───────────────────────────
   const [isDispatching, setIsDispatching] = useState<boolean>(false);
   const [dispatchStages, setDispatchStages] = useState<DispatchProgressionStage[]>([]);
+
+
   const [activeDispatchExecution, setActiveDispatchExecution] = useState<MultiAgentDispatchExecution | null>(null);
 
   // Donor state
   const [donors, setDonors] = useState<DonorProfile[]>(INITIAL_REGISTERED_DONORS);
   const [donorRequests, setDonorRequests] = useState<DonorRequest[]>(INITIAL_DONOR_REQUESTS);
+
+// ===================== CROSS-TAB SYNC (Hackathon Magic) =====================
+  const syncChannel = useRef<any>(null);
+  const isIncomingSync = useRef<boolean>(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      syncChannel.current = new BroadcastChannel('lifeline_demo_sync');
+      syncChannel.current.onmessage = (e) => {
+        if (e.data && e.data.type === 'SYNC_STATE') {
+          isIncomingSync.current = true;
+          if (e.data.alerts) setAlerts(e.data.alerts);
+          if (e.data.auditLogs) setAuditLogs(e.data.auditLogs);
+          if (e.data.issues) setIssues(e.data.issues);
+          if (e.data.donorRequests) setDonorRequests(e.data.donorRequests);
+          if (e.data.activeDispatchExecution !== undefined) setActiveDispatchExecution(e.data.activeDispatchExecution);
+          if (e.data.dispatchStages) setDispatchStages(e.data.dispatchStages);
+        }
+      };
+    }
+    return () => {
+      if (syncChannel.current) syncChannel.current.close();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (syncChannel.current) {
+      if (!isIncomingSync.current) {
+        syncChannel.current.postMessage({
+          type: 'SYNC_STATE',
+          alerts,
+          auditLogs,
+          issues,
+          donorRequests,
+          activeDispatchExecution,
+          dispatchStages
+        });
+      } else {
+        isIncomingSync.current = false;
+      }
+    }
+  }, [alerts, auditLogs, issues, donorRequests, activeDispatchExecution, dispatchStages]);
+  // ==============================================================================
 
   const currentHospital = hospitals.find((h) => h.id === activeHospitalId) || hospitals[0];
   const currentDonor = donors.find((d) => d.id === activeDonorId) || donors[0];
@@ -1854,3 +1904,7 @@ export const useDashboard = () => {
 };
 
 
+
+
+
+  
