@@ -127,8 +127,8 @@ export default function OgAdminPage() {
     triggerMultiAgentDispatch,
     triggerSimulatedAlert,
     createDonorRequest,
-    updateHospitalBedCount,
-    updateHospitalBloodBankUnits,
+    updateHospitalCapacity,
+    updateHospitalBloodBank,
     createIssue,
     currentHospital,
   } = useDashboard();
@@ -138,6 +138,21 @@ export default function OgAdminPage() {
   const [usernameInput, setUsernameInput] = useState<string>('');
   const [passwordInput, setPasswordInput] = useState<string>('');
   const [authError, setAuthError] = useState<string>('');
+
+  const updateHospitalBedCount = (hospitalId: string, bedType: string, count: number) => {
+    const hosp = hospitals.find(h => h.id === hospitalId);
+    if (!hosp) return;
+    if (bedType === 'icu') updateHospitalCapacity(hospitalId, count, hosp.availableTraumaBays);
+    if (bedType === 'general') updateHospitalCapacity(hospitalId, hosp.availableIcuBeds, hosp.availableTraumaBays);
+  };
+
+  const updateHospitalBloodBankUnits = (hospitalId: string, bloodType: string, absoluteUnits: number) => {
+    const hosp = hospitals.find(h => h.id === hospitalId);
+    if (!hosp) return;
+    const current = (hosp.bloodBankInventory as any)[bloodType] || 0;
+    updateHospitalBloodBank(hospitalId, bloodType as any, absoluteUnits - current);
+  };
+
 
   // Simulation Engine State
   const [isSimRunning, setIsSimRunning] = useState<boolean>(false);
@@ -384,11 +399,13 @@ export default function OgAdminPage() {
     const hosp = hospitals[Math.floor(Math.random() * hospitals.length)] || currentHospital;
     createIssue({
       hospital_id: hosp.id,
-      category: 'medical_equipment',
+      hospital_name: hosp.name,
+      category: 'equipment',
       title: 'CT Scanner Calibration In Progress',
       description: 'Emergency radiology performing rapid diagnostic recalibration. Diverting neuro imaging 15 mins.',
-      severity: 'medium',
-      logged_by: 'BioMed Operations',
+      severity: 'moderate',
+      status: 'investigating',
+      reported_by: 'BioMed Operations',
     });
 
     logSimEvent({
@@ -779,7 +796,7 @@ export default function OgAdminPage() {
               {liveEvents.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-slate-500 font-mono text-center p-6 space-y-2">
                   <Clock className="w-8 h-8 opacity-40 animate-spin" />
-                  <p>Simulation idle. Click "Start Continuous Demo" or "Trigger 1x Instant SOS" to stream live events.</p>
+                  <p>Simulation idle. Click &quot;Start Continuous Demo&quot; or &quot;Trigger 1x Instant SOS&quot; to stream live events.</p>
                 </div>
               ) : (
                 liveEvents.map((ev) => (

@@ -67,3 +67,8 @@ Thumbs.db
 # ─── ADK Session Storage ───────────────────────────────────────────────────────
 .adk/
 lifeline_adk/.adk/
+
+# ─── Local Runner Scripts ─────────────────────────────────────────────────────
+*.bat
+*.cmd
+*.ps1
