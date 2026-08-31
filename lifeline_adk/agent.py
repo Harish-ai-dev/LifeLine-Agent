@@ -336,55 +336,86 @@ def dispatch_emergency_case(
     return run_dispatch(case, loc)
 
 
+def check_hospital_capacity(facility_name: str = "") -> dict:
+    """
+    Check real-time hospital bed capacity and ICU availability across the regional network.
+
+    Args:
+        facility_name: Optional hospital name filter.
+
+    Returns:
+        dict with available hospitals, total/available ICU beds, and specialized departments.
+    """
+    from lifeline.tools.data_store import get_data_store
+    store = get_data_store()
+    hospitals = store.list_all("hospitals")
+    if facility_name:
+        hospitals = [h for h in hospitals if facility_name.lower() in h.get("name", "").lower()]
+    return {
+        "hospitals": [
+            {
+                "name": h.get("name"),
+                "icu_beds_available": h.get("icu_beds", 0),
+                "total_icu_beds": h.get("total_icu_beds", 10),
+                "specialties": h.get("specialties", []),
+            }
+            for h in hospitals[:8]
+        ]
+    }
+
+
+def check_open_blood_requests() -> dict:
+    """
+    Check active STAT blood donation requests and urgent regional requirements.
+
+    Returns:
+        dict with list of open blood donor requests.
+    """
+    from lifeline.tools.data_store import get_data_store
+    store = get_data_store()
+    requests = store.list_all("requests")
+    open_reqs = [r for r in requests if r.get("status") == "open"]
+    return {"open_requests": open_reqs[:10]}
+
+
 # =============================================================================
 # LEVEL 1 — Orchestrator root_agent (what `adk web` discovers)
 # =============================================================================
 
-root_agent = LlmAgent(
+orchestrator_agent = LlmAgent(
     name="Orchestrator",
-    model=DEFAULT_MODEL,  # gemini-3.7-flash (coordinator, not clinical)
+    model=DEFAULT_MODEL,
     description=(
-        "LifeLine Emergency Dispatch Orchestrator — autonomously coordinates the full "
-        "5-stage pipeline: NEWS2 → Triage → Bed-Matching → Routing → SBAR Briefing. "
-        "Entry points POST /dispatch and POST /sos both route into this orchestrator."
+        "LifeLine Emergency Dispatch Orchestrator — autonomously coordinates the 5-stage "
+        "emergency dispatch pipeline (NEWS2 → Triage → Bed-Matching → Routing → SBAR Briefing) "
+        "and assists with regional hospital capacity and operational intelligence."
     ),
     instruction="""\
 You are the LifeLine Emergency Dispatch Orchestrator.
 
-When you receive an emergency case, execute the full pipeline in order:
+For a casual greeting or open-ended question ("hi", "hello", "what can you do", "hey"):
+Respond briefly, warmly, and naturally in 1-2 sentences introducing yourself as the LifeLine Orchestrator and what you can assist with (running autonomous emergency dispatches, checking real-time hospital bed capacity, blood donor requests, or clinical triage). Do NOT output a formal numbered list or dump the full pipeline stages on a simple greeting.
 
-STAGE 1 — TRIAGE
-  Delegate to TriageAgent. It computes NEWS2 and classifies severity + specialty.
+Only go into detail about the underlying 5-stage dispatch pipeline (NEWS2 scoring, bed-matching, OSRM routing, SBAR pre-arrival briefing) if the user specifically asks how the system works or how emergency dispatch operates.
 
-STAGE 2 — BED MATCHING
-  Delegate to BedMatchingAgent with the triage output and patient location.
+When an emergency case is reported or patient vitals are provided:
+Execute the full emergency dispatch pipeline:
+1. TriageAgent: Compute NEWS2 score and classify clinical severity and specialty.
+2. BedMatchingAgent: Select the optimal hospital with confirmed bed availability.
+3. RoutingAgent: Calculate real-time driving route and ETA.
+4. BriefingAgent: Generate structured SBAR pre-arrival clinical handoff note.
+5. Present the final structured dispatch record.
 
-STAGE 3 — ROUTING
-  Delegate to RoutingAgent with patient location and hospital coordinates.
+Alternatively, call dispatch_emergency_case directly with patient vitals to run the entire pipeline in a single step.
 
-STAGE 4 — BRIEFING
-  Delegate to BriefingAgent with the complete case context.
-
-STAGE 5 — DISPATCH SUMMARY
-  Present the structured dispatch record:
-
-  LIFELINE DISPATCH RECORD
-  ─────────────────────────
-  Patient:   [age]yo — [complaint]
-  NEWS2:     [score]/20 ([risk band])
-  Severity:  [label]
-  Specialty: [required]
-  Hospital:  [name]
-  ETA:       [minutes] min
-  SBAR:      [pre_arrival_brief]
-
-Alternatively, call dispatch_emergency_case directly with the vitals to run the full pipeline in a single step.
-
-Rules:
-- Never skip a stage.
-- Never invent clinical data — use tool outputs only.
-- If any stage fails, report it and activate deterministic fallback.
+For operational queries about hospital capacity, inventory, or active cases:
+Answer grounded strictly in verified system data using your tools (check_hospital_capacity, check_open_blood_requests) — never invent statistics, bed counts, or hospital names.
 """,
-    tools=[dispatch_emergency_case],
+    tools=[dispatch_emergency_case, check_hospital_capacity, check_open_blood_requests],
     sub_agents=[triage_agent, bed_matching_agent, routing_agent, briefing_agent],
 )
+
+# Export root_agent for Google ADK discovery
+root_agent = orchestrator_agent
+
+

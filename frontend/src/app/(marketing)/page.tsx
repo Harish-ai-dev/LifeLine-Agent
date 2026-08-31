@@ -11,7 +11,7 @@ import { OpenSourceSection } from '@/components/marketing/OpenSourceSection';
 import { TeamSection } from '@/components/marketing/TeamSection';
 import { AgentInfo } from '@/data/marketing/agents';
 import { AgentDetailModal } from '@/components/marketing/AgentDetailModal';
-import { useMarketing } from './layout';
+import { useMarketing } from '../../context/MarketingContext';
 
 const HomePage = () => {
   const { openDemo, openWaitlist } = useMarketing();

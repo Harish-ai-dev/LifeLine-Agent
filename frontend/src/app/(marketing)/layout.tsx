@@ -6,19 +6,7 @@ import { Footer } from '@/components/marketing/Footer';
 import { CommandPalette } from '@/components/marketing/CommandPalette';
 import { WaitlistModal } from '@/components/marketing/WaitlistModal';
 
-interface MarketingContextType {
-  openDemo: () => void;
-  openWaitlist: () => void;
-  openSearch: () => void;
-}
-
-export const MarketingContext = createContext<MarketingContextType>({
-  openDemo: () => {},
-  openWaitlist: () => {},
-  openSearch: () => {},
-});
-
-export const useMarketing = () => useContext(MarketingContext);
+import { MarketingContext } from '../../context/MarketingContext';
 
 export default function MarketingLayout({
   children,

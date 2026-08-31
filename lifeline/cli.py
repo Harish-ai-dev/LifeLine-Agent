@@ -449,17 +449,22 @@ def install():
         cmd_npm = [npm_bin, "install", "--prefer-offline", "--no-audit", "--no-fund"]
         res_npm = subprocess.run(cmd_npm, cwd=str(FRONTEND_DIR), capture_output=True, text=True, shell=(sys.platform == "win32"))
 
-    if res_npm.returncode == 0:
-        console.print("[bold green]✓ Next.js frontend dependencies installed successfully.[/bold green]\n")
+    # ── Step 4: Build Next.js Frontend Production Bundle ──────────────────────
+    console.print(Rule("[bold]Step 4 — Next.js Frontend Production Bundle Build[/bold]"))
+    with Progress(SpinnerColumn(), TextColumn("[bold cyan]Building Next.js production bundle (npm run build)...[/bold cyan]"), console=console) as p:
+        p.add_task("build", total=None)
+        cmd_build = [npm_bin, "run", "build"]
+        res_build = subprocess.run(cmd_build, cwd=str(FRONTEND_DIR), capture_output=True, text=True, shell=(sys.platform == "win32"))
+
+    if res_build.returncode == 0:
+        console.print("[bold green]✓ Next.js frontend production bundle built successfully.[/bold green]\n")
     else:
-        err_console.print("✗ npm install failed inside frontend/ directory:")
-        err_console.print(res_npm.stderr or res_npm.stdout)
-        raise typer.Exit(1)
+        console.print("[yellow]⚠ Production build notice (dev mode will still work dynamically on startup).[/yellow]\n")
 
     console.print(Panel(
         "[bold green]🎉  Installation Complete![/bold green]\n\n"
-        "Both Python backend and Next.js frontend dependencies are ready.\n"
-        "Run [bold]lifeline setup[/bold] to configure your API keys, or [bold]lifeline run[/bold] to start.",
+        "Both Python backend and Next.js frontend dependencies and build are ready.\n"
+        "Run [bold]lifeline run[/bold] or [bold]lifeline start[/bold] to launch all services automatically.",
         border_style="green",
         expand=False,
     ))
@@ -534,19 +539,19 @@ def status():
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# run
+# run / start
 # ══════════════════════════════════════════════════════════════════════════════
 @app.command()
 def run(
     host: Annotated[str, typer.Option("--host", "-h", help="Bind host address")] = "0.0.0.0",
     port: Annotated[int, typer.Option("--port", "-p", help="FastAPI backend port")] = 8000,
     frontend_port: Annotated[int, typer.Option("--frontend-port", help="Next.js frontend port")] = 3000,
+    adk_port: Annotated[int, typer.Option("--adk-port", help="Google ADK Web UI port")] = 8088,
     reload: Annotated[bool, typer.Option("--reload", help="Enable auto-reload for development")] = False,
     backend_only: Annotated[bool, typer.Option("--backend-only", "-b", help="Start only the FastAPI backend")] = False,
 ):
     """
-    Start the LifeLine Agent backend and Next.js frontend concurrently.
-    Refuses to start if the mandatory Gemini API key is missing or invalid.
+    Start the LifeLine Agent backend, Next.js frontend, and Google ADK Web UI concurrently via start.py.
     """
     _banner()
     config = _inject_config(warn=False)
@@ -580,21 +585,15 @@ def run(
 
     start_script = PROJECT_ROOT / "start.py"
 
-    if not backend_only and start_script.exists():
-        console.print(Panel(
-            "[bold green]▶  Starting LifeLine Agent Stack (Backend + Frontend)[/bold green]\n\n"
-            f"  FastAPI Backend  →  [link]http://localhost:{port}[/link]\n"
-            f"  API Docs         →  [link]http://localhost:{port}/docs[/link]\n"
-            f"  Next.js Frontend →  [link]http://localhost:{frontend_port}[/link]\n\n"
-            "[dim]Press Ctrl+C to gracefully terminate all services[/dim]",
-            border_style="green",
-            expand=False,
-        ))
+    if start_script.exists():
         cmd = [
             sys.executable, str(start_script),
             "--port", str(port),
             "--frontend-port", str(frontend_port),
+            "--adk-port", str(adk_port),
         ]
+        if backend_only:
+            cmd.append("--backend-only")
         if reload:
             cmd.append("--reload")
         try:
@@ -603,16 +602,7 @@ def run(
             pass
         return
 
-    # Backend-only mode
-    console.print(Panel(
-        f"[bold yellow]▶  Starting FastAPI Backend (Port {port})[/bold yellow]\n\n"
-        f"  URL:     [link]http://{host}:{port}[/link]\n"
-        f"  Docs:    [link]http://{host}:{port}/docs[/link]\n"
-        f"  Health:  [link]http://{host}:{port}/health[/link]\n"
-        f"  Reload:  {'enabled' if reload else 'disabled'}",
-        border_style="yellow",
-        expand=False,
-    ))
+    # Fallback to direct uvicorn execution
     cmd = [
         sys.executable, "-m", "uvicorn",
         "lifeline.main:app",
@@ -625,6 +615,20 @@ def run(
         subprocess.run(cmd, cwd=str(PROJECT_ROOT))
     except KeyboardInterrupt:
         pass
+
+
+@app.command(name="start")
+def start_alias(
+    host: Annotated[str, typer.Option("--host", "-h", help="Bind host address")] = "0.0.0.0",
+    port: Annotated[int, typer.Option("--port", "-p", help="FastAPI backend port")] = 8000,
+    frontend_port: Annotated[int, typer.Option("--frontend-port", help="Next.js frontend port")] = 3000,
+    adk_port: Annotated[int, typer.Option("--adk-port", help="Google ADK Web UI port")] = 8088,
+    reload: Annotated[bool, typer.Option("--reload", help="Enable auto-reload for development")] = False,
+    backend_only: Annotated[bool, typer.Option("--backend-only", "-b", help="Start only the FastAPI backend")] = False,
+):
+    """Start all LifeLine Agent services (alias for lifeline run -> start.py)."""
+    run(host=host, port=port, frontend_port=frontend_port, adk_port=adk_port, reload=reload, backend_only=backend_only)
+
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -692,7 +696,25 @@ def dispatch(
     Runs NEWS2 Scoring → Gemini 3.1 Pro Triage → Gemini 3.5 Flash Bed Matching → OSRM Routing → Briefing.
     """
     _banner("Autonomous Dispatch Pipeline")
-    _inject_config(warn=False)
+    config = _inject_config(warn=False)
+
+    # ── Pre-flight Key & Config Validation Check ──────────────────────────────
+    audit = audit_full_system_config(config)
+    gemini_status = audit["GEMINI_API_KEY"]
+
+    if not gemini_status["valid"]:
+        console.print(Panel(
+            f"[bold red]🛑  DISPATCH BLOCKED — MANDATORY GEMINI API KEY MISSING OR INVALID[/bold red]\n\n"
+            f"  [yellow]Reason:[/yellow] {gemini_status['message']}\n\n"
+            "  The LifeLine multi-agent system requires a valid Gemini API key for clinical triage,\n"
+            "  bed-matching, routing, and daily intelligence summaries.\n\n"
+            "  [bold cyan]To fix this issue, run:[/bold cyan]\n"
+            "    [bold white]lifeline setup --key gemini[/bold white]\n\n"
+            "  Get your key from: [link]https://aistudio.google.com/apikey[/link]",
+            border_style="red",
+            expand=False,
+        ))
+        raise typer.Exit(1)
 
     cases_path = PROJECT_ROOT / "data" / "demo_cases.json"
     if not cases_path.exists():

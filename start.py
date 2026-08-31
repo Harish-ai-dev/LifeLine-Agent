@@ -60,6 +60,22 @@ def wait_for_port(port: int, host: str = "127.0.0.1", timeout: float = 10.0) -> 
     return False
 
 
+def ensure_frontend_built():
+    """Ensure frontend dependencies and production build are present."""
+    if not (FRONTEND_DIR / "package.json").exists():
+        return
+
+    npm = shutil.which("npm.cmd" if sys.platform == "win32" else "npm") or "npm"
+
+    if not (FRONTEND_DIR / "node_modules").exists():
+        print("📦 [INFO] Installing frontend dependencies (node_modules)...")
+        subprocess.run([npm, "install"], cwd=str(FRONTEND_DIR), check=True)
+
+    if not (FRONTEND_DIR / ".next" / "BUILD_ID").exists():
+        print("🔨 [INFO] Building frontend production bundle...")
+        subprocess.run([npm, "run", "build"], cwd=str(FRONTEND_DIR), check=True)
+
+
 def run_backend(port: int = 8000, reload: bool = False) -> subprocess.Popen:
     """Start the FastAPI backend server."""
     python = find_python()
@@ -71,11 +87,17 @@ def run_backend(port: int = 8000, reload: bool = False) -> subprocess.Popen:
     if reload:
         cmd.append("--reload")
 
+    env = {
+        **os.environ,
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONPATH": f"{PROJECT_ROOT}{os.pathsep}{os.environ.get('PYTHONPATH', '')}",
+    }
+
     print(f"🚀 [1/3] Starting FastAPI Backend on http://localhost:{port}...")
     proc = subprocess.Popen(
         cmd,
         cwd=str(PROJECT_ROOT),
-        env={**os.environ, "PYTHONUNBUFFERED": "1"},
+        env=env,
     )
     return proc
 
@@ -99,14 +121,22 @@ def run_frontend(port: int = 3000) -> subprocess.Popen:
 def run_adk_web(port: int = 8088) -> subprocess.Popen:
     """Start Google ADK Web UI server."""
     python = find_python()
+    # We no longer delete the session_db here so old ADK sessions are preserved.
+    
     adk_script = f"import sys; from google.adk.cli import main; sys.argv=['adk', 'web', '--port', '{port}', 'lifeline_adk']; main()"
     cmd = [python, "-c", adk_script]
+
+    env = {
+        **os.environ,
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONPATH": f"{PROJECT_ROOT}{os.pathsep}{os.environ.get('PYTHONPATH', '')}",
+    }
 
     print(f"🤖 [3/3] Starting Google ADK Visual Web UI on http://localhost:{port}...")
     proc = subprocess.Popen(
         cmd,
         cwd=str(PROJECT_ROOT),
-        env={**os.environ, "PYTHONUNBUFFERED": "1"},
+        env=env,
     )
     return proc
 
@@ -130,6 +160,25 @@ def main():
     print("🚑 LifeLine Agent — Autonomous Emergency Dispatch & ADK Swarm")
     print("   Next.js (3000) + FastAPI (8000) + Google ADK Web (8088)")
     print("=" * 70)
+
+    # Preflight Check for API Key
+    from dotenv import load_dotenv
+    load_dotenv()
+    gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+    if not gemini_key or gemini_key.strip() == "" or gemini_key.strip() == "your_gemini_api_key_here":
+        print("\n🛑 STARTUP BLOCKED: MANDATORY GEMINI API KEY IS MISSING OR INVALID!")
+        print("The LifeLine multi-agent system requires a valid Gemini API key for clinical triage, bed-matching, routing, etc.")
+        print("\nTo fix this issue, run the interactive setup wizard:")
+        print("  lifeline setup --key gemini")
+        print("\nor set GEMINI_API_KEY in your .env file.\n")
+        sys.exit(1)
+
+    # Ensure frontend build
+    if not args.backend_only:
+        try:
+            ensure_frontend_built()
+        except Exception as e:
+            print(f"⚠️ Warning during frontend setup: {e}")
 
     procs: list[subprocess.Popen] = []
 

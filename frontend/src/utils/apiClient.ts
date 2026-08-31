@@ -1,6 +1,16 @@
 import { AuthUser, HospitalIssue, InventoryItem, DailyIntelligenceReport, NaturalLanguageQueryResponse } from '../types/dashboard';
 
-const API_BASE_URL = 'http://localhost:8000';
+export const getApiUrl = (endpoint: string): string => {
+  const base = process.env.NEXT_PUBLIC_API_BASE_URL
+    ? process.env.NEXT_PUBLIC_API_BASE_URL.replace(/\/$/, '')
+    : (typeof window !== 'undefined' ? '/api' : 'http://localhost:8000');
+
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  if (base.endsWith('/api') && cleanEndpoint.startsWith('/api')) {
+    return `${base}${cleanEndpoint.slice(4)}`;
+  }
+  return `${base}${cleanEndpoint}`;
+};
 
 class ApiClient {
   private token: string | null = null;
@@ -20,7 +30,8 @@ class ApiClient {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const targetUrl = getApiUrl(endpoint);
+      const response = await fetch(targetUrl, {
         ...options,
         headers,
       });
@@ -119,7 +130,8 @@ class ApiClient {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
 
-    const response = await fetch(`${API_BASE_URL}/chat`, {
+    const targetUrl = getApiUrl('/chat');
+    const response = await fetch(targetUrl, {
       method: 'POST',
       headers,
       body: JSON.stringify({ messages, context }),
