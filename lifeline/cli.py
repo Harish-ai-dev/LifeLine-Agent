@@ -549,6 +549,9 @@ def run(
     adk_port: Annotated[int, typer.Option("--adk-port", help="Google ADK Web UI port")] = 8088,
     reload: Annotated[bool, typer.Option("--reload", help="Enable auto-reload for development")] = False,
     backend_only: Annotated[bool, typer.Option("--backend-only", "-b", help="Start only the FastAPI backend")] = False,
+    frontend_only: Annotated[bool, typer.Option("--frontend-only", help="Start only the Next.js frontend")] = False,
+    no_browser: Annotated[bool, typer.Option("--no-browser", help="Do not automatically open the browser")] = False,
+    no_adk: Annotated[bool, typer.Option("--no-adk", help="Do not start the ADK Web server")] = False,
 ):
     """
     Start the LifeLine Agent backend, Next.js frontend, and Google ADK Web UI concurrently via start.py.
@@ -594,8 +597,14 @@ def run(
         ]
         if backend_only:
             cmd.append("--backend-only")
+        if frontend_only:
+            cmd.append("--frontend-only")
         if reload:
             cmd.append("--reload")
+        if no_browser:
+            cmd.append("--no-browser")
+        if no_adk:
+            cmd.append("--no-adk")
         try:
             subprocess.run(cmd, cwd=str(PROJECT_ROOT))
         except KeyboardInterrupt:
@@ -625,9 +634,22 @@ def start_alias(
     adk_port: Annotated[int, typer.Option("--adk-port", help="Google ADK Web UI port")] = 8088,
     reload: Annotated[bool, typer.Option("--reload", help="Enable auto-reload for development")] = False,
     backend_only: Annotated[bool, typer.Option("--backend-only", "-b", help="Start only the FastAPI backend")] = False,
+    frontend_only: Annotated[bool, typer.Option("--frontend-only", help="Start only the Next.js frontend")] = False,
+    no_browser: Annotated[bool, typer.Option("--no-browser", help="Do not automatically open the browser")] = False,
+    no_adk: Annotated[bool, typer.Option("--no-adk", help="Do not start the ADK Web server")] = False,
 ):
     """Start all LifeLine Agent services (alias for lifeline run -> start.py)."""
-    run(host=host, port=port, frontend_port=frontend_port, adk_port=adk_port, reload=reload, backend_only=backend_only)
+    run(
+        host=host,
+        port=port,
+        frontend_port=frontend_port,
+        adk_port=adk_port,
+        reload=reload,
+        backend_only=backend_only,
+        frontend_only=frontend_only,
+        no_browser=no_browser,
+        no_adk=no_adk,
+    )
 
 
 
