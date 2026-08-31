@@ -12,7 +12,7 @@
 
 ---
 
-## ðŸŽ¯ Executive Summary & Value Proposition
+## Executive Summary & Value Proposition
 
 In acute medical crisesâ€”such as cardiac arrest, severe trauma, or hemorrhagic shockâ€”**seconds save lives**. However, traditional emergency dispatch systems remain heavily fragmented and reliant on manual coordination. Paramedics wait on hold to secure open ICU beds; emergency room teams receive minimal advance clinical briefings; and blood bank shortages trigger frantic, time-consuming searches.
 
@@ -27,7 +27,7 @@ In acute medical crisesâ€”such as cardiac arrest, severe trauma, or hemorrh
 
 ---
 
-## ðŸ› ï¸ The Unified lifeline CLI Toolkit
+## ï¸ The Unified lifeline CLI Toolkit
 
 LifeLine Agent is entirely driven by its robust, unified command-line interface. Whether you are running locally in VS Code or deploying to production, **you never need to manually run 
 pm install or pip**. The lifeline CLI handles everything.
@@ -77,7 +77,7 @@ lifeline run
 
 ---
 
-## ðŸ—ï¸ System ```mermaid
+## —ï¸ System ```mermaid
 flowchart TB
     subgraph Users [LifeLine Agent Ecosystem]
         direction LR
