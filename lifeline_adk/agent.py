@@ -72,21 +72,26 @@ try:
                                     yield chunk
                                 return
                             except Exception as fallback_err:
-                                from google.genai.types import GenerateContentResponse, Candidate, Content, Part
-                                logging.error(f"[Gemini Retry] Fallback model also failed! Yielding mock fallback to prevent crash.")
-                                mock_text = "?? **System Fallback Active:** The Gemini API is currently unavailable due to strict rate limits (Quota Exceeded). Please wait a few moments before sending another request, or upgrade your API tier."
-                                mock_resp = GenerateContentResponse(
-                                    candidates=[Candidate(content=Content(parts=[Part.from_text(text=mock_text)]))]
-                                )
-                                yield mock_resp
-                                return
+                                from google.adk.models.llm_response import LlmResponse
+                            from google.genai.types import Content, Part
+                            import logging
+                            logging.error("[Gemini Retry] Rate limited! Yielding mock fallback to prevent crash.")
+                            mock_text = "⚠️ **System Fallback Active:** The Gemini API is currently unavailable due to strict rate limits (Quota Exceeded). Please wait a few moments before sending another request, or upgrade your API tier."
+                            mock_resp = LlmResponse(
+                                content=Content(parts=[Part.from_text(text=mock_text)]),
+                                partial=False
+                            )
+                            yield mock_resp
+                            return
                         else:
-                            from google.genai.types import GenerateContentResponse, Candidate, Content, Part
-                            import json
-                            logging.error(f"[Gemini Retry] Exhausted retries! Yielding mock fallback to prevent crash.")
-                            mock_text = "?? **System Fallback Active:** The Gemini API is currently unavailable due to strict rate limits (Quota Exceeded). Please wait a few moments before sending another request, or upgrade your API tier."
-                            mock_resp = GenerateContentResponse(
-                                candidates=[Candidate(content=Content(parts=[Part.from_text(text=mock_text)]))]
+                            from google.adk.models.llm_response import LlmResponse
+                            from google.genai.types import Content, Part
+                            import logging
+                            logging.error("[Gemini Retry] Rate limited! Yielding mock fallback to prevent crash.")
+                            mock_text = "⚠️ **System Fallback Active:** The Gemini API is currently unavailable due to strict rate limits (Quota Exceeded). Please wait a few moments before sending another request, or upgrade your API tier."
+                            mock_resp = LlmResponse(
+                                content=Content(parts=[Part.from_text(text=mock_text)]),
+                                partial=False
                             )
                             yield mock_resp
                             return

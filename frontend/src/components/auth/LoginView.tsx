@@ -50,7 +50,7 @@ const PORTALS = [
     hintColor: 'text-sky-700 dark:text-sky-300',
     hintBg: 'bg-sky-50 dark:bg-sky-500/10 border-sky-100 dark:border-sky-500/20',
     activeBorder: 'border-sky-500 dark:border-sky-400',
-    hint: 'dr.mehta@lilavati.com',
+    hint: 'director.lilavati@lifelinedemo.app',
     placeholder: 'e.g. dr.mehta@lilavati.com',
     stats: [
       { icon: Activity, text: 'ER Bays Active' },
@@ -75,7 +75,7 @@ const PORTALS = [
     hintColor: 'text-teal-700 dark:text-teal-300',
     hintBg: 'bg-teal-50 dark:bg-teal-500/10 border-teal-100 dark:border-teal-500/20',
     activeBorder: 'border-teal-500 dark:border-teal-400',
-    hint: 'nurse.rao@lilavati.com',
+    hint: 'nurse.rao@lifelinedemo.app',
     placeholder: 'e.g. nurse.rao@lilavati.com',
     stats: [
       { icon: Heart, text: 'Vitals Monitoring Live' },
@@ -99,7 +99,7 @@ const PORTALS = [
     hintColor: 'text-rose-700 dark:text-rose-300',
     hintBg: 'bg-rose-50 dark:bg-rose-500/10 border-rose-100 dark:border-rose-500/20',
     activeBorder: 'border-rose-500 dark:border-rose-400',
-    hint: 'rahul.sharma@example.com',
+    hint: 'rahul_sharma@lifelinedemo.app',
     placeholder: 'e.g. rahul.sharma@example.com',
     stats: [
       { icon: Droplets, text: 'Eligibility Tracker Live' },
@@ -124,7 +124,7 @@ const PORTALS = [
     hintColor: 'text-indigo-700 dark:text-indigo-300',
     hintBg: 'bg-indigo-50 dark:bg-indigo-500/10 border-indigo-100 dark:border-indigo-500/20',
     activeBorder: 'border-indigo-500 dark:border-indigo-400',
-    hint: 'dir.sharma@gov.in',
+    hint: 'dir_sharma@lifelinedemo.app',
     placeholder: 'e.g. dir.sharma@gov.in',
     stats: [
       { icon: ShieldCheck, text: '12 Hospitals Monitored' },
@@ -437,4 +437,5 @@ function LoginForm({ portal }: { portal: PortalDef }) {
     </form>
   );
 }
+
 
