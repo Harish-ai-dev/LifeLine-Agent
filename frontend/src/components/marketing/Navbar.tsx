@@ -168,7 +168,7 @@ export function Navbar({
               <img 
                 src="/logo.png" 
                 alt="LifeLine Agent Logo" 
-                className="w-9 h-9 rounded-[11px] shadow-md group-hover:scale-105 transition-transform duration-300" 
+                className="w-9 h-9  shadow-md group-hover:scale-105 transition-transform duration-300" 
               />
               <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>

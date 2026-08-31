@@ -40,7 +40,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenDemo, onOpenWaitlist }) =>
               <img 
                 src="/logo.png" 
                 alt="LifeLine Agent Logo" 
-                className="w-9 h-9 rounded-[11px] shadow-sm group-hover:scale-105 transition-transform duration-300" 
+                className="w-9 h-9  shadow-sm group-hover:scale-105 transition-transform duration-300" 
               />
               <span className="font-bold text-slate-900 text-base tracking-wider">
                 LIFELINE<span className="text-cyan-500 font-extrabold">AGENT</span>
@@ -54,7 +54,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenDemo, onOpenWaitlist }) =>
             <div className="p-3.5 rounded-xl bg-white border border-slate-200 text-[11px] text-slate-650 max-w-sm space-y-1.5 shadow-sm">
               <div className="text-cyan-600 font-bold flex items-center space-x-1.5">
                 <span className="w-2 h-2 rounded-full bg-cyan-500 animate-ping" />
-                <span>Google Gemini AI Hackathon 2025</span>
+                <span>Google Gemini AI Hackathon 2026</span>
               </div>
               <p className="text-slate-500 text-[10px] leading-relaxed font-sans">
                 Public marketing & architecture documentation portal. Open-source under Apache 2.0 License.

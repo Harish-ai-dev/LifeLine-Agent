@@ -318,13 +318,17 @@ def dispatch_emergency_case(
         Structured dispatch record with triage classification, chosen hospital, OSRM ETA, SBAR brief, and audit trail ID.
     """
     from lifeline.orchestrator import run_dispatch
+    clean_consciousness = consciousness.lower().strip() if isinstance(consciousness, str) else "alert"
+    if clean_consciousness not in ["alert", "confused", "unresponsive"]:
+        clean_consciousness = "alert"
+
     vitals = Vitals(
         heart_rate=heart_rate,
         respiratory_rate=respiratory_rate,
         systolic_bp=systolic_bp,
         spo2=spo2,
         temperature_c=temperature_c,
-        consciousness=consciousness,
+        consciousness=clean_consciousness,
     )
     case = Case(
         patient_age=patient_age,

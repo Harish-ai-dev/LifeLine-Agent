@@ -77,26 +77,53 @@ lifeline run
 
 ---
 
-## 🏗️ System Architecture & Workflow
+## 🏗️ System ```mermaid
+flowchart TB
+    subgraph Users [LifeLine Agent Ecosystem]
+        direction LR
+        D[🩸 Blood Donor<br/><i>Mobile / Portal</i>]
+        H[🏥 Hospital Staff<br/><i>ER Ops Console & Bays</i>]
+        G[🏛️ Gov Authority<br/><i>Regional Exec Brief</i>]
+    end
 
-`	ext
-┌─────────────────────────────────────────────────────────────────────────┐
-│                        LIFELINE AGENT ECOSYSTEM                         │
-├──────────────────┬─────────────────────────────┬────────────────────────┤
-│   BLOOD DONOR    │       HOSPITAL STAFF        │  GOVERNMENT AUTHORITY  │
-│  lood_donor   │      hospital_staff       │ government_authority │
-│ (Mobile/Portal)  │   (ER Ops Console & Bays)   │ (Regional Exec Brief)  │
-└─────────┬────────┴──────────────┬──────────────┴───────────┬────────────┘
-          │                       │                          │
-          ▼                       ▼                          ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                   FASTAPI UNIFIED REST API GATEWAY                      │
-│   • Demo/Mock Auth (POST /auth/login, GET /auth/me)                 │
-│   • Donor Coordination (/donors, /requests, /requests/:id/respond)│
-│   • Hospital ER Operations (/patients, /sos, /beds, /inventory) │
-│   • Regional Intelligence (/network/overview, /reports/daily)       │
-│   • Core Multi-Agent Dispatch (POST /dispatch, GET /health)         │
-└─────────────────────────────────┬───────────────────────────────────────┘
+    API[⚡ FastAPI Unified REST API Gateway<br/><i>Core Router for Auth, Donors, ER, and Intelligence</i>]
+
+    subgraph Core [LifeLine Autonomous Engine]
+        direction LR
+        subgraph Pipeline [Core Multi-Agent Pipeline]
+            direction TB
+            1([1. Deterministic NEWS2 Engine])
+            2([2. Triage<br/><i>gemini-3.1-pro</i>])
+            3([3. Bed-Match<br/><i>gemini-3.5-flash</i>])
+            4([4. Routing & SBAR Briefing])
+            1 --> 2 --> 3 --> 4
+        end
+
+        subgraph DB [Google Cloud Firestore]
+            direction TB
+            F1[(dispatch_cases<br/><i>Audit Log</i>)]
+            F2[(donors, requests)]
+            F3[(patients, issues)]
+            F4[(inventory, reports)]
+        end
+    end
+
+    D -->|/requests/:id/respond| API
+    H -->|/sos, /beds, /inventory| API
+    G -->|/network/overview, /reports| API
+
+    API ===>|POST /dispatch| Pipeline
+    API <.->|CRUD| DB
+    Pipeline ===>|Immutable Audit Logging| DB
+    
+    classDef primary fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#0d47a1
+    classDef secondary fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#4a148c
+    classDef db fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#e65100
+
+    class Users,API primary
+    class Pipeline secondary
+    class DB db
+```�──────────────┬───────────────────────────────────────┘
                                   │
           ┌───────────────────────┴───────────────────────┐
           ▼                                               ▼

@@ -10,7 +10,7 @@ export function Logo({ className = '' }: LogoProps) {
       <img
         src="/logo.png"
         alt="LifeLine Agent Logo"
-        className="w-full h-full object-contain rounded-[11px] shadow-md"
+        className="w-full h-full object-contain  shadow-md"
       />
     </div>
   );

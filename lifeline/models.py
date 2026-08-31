@@ -14,7 +14,7 @@ TRIAGE_MODEL = os.environ.get("TRIAGE_MODEL", "gemini-flash-latest")
 DEFAULT_MODEL = os.environ.get("GEMINI_MODEL", "gemini-flash-latest")
 
 # Fallback if primary unavailable
-FALLBACK_MODEL = os.environ.get("FALLBACK_MODEL", DEFAULT_MODEL)
+FALLBACK_MODEL = os.environ.get("FALLBACK_MODEL", "gemini-3.1-flash-lite")
 
 # ── Per-Agent Assignment ──────────────────────────────────────────────────────
 AGENT_MODELS = {

@@ -1,6 +1,6 @@
 """
-Vercel Serverless Entrypoint for LifeLine Agent API.
-Bridges Vercel's Python runtime to the FastAPI application.
+Standard Serverless Entrypoint for LifeLine Agent API.
+Bridges Standard's Python runtime to the FastAPI application.
 """
 
 import os
@@ -16,8 +16,8 @@ from lifeline.main import app as lifeline_app
 
 # Master app to handle both /api/* and root path requests
 app = FastAPI(
-    title="LifeLine Agent API (Vercel)",
-    description="Vercel Serverless handler for LifeLine Agent emergency dispatch & healthcare coordination",
+    title="LifeLine Agent API (Standard)",
+    description="Standard Serverless handler for LifeLine Agent emergency dispatch & healthcare coordination",
     version="0.1.0",
 )
 

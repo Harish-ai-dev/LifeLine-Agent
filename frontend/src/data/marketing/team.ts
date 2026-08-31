@@ -44,7 +44,7 @@ export const PROJECT_METADATA = {
   shortTitle: 'LifeLine Agent',
   tagline: 'Zero phone calls, zero hold music, seconds not minutes.',
   subtext: 'A multi-agent AI system on Google Gemini that eliminates fatal communication latency between emergency dispatch, EMS ambulances, receiving hospitals, and public health authorities.',
-  hackathonBadge: 'Google Gemini AI Hackathon 2025 Submission',
+  hackathonBadge: 'Google Gemini AI Hackathon 2026 Submission',
   license: 'Apache 2.0 Open Source License',
   repoUrl: 'https://github.com/Harish-ai-dev/LifeLine-Agent',
   demoVideoDuration: '4:15',

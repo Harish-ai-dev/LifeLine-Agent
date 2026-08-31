@@ -29,7 +29,7 @@ export const Header: React.FC<HeaderProps> = ({
           <img
             src="/logo.png"
             alt="LifeLine Agent Logo"
-            className="w-10 h-10 rounded-xl shadow-md shadow-sky-600/20 hover:scale-105 transition-transform duration-300"
+            className="w-10 h-10 shadow-md shadow-sky-600/20 hover:scale-105 transition-transform duration-300"
           />
           <div>
             <div className="flex items-center gap-1.5">
