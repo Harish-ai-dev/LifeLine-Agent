@@ -1,5 +1,4 @@
 import { DashboardProvider } from '@/context/DashboardContext';
-import { NextAuthProvider } from '@/components/auth/NextAuthProvider';
 import { AppWrapper } from '@/components/layout/AppWrapper';
 
 export default function AppLayout({
@@ -9,13 +8,11 @@ export default function AppLayout({
 }>) {
   return (
     <div className="h-screen w-full overflow-hidden flex select-none">
-      <NextAuthProvider>
-        <DashboardProvider>
-          <AppWrapper>
-            {children}
-          </AppWrapper>
-        </DashboardProvider>
-      </NextAuthProvider>
+      <DashboardProvider>
+        <AppWrapper>
+          {children}
+        </AppWrapper>
+      </DashboardProvider>
     </div>
   );
 }

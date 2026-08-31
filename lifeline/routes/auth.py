@@ -9,79 +9,27 @@ from lifeline.tools.data_store import get_data_store
 
 router = APIRouter()
 
-VALID_ROLES = {"blood_donor", "hospital_staff", "government_authority"}
+import logging
+from typing import Optional
+from fastapi import APIRouter, Header, HTTPException, status
+from pydantic import BaseModel
+from lifeline.schemas import UserProfile, ErrorResponse
+from lifeline.firebase import get_auth, get_db
 
-FACILITY_NAMES = {
-    "hosp_mumbai_01": "Lilavati Hospital & Research Centre",
-    "hosp_mumbai_02": "P. D. Hinduja National Hospital",
-    "hosp_mumbai_03": "Breach Candy Hospital Trust",
-    "hosp_mumbai_04": "King Edward Memorial (KEM) Hospital",
-    "hosp_mumbai_11": "Lokmanya Tilak Municipal General Hospital (Sion Hospital)",
-    "hosp_mumbai_13": "Fortis Hospital Mulund",
-}
-
-
-@router.post(
-    "/login",
-    response_model=LoginResponse,
-    responses={
-        400: {"model": ErrorResponse, "description": "Invalid role or payload"},
-    },
-)
-async def login(payload: LoginRequest):
-    """
-    Demo/mock login for LifeLine Agent role personas.
-    Accepts blood_donor, hospital_staff, or government_authority.
-    """
-    if payload.role not in VALID_ROLES:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid role '{payload.role}'. Must be one of: {list(VALID_ROLES)}",
-        )
-
-    # Generate user ID and session token
-    clean_username = payload.username.strip().lower().replace(" ", "_")
-    user_id = f"usr_{clean_username[:10]}"
-    token = f"lifeline_mock_{payload.role}_{user_id}"
-
-    facility_id = payload.facility_id
-    facility_name = None
-
-    if payload.role == "hospital_staff":
-        if not facility_id:
-            facility_id = "hosp_mumbai_01"
-        # Look up hospital name in data store or static map
-        store = get_data_store()
-        hosp = store.get("hospitals", facility_id)
-        if hosp and hosp.get("name"):
-            facility_name = hosp["name"]
-        else:
-            facility_name = FACILITY_NAMES.get(facility_id, "Lilavati Hospital & Research Centre")
-
-    user_profile = UserProfile(
-        id=user_id,
-        username=payload.username,
-        role=payload.role,
-        facility_id=facility_id,
-        facility_name=facility_name,
-    )
-
-    return LoginResponse(
-        token=token,
-        user=user_profile,
-    )
-
+logger = logging.getLogger(__name__)
+router = APIRouter()
 
 @router.get(
     "/me",
     response_model=UserProfile,
     responses={
         401: {"model": ErrorResponse, "description": "Missing or invalid token"},
+        403: {"model": ErrorResponse, "description": "No profile found for this account"},
     },
 )
 async def get_current_user(authorization: Optional[str] = Header(None)):
     """
-    Resolve currently authenticated user profile from Authorization Bearer token.
+    Resolve currently authenticated user profile from Firebase Authorization Bearer token.
     """
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(
@@ -89,41 +37,56 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
             detail="Missing or malformed Authorization header. Expected 'Bearer <token>'",
         )
 
-    token = authorization.split("Bearer ", 1)[1].strip()
-    # Format: lifeline_mock_<role>_<uid>
-    parts = token.split("_")
-    if not token.startswith("lifeline_mock_") or len(parts) < 4:
+    id_token = authorization.split("Bearer ", 1)[1].strip()
+    
+    # 1. Verify token with Firebase Auth
+    firebase_auth = get_auth()
+    if not firebase_auth:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Firebase Auth is not initialized on the server.",
+        )
+        
+    try:
+        decoded = firebase_auth.verify_id_token(id_token)
+    except Exception as e:
+        logger.warning(f"Invalid Firebase ID token: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid mock token format. Expected 'lifeline_mock_<role>_<uid>'",
+            detail="Invalid or expired authentication token.",
         )
 
-    # Reconstruct role and uid
-    # e.g. lifeline_mock_hospital_staff_usr_dr_smith
-    # e.g. lifeline_mock_blood_donor_donor_6721
-    token_body = token[len("lifeline_mock_"):]
-    matched_role = None
-    for r in VALID_ROLES:
-        if token_body.startswith(r + "_"):
-            matched_role = r
-            break
-
-    if not matched_role:
+    uid = decoded["uid"]
+    
+    # 2. Look up the role & facility scope in the Firestore `users` collection
+    db = get_db()
+    if not db:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Unknown role in token payload.",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Firestore is not initialized on the server.",
         )
-
-    uid = token_body[len(matched_role) + 1:]
-    username = uid.replace("usr_", "").replace("donor_", "").replace("gov_", "")
-
-    facility_id = "hosp_mumbai_01" if matched_role == "hospital_staff" else None
-    facility_name = "Lilavati Hospital & Research Centre" if matched_role == "hospital_staff" else None
+        
+    user_ref = db.collection("users").document(uid)
+    user_doc = user_ref.get()
+    
+    if not user_doc.exists:
+        logger.warning(f"No user profile found for authenticated UID {uid}")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="No profile found for this account.",
+        )
+        
+    user_data = user_doc.to_dict() or {}
+    role = user_data.get("role")
+    
+    # Optional facility routing if the user is hospital scoped
+    facility_id = user_data.get("hospitalId")
+    facility_name = user_data.get("hospitalName")
 
     return UserProfile(
         id=uid,
-        username=username,
-        role=matched_role,  # type: ignore
+        username=user_data.get("email") or decoded.get("email") or uid,
+        role=role,
         facility_id=facility_id,
         facility_name=facility_name,
     )

@@ -30,7 +30,7 @@ import { DEMO_USERS } from '../../data/mockDashboardData';
 import { soundEffects } from '../../utils/soundEffects';
 import { Suspense } from 'react';
 
-type RoleKey = 'hospital_staff' | 'blood_donor' | 'government_authority';
+type RoleKey = 'hospital_staff' | 'blood_donor' | 'government_authority' | 'hospital_director' | 'admin';
 
 const PORTALS = [
   {
@@ -50,7 +50,7 @@ const PORTALS = [
     hintColor: 'text-sky-700 dark:text-sky-300',
     hintBg: 'bg-sky-50 dark:bg-sky-500/10 border-sky-100 dark:border-sky-500/20',
     activeBorder: 'border-sky-500 dark:border-sky-400',
-    hint: 'dr.mehta@lilavati.com',
+    hint: 'director.lilavati@lifelinedemo.app',
     placeholder: 'e.g. dr.mehta@lilavati.com',
     stats: [
       { icon: Activity, text: 'ER Bays Active' },
@@ -75,7 +75,7 @@ const PORTALS = [
     hintColor: 'text-teal-700 dark:text-teal-300',
     hintBg: 'bg-teal-50 dark:bg-teal-500/10 border-teal-100 dark:border-teal-500/20',
     activeBorder: 'border-teal-500 dark:border-teal-400',
-    hint: 'nurse.rao@lilavati.com',
+    hint: 'nurse.rao@lifelinedemo.app',
     placeholder: 'e.g. nurse.rao@lilavati.com',
     stats: [
       { icon: Heart, text: 'Vitals Monitoring Live' },
@@ -99,7 +99,7 @@ const PORTALS = [
     hintColor: 'text-rose-700 dark:text-rose-300',
     hintBg: 'bg-rose-50 dark:bg-rose-500/10 border-rose-100 dark:border-rose-500/20',
     activeBorder: 'border-rose-500 dark:border-rose-400',
-    hint: 'rahul.sharma@example.com',
+    hint: 'rahul_sharma@lifelinedemo.app',
     placeholder: 'e.g. rahul.sharma@example.com',
     stats: [
       { icon: Droplets, text: 'Eligibility Tracker Live' },
@@ -124,7 +124,7 @@ const PORTALS = [
     hintColor: 'text-indigo-700 dark:text-indigo-300',
     hintBg: 'bg-indigo-50 dark:bg-indigo-500/10 border-indigo-100 dark:border-indigo-500/20',
     activeBorder: 'border-indigo-500 dark:border-indigo-400',
-    hint: 'dir.sharma@gov.in',
+    hint: 'dir_sharma@lifelinedemo.app',
     placeholder: 'e.g. dir.sharma@gov.in',
     stats: [
       { icon: ShieldCheck, text: '12 Hospitals Monitored' },
@@ -305,7 +305,6 @@ import { useRouter } from 'next/navigation';
 
 // ── Login form (shown after portal selected) ─────────────────────────────────
 function LoginForm({ portal }: { portal: PortalDef }) {
-  const { login } = useDashboard();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
@@ -323,38 +322,29 @@ function LoginForm({ portal }: { portal: PortalDef }) {
     setIsLoading(true);
     soundEffects.playAcknowledgeChime();
 
-    // Still find the demo user match to establish local context roles
-    const match =
-      DEMO_USERS.find(
-        (u) => u.username.toLowerCase() === username.trim().toLowerCase() && u.role === portal.role
-      ) || DEMO_USERS.find((u) => u.role === portal.role);
-
     try {
       setSuccess(`Authenticating with Firebase...`);
+      const auth = getFirebaseAuth();
+      if (!auth) throw new Error("Firebase Auth is disabled or missing configuration.");
       
-      // Attempt Firebase Authentication
-      // (If this is a demo account that doesn't exist in Firebase yet, you can create it in the console)
-      try {
-        const auth = getFirebaseAuth();
-        if (!auth) throw new Error("Firebase Auth is disabled or missing configuration.");
-        await signInWithEmailAndPassword(auth, username.trim(), password);
-      } catch (authError: any) {
-        // Fallback or handle error. For demo, we might want to allow it if it's a known mock user and we are testing
-        console.warn("Firebase Auth Error:", authError);
-        // Note: For a strict Firebase implementation, you would throw here if auth fails.
-        // throw authError; 
-      }
+      // Enforce Strict Firebase Authentication
+      await signInWithEmailAndPassword(auth, username.trim(), password);
       
-      if (match) {
-        // Update local dashboard context
-        await login(match.username, match.role, match.facility_id, match.donor_id);
-      } else {
-        // If it's a real Firebase user not in our mock data
-        await login(username, portal.role);
-      }
+      // The onAuthStateChanged hook in DashboardContext will handle state hydration.
+      // We just need to route the user.
+      setSuccess('Authenticated! Routing...');
+      setTimeout(() => {
+        if (portal.role === 'hospital_staff' || portal.role === 'hospital_director') router.push('/hospital');
+        else if (portal.role === 'government_authority') router.push('/government');
+        else if (portal.role === 'blood_donor') router.push('/donor');
+        else if (portal.role === 'admin') router.push('/admin');
+      }, 500);
+
     } catch (err: any) {
-      console.error(err);
-      setError(err.message || 'Authentication error. Please try again.');
+      console.error("Firebase Auth Error:", err);
+      // Strip confusing Firebase error codes for the UI
+      const msg = err.code?.includes('auth/') ? 'Invalid email or password.' : err.message;
+      setError(msg || 'Authentication error. Please try again.');
       setIsLoading(false);
       setSuccess('');
     }
@@ -433,7 +423,7 @@ function LoginForm({ portal }: { portal: PortalDef }) {
 
       {/* Demo hint */}
       <div 
-        onClick={() => { setUsername(portal.hint); setPassword('password'); }}
+        onClick={() => { setUsername(portal.hint); setPassword(process.env.NEXT_PUBLIC_DEMO_PASSWORD || 'password123'); }}
         className={`flex items-start gap-2 p-3 rounded-xl border text-[11px] font-mono ${portal.hintBg} ${portal.hintColor} cursor-pointer hover:opacity-80 transition-opacity`}
         title="Click to autofill"
       >

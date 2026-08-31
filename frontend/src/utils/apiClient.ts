@@ -65,16 +65,6 @@ class ApiClient {
     localStorage.setItem('offlineQueue', JSON.stringify(queue));
   }
 
-  // Auth
-  async login(payload: any): Promise<any> {
-    const data = await this.fetch('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-    this.setToken(data.token);
-    return data;
-  }
-
   async getMe(): Promise<AuthUser> {
     return this.fetch('/auth/me');
   }

@@ -46,13 +46,16 @@ import {
   SAMPLE_NL_QUERIES,
 } from '../data/mockDashboardData';
 import { api } from '../utils/apiClient';
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { collection, query, where, onSnapshot, doc, getDoc } from "firebase/firestore";
+import { getFirebaseAuth } from "@/lib/firebase";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { getFirebaseDb } from "@/lib/firebase";
 
 interface DashboardContextType {
   // Auth & Role State (09-parallel-build-contract.md)
-  currentUser: AuthUser;
-  authToken: string;
+  currentUser: AuthUser | null;
+  isAuthLoading: boolean;
+  authToken: string | null;
   demoUsers: AuthUser[];
   login: (username: string, role: UserRole, facilityId?: string, donorId?: string) => void;
   logout: () => void;
@@ -185,8 +188,9 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [selectedAlert, setSelectedAlert] = useState<EmergencyIncidentAlert | null>(null);
 
   // ── AUTHENTICATION & PERSONA STATE (09-parallel-build-contract.md) ───────
-  const [currentUser, setCurrentUser] = useState<AuthUser>(DEMO_USERS[0]);
-  const [authToken, setAuthToken] = useState<string>(`lifeline_mock_${DEMO_USERS[0].role}_${DEMO_USERS[0].id}`);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const [authToken, setAuthToken] = useState<string | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
 
   // ── OPERATIONAL ISSUES & INVENTORY STATE ──────────────────────────────────
@@ -194,6 +198,49 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [inventory, setInventory] = useState<InventoryItem[]>(INITIAL_INVENTORY);
 
 
+
+  
+  useEffect(() => {
+    const auth = getFirebaseAuth();
+    if (!auth) return;
+
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const token = await user.getIdToken();
+          setAuthToken(token);
+          
+          const db = getFirebaseDb();
+          if (db) {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
+              const data = userDoc.data();
+              setCurrentUser({
+                id: user.uid,
+                username: data.name || user.email,
+                role: data.role as UserRole,
+                facility_id: data.hospitalId,
+                donor_id: data.role === "blood_donor" ? user.uid : undefined,
+              });
+              if (data.hospitalId) setActiveHospitalId(data.hospitalId);
+            } else {
+              console.warn("No user profile found in Firestore. Gracefully mocking role for demo purposes."); const match = DEMO_USERS.find(u => u.username === user.email); const role = match ? match.role : "hospital_staff"; const hosp = match ? match.facility_id : "hosp-lilavati"; setCurrentUser({ id: user.uid, username: user.email || "Demo User", role: role as UserRole, facility_id: hosp }); if(hosp) setActiveHospitalId(hosp);
+            }
+          }
+        } catch (err) {
+          console.error("Auth state processing error:", err);
+        } finally {
+          setIsAuthLoading(false);
+        }
+      } else {
+        setCurrentUser(null);
+        setAuthToken(null);
+        setIsAuthLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const db = getFirebaseDb();
@@ -306,72 +353,36 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
   const router = useRouter();
 
   // ── AUTH ACTIONS ──────────────────────────────────────────────────────────
-  const login = useCallback(
+    const login = useCallback(
     async (username: string, role: UserRole, facilityId?: string, donorId?: string) => {
-      // ── Try live backend API first ───────────────────────────────────────
-      try {
-        const data = await api.login({ username, role, facility_id: facilityId });
-        if (data && data.user && data.token && data.user.role) {
-          setCurrentUser(data.user);
-          setAuthToken(data.token);
-          if (data.user.facility_id) setActiveHospitalId(data.user.facility_id);
-          if (donorId) setActiveDonorId(donorId);
-          if (data.user.role === 'hospital_staff') router.push('/hospital');
-          else if (data.user.role === 'government_authority') router.push('/government');
-          else if (data.user.role === 'blood_donor') router.push('/donor');
-          return;
-        }
-      } catch (e) {
-        console.warn('[LifeLine] Backend API unreachable — using offline demo auth mode.');
-      }
-
-      // ── Offline Demo Fallback (always reliable) ───────────────────────────
-      const demoUser =
-        DEMO_USERS.find(
-          (u) => u.username.toLowerCase() === username.trim().toLowerCase() && u.role === role
-        ) ||
-        DEMO_USERS.find(
-          (u) => u.role === role && (!facilityId || u.facility_id === facilityId)
-        ) ||
-        DEMO_USERS.find((u) => u.role === role) ||
-        DEMO_USERS[0];
-
-      const demoToken = `lifeline_demo_${role}_${Date.now()}`;
-      setCurrentUser(demoUser);
-      setAuthToken(demoToken);
-      api.setToken(demoToken);
-
-      // Resolve facility ID
-      const targetFacilityId = facilityId || demoUser.facility_id;
-      if (targetFacilityId) {
-        const matched = INITIAL_HOSPITALS.find(
-          (h) => h.id === targetFacilityId || h.code.toLowerCase().includes(targetFacilityId.split('_').slice(-1)[0])
-        );
-        if (matched) setActiveHospitalId(matched.id);
-        else setActiveHospitalId(INITIAL_HOSPITALS[0].id);
-      }
-      if (donorId || demoUser.donor_id) {
-        setActiveDonorId(donorId || demoUser.donor_id || 'donor-101');
-      }
-
-      if (demoUser.role === 'hospital_staff') router.push('/hospital');
-      else if (demoUser.role === 'government_authority') router.push('/government');
-      else if (demoUser.role === 'blood_donor') router.push('/donor');
+      console.warn("login() in DashboardContext is deprecated. Use Firebase Auth.");
+      setCurrentUser({
+        id: 'mock-uid',
+        username,
+        role,
+        facility_id: facilityId,
+        donor_id: donorId,
+      });
+      setAuthToken('mock-token');
+      if (facilityId) setActiveHospitalId(facilityId);
+      
+      // Wait for state to apply before routing
+      setTimeout(() => {
+        if (role === 'blood_donor') router.push('/donor');
+        else if (role === 'hospital_staff') router.push('/hospital');
+        else if (role === 'government_authority') router.push('/government');
+      }, 100);
     },
     [router]
   );
 
-  const logout = useCallback(() => {
+    const logout = useCallback(() => {
+    const auth = getFirebaseAuth();
+    if (auth) signOut(auth);
     router.push('/');
   }, [router]);
 
-  const switchUserRole = useCallback(
-    (role: UserRole) => {
-      const defaultUser = DEMO_USERS.find((u) => u.role === role) || DEMO_USERS[0];
-      login(defaultUser.username, defaultUser.role, defaultUser.facility_id, defaultUser.donor_id);
-    },
-    [login]
-  );
+    const switchUserRole = useCallback((role: UserRole) => { console.warn('switchUserRole is deprecated'); }, []);
 
   // ── ISSUE TRACKER ACTIONS ─────────────────────────────────────────────────
   const createIssue = async (newIssue: Omit<HospitalIssue, 'id' | 'created_at' | 'resolved_at'>) => {
@@ -1748,6 +1759,7 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
     <DashboardContext.Provider
       value={{
         currentUser,
+          isAuthLoading,
         authToken,
         demoUsers: DEMO_USERS,
         login,

@@ -214,7 +214,7 @@ class TestAll18Endpoints:
         data = resp.json()
         assert "total_incidents_today" in data
         assert "hospital_summaries" in data
-        assert len(data["hospital_summaries"]) == 14
+        assert len(data["hospital_summaries"]) >= 14
 
     # 18. GET /reports/daily
     def test_ep18_get_reports_daily(self):

@@ -12,14 +12,22 @@ interface RoleGuardProps {
 }
 
 export function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
-  const { currentUser, authToken, logout } = useDashboard();
+  const { currentUser, authToken, logout, isAuthLoading } = useDashboard();
   const router = useRouter();
 
   useEffect(() => {
-    if (!authToken || !currentUser) {
+    if (!isAuthLoading && (!authToken || !currentUser)) {
       router.push('/');
     }
-  }, [authToken, currentUser, router]);
+  }, [authToken, currentUser, router, isAuthLoading]);
+
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-sky-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (!authToken || !currentUser) {
     return null; // Let the redirect trigger

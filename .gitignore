@@ -72,3 +72,4 @@ lifeline_adk/.adk/
 *.bat
 *.cmd
 *.ps1
+start.bat

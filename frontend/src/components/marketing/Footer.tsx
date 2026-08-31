@@ -3,7 +3,6 @@
 import React from 'react';
 import Link from 'next/link';
 import { 
-  Github, 
   ExternalLink, 
   Play, 
   HeartPulse, 
@@ -14,6 +13,7 @@ import {
   Star,
   Info
 } from 'lucide-react';
+import { Github } from '@/components/icons/GithubIcon';
 import { PROJECT_METADATA } from '@/data/marketing/team';
 
 interface FooterProps {
