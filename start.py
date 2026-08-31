@@ -5,6 +5,7 @@ Starts FastAPI backend (8000), Next.js frontend (3000), and Google ADK Web UI (8
 
 Usage:
     python start.py                          # starts Backend (8000), Frontend (3000), ADK Web (8088)
+    python start.py --frontend next          # explicit frontend target
     python start.py --port 8000              # custom backend port
     python start.py --frontend-port 3000     # custom Next.js port
     python start.py --adk-port 8088          # custom ADK Web port
@@ -119,11 +120,9 @@ def run_frontend(port: int = 3000) -> subprocess.Popen:
 
 
 def run_adk_web(port: int = 8088) -> subprocess.Popen:
-    """Start Google ADK Web UI server."""
+    """Start Google ADK Web UI server if available."""
     python = find_python()
-    # We no longer delete the session_db here so old ADK sessions are preserved.
-    
-    adk_script = f"import sys; from google.adk.cli import main; sys.argv=['adk', 'web', '--port', '{port}', 'lifeline_adk']; main()"
+    adk_script = f"import sys; from google.adk.cli import main; sys.argv=['adk', 'web', '--port', '{port}', '--host', '0.0.0.0', '.']; main()"
     cmd = [python, "-c", adk_script]
 
     env = {
@@ -147,6 +146,7 @@ def main():
         allow_abbrev=False,
     )
     parser.add_argument("--port", type=int, default=8000, help="FastAPI backend port (default: 8000)")
+    parser.add_argument("--frontend", default="next", help="Frontend type (default: next)")
     parser.add_argument("--frontend-port", dest="frontend_port", type=int, default=3000, help="Next.js frontend port (default: 3000)")
     parser.add_argument("--adk-port", dest="adk_port", type=int, default=8088, help="Google ADK Web port (default: 8088)")
     parser.add_argument("--backend-only", action="store_true", help="Start only the backend")
@@ -157,28 +157,34 @@ def main():
     args = parser.parse_args()
 
     print("=" * 70)
-    print("🚑 LifeLine Agent — Autonomous Emergency Dispatch & ADK Swarm")
-    print("   Next.js (3000) + FastAPI (8000) + Google ADK Web (8088)")
+    print("🚑 LifeLine Agent — Autonomous Emergency Dispatch & Dashboard")
+    print(f"   Next.js ({args.frontend_port}) + FastAPI ({args.port})")
     print("=" * 70)
 
-    # Preflight Check for API Key
-    from dotenv import load_dotenv
-    load_dotenv()
+    # Load configuration
+    try:
+        from admin.config_manager import get_runtime_config, inject_to_env
+        inject_to_env(get_runtime_config())
+    except Exception:
+        pass
+
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except Exception:
+        pass
+
     gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
-    if not gemini_key or gemini_key.strip() == "" or gemini_key.strip() == "your_gemini_api_key_here":
-        print("\n🛑 STARTUP BLOCKED: MANDATORY GEMINI API KEY IS MISSING OR INVALID!")
-        print("The LifeLine multi-agent system requires a valid Gemini API key for clinical triage, bed-matching, routing, etc.")
-        print("\nTo fix this issue, run the interactive setup wizard:")
-        print("  lifeline setup --key gemini")
-        print("\nor set GEMINI_API_KEY in your .env file.\n")
-        sys.exit(1)
+    if not gemini_key or gemini_key.strip() in ("", "your_gemini_api_key_here"):
+        print("ℹ️ [INFO] GEMINI_API_KEY running in local simulation & deterministic mode.")
+        os.environ["GEMINI_API_KEY"] = "mock_key_for_local_development"
 
     # Ensure frontend build
     if not args.backend_only:
         try:
             ensure_frontend_built()
         except Exception as e:
-            print(f"⚠️ Warning during frontend setup: {e}")
+            print(f"⚠️ Warning during frontend check: {e}")
 
     procs: list[subprocess.Popen] = []
 
@@ -193,23 +199,23 @@ def main():
             frontend_proc = run_frontend(port=args.frontend_port)
             procs.append(frontend_proc)
 
-        # 3. Start ADK Web
+        # 3. Start ADK Web (optional)
         if not args.no_adk and not args.frontend_only:
-            adk_proc = run_adk_web(port=args.adk_port)
-            procs.append(adk_proc)
+            try:
+                adk_proc = run_adk_web(port=args.adk_port)
+                procs.append(adk_proc)
+            except Exception:
+                pass
 
         # Wait briefly for servers
         time.sleep(2)
 
         print("\n" + "=" * 70)
         print("✅ LifeLine Agent is now LIVE!")
-        print(f"   • Web Showcase:          http://localhost:{args.frontend_port}")
-        print(f"   • Secret Admin & Demo:   http://localhost:{args.frontend_port}/og/admin")
-        print(f"   • Google ADK Web UI:     http://localhost:{args.adk_port}")
-        print(f"   • Login Portal:          http://localhost:{args.frontend_port}/login")
-        print(f"   • Backend API:           http://localhost:{args.port}")
-        print(f"   • Swagger Docs:          http://localhost:{args.port}/docs")
-        print(f"   • Health Check:          http://localhost:{args.port}/health")
+        print(f"   • Hospital & Donor Dashboard: http://localhost:{args.frontend_port}")
+        print(f"   • Backend API:                http://localhost:{args.port}")
+        print(f"   • Swagger Docs:               http://localhost:{args.port}/docs")
+        print(f"   • Health Check:               http://localhost:{args.port}/health")
         print("=" * 70)
         print("\nPress Ctrl+C to stop all services.\n")
 

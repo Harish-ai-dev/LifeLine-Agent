@@ -7,17 +7,17 @@ import {
   ShieldAlert, 
   Sparkles, 
   Play, 
-  Github, 
   Clock, 
   Zap, 
   Building2, 
   Layers, 
   CheckCircle2, 
-  ChevronRight,
-  TrendingUp,
-  Cpu,
-  Star
+  ChevronRight, 
+  TrendingUp, 
+  Cpu, 
+  Star 
 } from 'lucide-react';
+import { Github } from '@/components/icons/GithubIcon';
 import { PROJECT_METADATA } from '@/data/marketing/team';
 
 interface HeroProps {

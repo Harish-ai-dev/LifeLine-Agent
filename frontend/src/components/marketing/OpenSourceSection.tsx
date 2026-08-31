@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { 
   FileCode, 
-  Github, 
   CheckCircle2, 
   Copy, 
   ExternalLink, 
@@ -12,6 +11,7 @@ import {
   ShieldCheck, 
   BookOpen
 } from 'lucide-react';
+import { Github } from '@/components/icons/GithubIcon';
 import { PROJECT_METADATA } from '@/data/marketing/team';
 
 export const OpenSourceSection: React.FC = () => {
