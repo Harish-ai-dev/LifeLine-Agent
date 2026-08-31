@@ -564,18 +564,12 @@ def run(
     gemini_status = audit["GEMINI_API_KEY"]
 
     if not gemini_status["valid"]:
-        console.print(Panel(
-            f"[bold red]🛑  STARTUP BLOCKED — MANDATORY GEMINI API KEY MISSING OR INVALID[/bold red]\n\n"
-            f"  [yellow]Reason:[/yellow] {gemini_status['message']}\n\n"
-            "  The LifeLine multi-agent system requires a valid Gemini API key for clinical triage,\n"
-            "  bed-matching, routing, and daily intelligence summaries.\n\n"
-            "  [bold cyan]To fix this issue, run:[/bold cyan]\n"
-            "    [bold white]lifeline setup --key gemini[/bold white]\n\n"
-            "  Get your key from: [link]https://aistudio.google.com/apikey[/link]",
-            border_style="red",
-            expand=False,
-        ))
-        raise typer.Exit(1)
+        console.print(
+            "[yellow]⚡ Notice:[/yellow] GEMINI_API_KEY not configured. "
+            "Running in [bold cyan]Local Deterministic Simulation Mode[/bold cyan]. "
+            "To enable live Gemini AI models, run: [bold white]lifeline setup --key gemini[/bold white]\n"
+        )
+        os.environ["GEMINI_API_KEY"] = "mock_key_for_local_development"
 
     # Check optional feature degraded modes
     gcp_status = audit["GCP_PROJECT_ID"]
@@ -725,18 +719,12 @@ def dispatch(
     gemini_status = audit["GEMINI_API_KEY"]
 
     if not gemini_status["valid"]:
-        console.print(Panel(
-            f"[bold red]🛑  DISPATCH BLOCKED — MANDATORY GEMINI API KEY MISSING OR INVALID[/bold red]\n\n"
-            f"  [yellow]Reason:[/yellow] {gemini_status['message']}\n\n"
-            "  The LifeLine multi-agent system requires a valid Gemini API key for clinical triage,\n"
-            "  bed-matching, routing, and daily intelligence summaries.\n\n"
-            "  [bold cyan]To fix this issue, run:[/bold cyan]\n"
-            "    [bold white]lifeline setup --key gemini[/bold white]\n\n"
-            "  Get your key from: [link]https://aistudio.google.com/apikey[/link]",
-            border_style="red",
-            expand=False,
-        ))
-        raise typer.Exit(1)
+        console.print(
+            "[yellow]⚡ Notice:[/yellow] GEMINI_API_KEY not configured. "
+            "Running dispatch with [bold cyan]Local Deterministic Clinical Engine[/bold cyan]. "
+            "To enable live Gemini AI models, run: [bold white]lifeline setup --key gemini[/bold white]\n"
+        )
+        os.environ["GEMINI_API_KEY"] = "mock_key_for_local_development"
 
     cases_path = PROJECT_ROOT / "data" / "demo_cases.json"
     if not cases_path.exists():
@@ -756,7 +744,19 @@ def dispatch(
         for i, name in enumerate(case_keys, 1):
             console.print(f"  {i}. {name}")
         choice = Prompt.ask("\nSelect scenario number", choices=[str(i) for i in range(1, len(case_keys) + 1)], default="1")
-        scenario = case_keys[int(choice) - 1]
+    if scenario:
+        matched_key = None
+        for k in cases:
+            if k.lower() == scenario.lower():
+                matched_key = k
+                break
+        if not matched_key:
+            for k in cases:
+                if scenario.lower() in k.lower():
+                    matched_key = k
+                    break
+        if matched_key:
+            scenario = matched_key
 
     case_data = cases.get(scenario)
     if not case_data:

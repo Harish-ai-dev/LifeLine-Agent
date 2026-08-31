@@ -7,9 +7,9 @@ import {
   ShieldCheck, 
   Sparkles, 
   Award, 
-  Github,
   ExternalLink
 } from 'lucide-react';
+import { Github } from '@/components/icons/GithubIcon';
 import { PROJECT_METADATA } from '@/data/marketing/team';
 
 const AboutPage: React.FC = () => {

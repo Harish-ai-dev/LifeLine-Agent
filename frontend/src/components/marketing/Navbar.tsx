@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation';
 import { 
   Menu, 
   X, 
-  Github, 
   Play, 
   Sparkles, 
   HeartPulse, 
@@ -21,6 +20,7 @@ import {
   Lock,
   ArrowUpRight
 } from 'lucide-react';
+import { Github } from '@/components/icons/GithubIcon';
 import { PROJECT_METADATA } from '@/data/marketing/team';
 import { CLINICAL_SCENARIOS } from '@/data/marketing/pipeline';
 import { DESIGN_TOKENS } from '@/data/marketing/tokens';

@@ -2,9 +2,12 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Start LifeLine Full Stack (Next.js + FastAPI + ADK Web)",
+      "label": "LifeLine: Start Full Stack (Next.js + FastAPI + ADK Web)",
       "type": "shell",
-      "command": "cmd.exe /c start.bat",
+      "command": "python start.py",
+      "windows": {
+        "command": "start.bat"
+      },
       "problemMatcher": [],
       "presentation": {
         "reveal": "always",
@@ -17,29 +20,72 @@
       }
     },
     {
-      "label": "Run ADK Web UI Only",
+      "label": "LifeLine: Run FastAPI Backend Only (8000)",
       "type": "shell",
-      "command": "python -c \"import sys; from google.adk.cli import main; sys.argv=['adk', 'web', '--port', '8088', 'lifeline_adk']; main()\"",
+      "command": "python -m uvicorn lifeline.main:app --host 0.0.0.0 --port 8000 --reload",
+      "options": {
+        "env": {
+          "PYTHONPATH": "${workspaceFolder}",
+          "PYTHONUTF8": "1",
+          "PYTHONIOENCODING": "utf-8"
+        }
+      },
       "problemMatcher": [],
       "presentation": {
         "reveal": "always",
-        "panel": "new",
-        "focus": true
+        "panel": "new"
       }
     },
     {
-      "label": "Run Next.js Frontend Only",
+      "label": "LifeLine: Run Next.js Frontend Only (3000)",
       "type": "shell",
-      "command": "npm run dev",
+      "command": "npm run start",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "LifeLine: Run Google ADK Web UI Only (8088)",
+      "type": "shell",
+      "command": "python -c \"import sys; from google.adk.cli import main; sys.argv=['adk', 'web', '--port', '8088', '--host', '0.0.0.0', '.']; main()\"",
+      "options": {
+        "env": {
+          "PYTHONPATH": "${workspaceFolder}",
+          "PYTHONUTF8": "1",
+          "PYTHONIOENCODING": "utf-8"
+        }
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "LifeLine: Build Next.js Production Bundle",
+      "type": "shell",
+      "command": "npm run build",
       "options": {
         "cwd": "${workspaceFolder}/frontend"
       },
       "problemMatcher": []
     },
     {
-      "label": "Run FastAPI Backend Only",
+      "label": "LifeLine: Run Pytest Test Suite",
       "type": "shell",
-      "command": "python -m lifeline.main",
+      "command": "pytest -v tests",
+      "options": {
+        "env": {
+          "PYTHONPATH": "${workspaceFolder}",
+          "PYTHONUTF8": "1",
+          "PYTHONIOENCODING": "utf-8"
+        }
+      },
       "problemMatcher": []
     }
   ]

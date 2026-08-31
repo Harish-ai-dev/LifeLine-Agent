@@ -1,13 +1,11 @@
-import React from 'react';
 import { 
   Users, 
-  Github, 
-  Linkedin, 
   ExternalLink,
   Award,
   Heart,
   HeartHandshake
 } from 'lucide-react';
+import { Github, Linkedin } from '@/components/icons/GithubIcon';
 import { TEAM_MEMBERS, PROJECT_METADATA } from '@/data/marketing/team';
 
 export const TeamSection: React.FC = () => {
