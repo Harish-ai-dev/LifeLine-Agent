@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useDashboard } from '../../../context/DashboardContext';
+import { useDashboard } from '@/context/DashboardContext';
 import {
   Calendar,
   Award,
@@ -13,7 +13,7 @@ import {
   ShieldCheck,
   Download,
 } from 'lucide-react';
-import { soundEffects } from '../../../utils/soundEffects';
+import { soundEffects } from '@/utils/soundEffects';
 
 export default function DonorDonationsPage() {
   const { currentDonor } = useDashboard();

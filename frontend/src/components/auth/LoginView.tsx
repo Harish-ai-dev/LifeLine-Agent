@@ -300,7 +300,7 @@ function LoginContent({ isModal = false }: { isModal?: boolean }) {
 }
 
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { getFirebaseAuth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 
 // ── Login form (shown after portal selected) ─────────────────────────────────
@@ -335,6 +335,8 @@ function LoginForm({ portal }: { portal: PortalDef }) {
       // Attempt Firebase Authentication
       // (If this is a demo account that doesn't exist in Firebase yet, you can create it in the console)
       try {
+        const auth = getFirebaseAuth();
+        if (!auth) throw new Error("Firebase Auth is disabled or missing configuration.");
         await signInWithEmailAndPassword(auth, username.trim(), password);
       } catch (authError: any) {
         // Fallback or handle error. For demo, we might want to allow it if it's a known mock user and we are testing

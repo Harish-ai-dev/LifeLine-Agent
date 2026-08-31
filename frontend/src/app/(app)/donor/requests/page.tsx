@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useDashboard } from '../../../context/DashboardContext';
+import { useDashboard } from '@/context/DashboardContext';
 import {
   Droplets,
   Building2,
@@ -16,9 +16,9 @@ import {
   Heart,
   ChevronRight,
 } from 'lucide-react';
-import { soundEffects } from '../../../utils/soundEffects';
+import { soundEffects } from '@/utils/soundEffects';
 
-import { DonorResponseStatus } from '../../../types/dashboard';
+import { DonorResponseStatus } from '@/types/dashboard';
 
 export default function DonorRequestsPage() {
   const { currentDonor, donorRequests, respondToDonorRequest } = useDashboard();

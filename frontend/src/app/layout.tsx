@@ -1,13 +1,8 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { DashboardProvider } from '@/context/DashboardContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { NextAuthProvider } from '@/components/auth/NextAuthProvider';
-
-
-import { AppWrapper } from '@/components/layout/AppWrapper';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -28,17 +23,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="">
-      <body className={`${inter.className} h-screen overflow-hidden flex select-none bg-slate-50 text-slate-900`}>
+      <body className={`${inter.className} min-h-screen flex flex-col bg-slate-50 text-slate-900`}>
         <ErrorBoundary isRoot={true}>
-          <NextAuthProvider>
-            <ThemeProvider>
-              <DashboardProvider>
-                <AppWrapper>
-                  {children}
-                </AppWrapper>
-              </DashboardProvider>
-            </ThemeProvider>
-          </NextAuthProvider>
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
         </ErrorBoundary>
       </body>
     </html>

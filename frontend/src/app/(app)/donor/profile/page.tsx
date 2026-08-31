@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useDashboard } from '../../../context/DashboardContext';
+import { useDashboard } from '@/context/DashboardContext';
 import {
   Users,
   ShieldCheck,
@@ -14,7 +14,7 @@ import {
   CheckCircle,
   Bell,
 } from 'lucide-react';
-import { soundEffects } from '../../../utils/soundEffects';
+import { soundEffects } from '@/utils/soundEffects';
 
 export default function DonorProfilePage() {
   const { currentDonor } = useDashboard();

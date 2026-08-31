@@ -47,7 +47,7 @@ import {
 } from '../data/mockDashboardData';
 import { api } from '../utils/apiClient';
 import { collection, query, where, onSnapshot } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { getFirebaseDb } from "@/lib/firebase";
 
 interface DashboardContextType {
   // Auth & Role State (09-parallel-build-contract.md)
@@ -196,6 +196,7 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
 
 
   useEffect(() => {
+    const db = getFirebaseDb();
     if (authToken && db) {
       api.setToken(authToken);
 

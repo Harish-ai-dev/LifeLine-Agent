@@ -32,8 +32,8 @@ import {
   LogOut,
   Sliders,
 } from 'lucide-react';
-import { useDashboard } from '../../../context/DashboardContext';
-import { CrisisType, BloodGroup } from '../../../types/dashboard';
+import { useDashboard } from '@/context/DashboardContext';
+import { CrisisType, BloodGroup } from '@/types/dashboard';
 
 interface SimulatedSms {
   id: string;
