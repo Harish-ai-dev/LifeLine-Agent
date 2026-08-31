@@ -123,11 +123,14 @@ def run_adk_web(port: int = 8088) -> subprocess.Popen:
     """Start Google ADK Web UI server if available."""
     python = find_python()
 <<<<<<< HEAD
+<<<<<<< HEAD
     # We no longer delete the session_db here so old ADK sessions are preserved.
     
     adk_script = f"import sys; from google.adk.cli import main; sys.argv=['adk', 'web', '--port', '{port}', 'lifeline_adk']; main()"
     cmd = [python, "-W", "ignore", "-c", adk_script]
 =======
+=======
+>>>>>>> f3a327a5af157b83d5194bf795a927ab93e1fcc2
     adk_script = f"import sys; from google.adk.cli import main; sys.argv=['adk', 'web', '--port', '{port}', '--host', '0.0.0.0', '.']; main()"
     cmd = [python, "-c", adk_script]
 >>>>>>> f3a327a5af157b83d5194bf795a927ab93e1fcc2
