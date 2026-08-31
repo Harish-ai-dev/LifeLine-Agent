@@ -214,6 +214,7 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
           if (db) {
             try {
               const getDocPromise = getDoc(doc(db, "users", user.uid));
+              getDocPromise.catch(() => {});
                 let timeoutHandle: any;
                 const timeoutPromise = new Promise((_, reject) => {
                   timeoutHandle = setTimeout(() => reject(new Error("Firestore timeout")), 2000);
@@ -1852,5 +1853,6 @@ export const useDashboard = () => {
   }
   return context;
 };
+
 
 
