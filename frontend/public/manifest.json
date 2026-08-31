@@ -1,0 +1,21 @@
+{
+  "name": "LifeLine Agent",
+  "short_name": "LifeLine",
+  "description": "AI-Powered Autonomous Emergency Dispatch & Healthcare Coordination",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0f1d",
+  "theme_color": "#ef4444",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
