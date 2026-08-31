@@ -431,7 +431,7 @@ function LoginForm({ portal }: { portal: PortalDef }) {
         <span>
           <span className="font-bold opacity-70">Demo: </span>
           {portal.hint}
-          <span className="block opacity-60 mt-0.5">Click to autofill demo credentials.</span>
+          <span className="block opacity-60 mt-0.5">CLICK HERE to autofill email and password.</span>
         </span>
       </div>
     </form>
