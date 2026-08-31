@@ -172,7 +172,7 @@ export function Sidebar() {
       {/* Brand Header */}
       <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200 bg-slate-50">
         <div className="flex items-center gap-3 overflow-hidden">
-          <img src="/logo.png" alt="LifeLine Agent Logo" className="w-9 h-9 rounded-[11px] shadow-md shrink-0 hover:scale-110 transition-transform duration-300" />
+          <img src="/logo.png" alt="LifeLine Agent Logo" className="w-9 h-9  shadow-md shrink-0 hover:scale-110 transition-transform duration-300" />
           {!collapsed && (
             <div className="flex flex-col min-w-0">
               <span className="font-black text-sm tracking-tight text-slate-900 flex items-center gap-1.5">

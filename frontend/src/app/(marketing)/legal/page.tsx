@@ -15,7 +15,7 @@ const PrivacyTermsPage: React.FC = () => {
           <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white font-sans">
             Privacy Policy & Apache 2.0 Open Source Terms
           </h1>
-          <p className="mt-2 text-slate-400 dark:text-slate-400">Last updated: February 2025 • LifeLine Agent Project</p>
+          <p className="mt-2 text-slate-400 dark:text-slate-400">Last updated: February 2026 • LifeLine Agent Project</p>
         </div>
 
         {/* Section 1: Apache 2.0 License */}
